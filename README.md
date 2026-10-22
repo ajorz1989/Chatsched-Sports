@@ -42,7 +42,7 @@ React 19 · TypeScript · Vite · Tailwind CSS · Lucide · Supabase Auth/Postgr
 3. Copy `.env.example` to `.env.local`.
 4. Create a **new, separate** Supabase project for ChatSched Sport.
 5. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in `.env.local`.
-6. Apply, in order, `supabase/migrations/202610220001_initial_sports_network.sql` and `supabase/migrations/202610220002_workspace_messaging_admin.sql` in the new Sport project's SQL editor.
+6. Apply these migrations in order in the new Sport project's SQL editor: `supabase/migrations/202610220001_initial_sports_network.sql`, `supabase/migrations/202610220002_workspace_messaging_admin.sql`, then `supabase/migrations/202610220003_enable_sport_realtime.sql`.
 7. Run `npm run dev` for development, `npm run test` for unit tests, and `npm run build` for type-checking plus the production build.
 
 **Never use the existing ChatSched advertising database for Sport.** Only a browser-safe Supabase publishable/anon key belongs in Vite client environment variables; never put a service-role or secret key in the browser or commit real environment files.
