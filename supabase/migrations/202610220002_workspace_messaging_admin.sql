@@ -116,12 +116,31 @@ create index if not exists safety_reports_status_created_idx on public.safety_re
 create index if not exists safety_reports_target_idx on public.safety_reports(target_type, target_id, created_at desc);
 create index if not exists safety_reports_reporter_idx on public.safety_reports(reporter_id, created_at desc);
 
+create table if not exists public.career_support_requests (
+  id uuid primary key default gen_random_uuid(),
+  athlete_id uuid not null references public.profiles(id) on delete restrict,
+  service_type text not null check (service_type in ('representation','trial_support','career_planning','recruitment','sponsorship','international_pathway','profile_review','other')),
+  goals text not null check (length(trim(goals)) between 10 and 4000),
+  preferred_outcome text,
+  consent_to_contact boolean not null default false check (consent_to_contact),
+  status text not null default 'submitted' check (status in ('submitted','in_review','accepted','declined','closed')),
+  admin_notes text,
+  reviewed_by uuid references auth.users(id) on delete set null,
+  reviewed_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists career_support_athlete_idx on public.career_support_requests(athlete_id, created_at desc);
+create index if not exists career_support_status_idx on public.career_support_requests(status, created_at desc);
+
+
 alter table public.athlete_media enable row level security;
 alter table public.conversations enable row level security;
 alter table public.messages enable row level security;
 alter table public.notifications enable row level security;
 alter table public.admin_audit_log enable row level security;
 alter table public.safety_reports enable row level security;
+alter table public.career_support_requests enable row level security;
 
 create policy "Public media follows athlete profile visibility"
   on public.athlete_media for select to anon, authenticated
@@ -211,6 +230,24 @@ create policy "Sport admins can update safety reports"
   using (private.is_sport_admin())
   with check (private.is_sport_admin());
 
+create policy "Athletes can create their own career support requests"
+  on public.career_support_requests for insert to authenticated
+  with check (
+    athlete_id = (select auth.uid())
+    and consent_to_contact = true
+    and exists (select 1 from public.profiles profile where profile.id = (select auth.uid()) and profile.account_type = 'athlete')
+  );
+create policy "Athletes can read their own career support requests"
+  on public.career_support_requests for select to authenticated
+  using (athlete_id = (select auth.uid()));
+create policy "Sport admins can read career support requests"
+  on public.career_support_requests for select to authenticated
+  using (private.is_sport_admin());
+create policy "Sport admins can update career support requests"
+  on public.career_support_requests for update to authenticated
+  using (private.is_sport_admin())
+  with check (private.is_sport_admin());
+
 -- Admins can review pending data; rows remain invisible to ordinary members unless
 -- they own the organisation or the organisation has been verified.
 create policy "Sport admins can review all profiles"
@@ -241,6 +278,9 @@ grant select, update (read_at) on public.notifications to authenticated;
 grant select, insert on public.admin_audit_log to authenticated;
 grant select, insert on public.safety_reports to authenticated;
 grant update (status, resolution, reviewed_by, reviewed_at, updated_at) on public.safety_reports to authenticated;
+grant select, insert on public.career_support_requests to authenticated;
+grant update (status, admin_notes, reviewed_by, reviewed_at, updated_at) on public.career_support_requests to authenticated;
+comment on table public.career_support_requests is 'Private requests for career guidance, trial support, representation and other services. Athletes see their own requests; only allow-listed Sport administrators can review or update them.';
 comment on table public.safety_reports is 'Private safety-report submissions and moderated outcomes. Only the reporter and allow-listed Sport administrators can read reports.';
 
 -- Verification columns require admin membership in a trigger as well as an RLS policy.
@@ -327,6 +367,49 @@ revoke all on function private.notify_athlete_on_application_status() from publi
 create trigger notify_athlete_after_application_status
   after update of status on public.opportunity_applications
   for each row execute function private.notify_athlete_on_application_status();
+ 
+create or replace function private.notify_admins_on_career_support_request()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $support_notice$
+begin
+  insert into public.notifications (user_id, notification_type, title, body, target_path)
+  select administrator.user_id, 'career_support_request', 'New athlete support request',
+    'A new request for "' || new.service_type || '" support is ready for review.',
+    '/admin'
+  from private.sport_admins administrator
+  join public.profiles profile on profile.id = administrator.user_id;
+  return new;
+end;
+$support_notice$;
+revoke all on function private.notify_admins_on_career_support_request() from public, anon, authenticated;
+create trigger notify_admins_after_career_support_request
+  after insert on public.career_support_requests
+  for each row execute function private.notify_admins_on_career_support_request();
+
+create or replace function private.notify_athlete_on_career_support_status()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $support_status_notice$
+begin
+  if new.status is distinct from old.status then
+    insert into public.notifications (user_id, notification_type, title, body, target_path)
+    values (new.athlete_id, 'career_support_status', 'Career support request updated',
+      'Your request status is now "' || new.status || '".',
+      '/workspace');
+  end if;
+  return new;
+end;
+$support_status_notice$;
+revoke all on function private.notify_athlete_on_career_support_status() from public, anon, authenticated;
+create trigger notify_athlete_after_career_support_status
+  after update of status on public.career_support_requests
+  for each row execute function private.notify_athlete_on_career_support_status();
+
 
 
 -- Expose only explicitly public athlete/member fields through directory views.
