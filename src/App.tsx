@@ -6,6 +6,10 @@ import OpportunityDetailPage from "./pages/OpportunityDetailPage";
 import JoinPage from "./pages/JoinPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import WorkspacePage from "./pages/WorkspacePage";
+import AdminPage from "./pages/AdminPage";
+import MessagesPage from "./pages/MessagesPage";
+import TalentDirectoryPage from "./pages/TalentDirectoryPage";
+import TalentProfilePage from "./pages/TalentProfilePage";
 
 export default function App() {
   return (
@@ -17,6 +21,10 @@ export default function App() {
           <Route path="/opportunities/:opportunityId" element={<OpportunityDetailPage />} />
           <Route path="/join" element={<JoinPage />} />
           <Route path="/workspace" element={<WorkspacePage />} />
+          <Route path="/talent" element={<TalentDirectoryPage />} />
+          <Route path="/talent/:athleteId" element={<TalentProfilePage />} />
+          <Route path="/messages" element={<MessagesPage />} />
+          <Route path="/admin" element={<AdminPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
