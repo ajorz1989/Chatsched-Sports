@@ -17,6 +17,17 @@ export default function TalentProfilePage(){
  if(mediaResult.error)throw mediaResult.error;if(achievementResult.error)throw achievementResult.error;if(statResult.error)throw statResult.error;if(experienceResult.error)throw experienceResult.error;
  if(alive){setProfile(data as Athlete);setMedia((mediaResult.data??[]) as Media[]);setAchievements((achievementResult.data??[]) as Achievement[]);setStatistics((statResult.data??[]) as unknown as Statistic[]);setExperience((experienceResult.data??[]) as unknown as Experience[]);}
  }catch(e){if(alive)setError(e instanceof Error?e.message:"The athlete profile could not be loaded.");}finally{if(alive)setLoading(false);}})();return()=>{alive=false;};},[athleteId]);
+ useEffect(()=>{
+  if(profile){
+   const title=profile.display_name+" — Athlete Profile | ChatSched Sport";
+   const description=[profile.display_name,profile.sport,profile.position,profile.location,profile.career_goals].filter(Boolean).join(" · ");
+   document.title=title;
+   document.querySelector('meta[name="description"]')?.setAttribute("content",description.slice(0,160));
+   document.querySelector('meta[property="og:title"]')?.setAttribute("content",title);
+   document.querySelector('meta[property="og:description"]')?.setAttribute("content",description.slice(0,160));
+   document.querySelector('meta[name="robots"]')?.setAttribute("content","index,follow");
+  } else if(!loading&&error) document.querySelector('meta[name="robots"]')?.setAttribute("content","noindex,nofollow");
+ },[profile,loading,error]);
  if(loading)return <section className="workspace-wrap"><div className="workspace-loading">Loading public profile…</div></section>;
  if(!profile)return <section className="workspace-wrap"><div className="workspace-empty"><span className="workspace-icon"><UserRound size={26}/></span><p className="workspace-kicker">ATHLETE PROFILE</p><h1>Profile unavailable.</h1><p>{error||"This profile is not publicly available."}</p><Link className="button button-dark" to="/talent"><ArrowLeft size={16}/> Back to talent directory</Link></div></section>;
  return <section className="talent-profile-page"><div className="talent-profile-top"><Link to="/talent" className="back-link"><ArrowLeft size={16}/> Talent directory</Link><span className="talent-public"><ShieldCheck size={13}/> Public sports profile</span></div>
