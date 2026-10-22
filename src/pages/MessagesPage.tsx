@@ -29,6 +29,7 @@ export default function MessagesPage(){
    }));
    setConversations(enriched as Conversation[]);
    if(requestedConversation&&unique.some(row=>row.id===requestedConversation))setActiveId(requestedConversation);
+   else if(requestedPartner){const partnerConversation=enriched.find(item=>item.otherId===requestedPartner);if(partnerConversation)setActiveId(partnerConversation.id);else if(!activeId&&enriched.length)setActiveId(enriched[0].id);}
    else if(!activeId&&enriched.length)setActiveId(enriched[0].id);
   }catch(error){setNotice(error instanceof Error?error.message:"Inbox could not be loaded. Check the Sport messaging migration and RLS policies.");}
   finally{setLoading(false);}
