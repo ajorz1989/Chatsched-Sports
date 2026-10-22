@@ -201,7 +201,10 @@ create policy "Members can delete their own achievements"
 
 create policy "Verified published opportunities are public"
   on public.opportunities for select to anon, authenticated using (
-    (status = 'published' and verification_status = 'verified')
+    (status = 'published' and verification_status = 'verified' and exists (
+      select 1 from public.organisations public_org
+      where public_org.id = organisation_id and public_org.verification_status = 'verified'
+    ))
     or exists (select 1 from public.organisations o where o.id = organisation_id and o.owner_id = (select auth.uid()))
   );
 create policy "Organisation owners can create opportunities"
