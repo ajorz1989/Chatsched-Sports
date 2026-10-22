@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { ArrowUpRight, BriefcaseBusiness, CheckCircle2, ClipboardList, FileText, Heart, LoaderCircle, LogOut, Plus, Save, ShieldCheck, Trophy, UserRound, X } from "lucide-react";
+import { ArrowUpRight, BriefcaseBusiness, ClipboardList, FileText, Heart, LoaderCircle, LogOut, Plus, Save, ShieldCheck, Trophy, UserRound, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase, supabaseConfigured } from "../lib/supabase";
 import { loadOpportunityById } from "../lib/opportunities";
@@ -14,8 +14,6 @@ type ApplicationRow = { id: string; opportunity_id: string; status: string; mess
 type Org = { id: string; name: string; organisation_type: string; verification_status: string; location: string | null; country: string; website: string | null; description: string | null };
 type ManagedOpportunity = { id: string; title: string; status: string; verification_status: string; closing_date: string | null; created_at: string; opportunity_type: string };
 const opportunityTypes: OpportunityType[] = ["trial","academy","scholarship","scouting","sponsorship","coaching","event","development"];
-const orgRoles: AccountType[] = ["club","academy","scout","coach","brand","sponsor","agent","event"];
-const orgTypeFor = (role: AccountType) => orgRoles.includes(role) ? role : "other";
 
 export default function WorkspacePage() {
   const [user, setUser] = useState<{id:string;email?:string} | null>(null);
