@@ -1,4 +1,4 @@
-import {useEffect,useMemo,useState,type FormEvent} from "react";import {ArrowLeft,ArrowUpRight,Check,LoaderCircle,MessageCircle,Send,ShieldCheck} from "lucide-react";import {Link,useSearchParams} from "react-router-dom";import {supabase,supabaseConfigured} from "../lib/supabase";import "../styles-workspace.css";
+import {useEffect,useMemo,useState,type FormEvent} from "react";import {ArrowUpRight,LoaderCircle,MessageCircle,Send,ShieldCheck} from "lucide-react";import {Link,useSearchParams} from "react-router-dom";import {supabase,supabaseConfigured} from "../lib/supabase";import "../styles-workspace.css";
 type Conversation={id:string;participant_a:string;participant_b:string;updated_at:string;otherId:string;otherName:string;otherRole:string;otherLocation:string|null};
 type Message={id:string;conversation_id:string;sender_id:string;body:string;created_at:string;read_at:string|null};
 type DirectoryMember={id:string;display_name:string;account_type:string;location:string|null;country:string|null;avatar_url:string|null};
@@ -12,18 +12,18 @@ export default function MessagesPage(){
  const {data:{subscription}}=supabase.auth.onAuthStateChange((_event,session)=>{if(alive)setUserId(session?.user?.id??"");});
  return()=>{alive=false;subscription.unsubscribe();};},[]);
  async function loadInbox(id:string){
-  if(!supabase)return;setLoading(true);
+  const client=supabase;if(!client)return;setLoading(true);
   try{
    const [a,b]=await Promise.all([
-    supabase.from("conversations").select("id,participant_a,participant_b,updated_at").eq("participant_a",id).order("updated_at",{ascending:false}).limit(100),
-    supabase.from("conversations").select("id,participant_a,participant_b,updated_at").eq("participant_b",id).order("updated_at",{ascending:false}).limit(100)
+    client.from("conversations").select("id,participant_a,participant_b,updated_at").eq("participant_a",id).order("updated_at",{ascending:false}).limit(100),
+    client.from("conversations").select("id,participant_a,participant_b,updated_at").eq("participant_b",id).order("updated_at",{ascending:false}).limit(100)
    ]);
    if(a.error)throw a.error;if(b.error)throw b.error;
    const rows=[...(a.data??[]),...(b.data??[])].sort((x,y)=>y.updated_at.localeCompare(x.updated_at));
    const unique=Array.from(new Map(rows.map(row=>[row.id,row])).values());
    const enriched=await Promise.all(unique.map(async row=>{
     const otherId=row.participant_a===id?row.participant_b:row.participant_a;
-    const result=await supabase.from("member_directory").select("id,display_name,account_type,location,country,avatar_url").eq("id",otherId).maybeSingle();
+    const result=await client.from("member_directory").select("id,display_name,account_type,location,country,avatar_url").eq("id",otherId).maybeSingle();
     const member=result.data as DirectoryMember|null;
     return {...row,otherId,otherName:member?.display_name||"Sport network member",otherRole:member?.account_type||"member",otherLocation:member?.location||member?.country||null};
    }));
@@ -46,7 +46,7 @@ export default function MessagesPage(){
     let result=await supabase.from("conversations").select("id,participant_a,participant_b,updated_at").eq("participant_a",pair.participant_a).eq("participant_b",pair.participant_b).maybeSingle();
     if(result.error){setNotice(result.error.message);await loadInbox(userId);return;}
     if(!result.data){result=await supabase.from("conversations").insert(pair).select("id,participant_a,participant_b,updated_at").single();}
-    if(result.error){setNotice(result.error.message);await loadInbox(userId);return;}
+    if(result.error||!result.data){setNotice(result.error?.message??"Conversation was not created.");await loadInbox(userId);return;}
     if(alive)setActiveId(result.data.id);
    }
    await loadInbox(userId);
