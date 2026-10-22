@@ -9,6 +9,7 @@ import "../styles-workspace.css";
 type Member = { id: string; email: string; display_name: string; account_type: AccountType; location: string | null; country: string | null; bio: string | null };
 type Sport = { id: string; name: string };
 type Achievement = { id: string; title: string; organisation_name: string | null; achievement_date: string | null; description: string | null };
+type AthleteMedia = { id: string; media_type: "photo"|"video"|"link"|"document"; title: string; url: string; is_public: boolean; display_order: number; created_at: string };
 type SavedRow = { opportunity_id: string; created_at: string };
 type ApplicationRow = { id: string; opportunity_id: string; status: string; message: string | null; created_at: string };
 type Org = { id: string; name: string; organisation_type: string; verification_status: string; location: string | null; country: string; website: string | null; description: string | null };
@@ -29,11 +30,17 @@ export default function WorkspacePage() {
   const [availability, setAvailability] = useState("");
   const [goals, setGoals] = useState("");
   const [visibility, setVisibility] = useState("private");
+  const [highlightUrl, setHighlightUrl] = useState("");
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [achievementTitle, setAchievementTitle] = useState("");
   const [achievementOrg, setAchievementOrg] = useState("");
   const [achievementDate, setAchievementDate] = useState("");
   const [achievementDescription, setAchievementDescription] = useState("");
+  const [mediaItems, setMediaItems] = useState<AthleteMedia[]>([]);
+  const [mediaTitle, setMediaTitle] = useState("");
+  const [mediaUrl, setMediaUrl] = useState("");
+  const [mediaType, setMediaType] = useState<"video"|"link"|"photo"|"document">("video");
+  const [mediaPublic, setMediaPublic] = useState(true);
   const [saved, setSaved] = useState<Opportunity[]>([]);
   const [applications, setApplications] = useState<{row:ApplicationRow;opportunity:Opportunity|null}[]>([]);
   const [organisations, setOrganisations] = useState<Org[]>([]);
@@ -81,7 +88,7 @@ export default function WorkspacePage() {
       const [profileRes, sportRes, athleteRes, achievementRes, savedRes, applicationRes, orgRes] = await Promise.all([
         supabase.from("profiles").select("id,email,display_name,account_type,location,country,bio").eq("id",user.id).maybeSingle(),
         supabase.from("sports").select("id,name").eq("is_active",true).order("name"),
-        supabase.from("athlete_profiles").select("primary_sport_id,position,playing_level,availability,career_goals,visibility").eq("user_id",user.id).maybeSingle(),
+        supabase.from("athlete_profiles").select("primary_sport_id,position,playing_level,availability,career_goals,visibility,highlight_video_url").eq("user_id",user.id).maybeSingle(),
         supabase.from("athlete_achievements").select("id,title,organisation_name,achievement_date,description").eq("athlete_id",user.id).order("achievement_date",{ascending:false}),
         supabase.from("saved_opportunities").select("opportunity_id,created_at").eq("athlete_id",user.id).order("created_at",{ascending:false}),
         supabase.from("opportunity_applications").select("id,opportunity_id,status,message,created_at").eq("athlete_id",user.id).order("created_at",{ascending:false}),
@@ -94,7 +101,7 @@ export default function WorkspacePage() {
       }
       if (sportRes.data) setSports(sportRes.data as Sport[]);
       if (athleteRes.data) {
-        const a = athleteRes.data as unknown as {primary_sport_id:string|null;position:string|null;playing_level:string|null;availability:string|null;career_goals:string|null;visibility:string};
+        const a = athleteRes.data as unknown as {primary_sport_id:string|null;position:string|null;playing_level:string|null;availability:string|null;career_goals:string|null;visibility:string;highlight_video_url:string|null};
         setSportId(a.primary_sport_id ?? "");setPosition(a.position ?? "");setLevel(a.playing_level ?? "");setAvailability(a.availability ?? "");setGoals(a.career_goals ?? "");setVisibility(a.visibility ?? "public");
       }
       if (achievementRes.data) setAchievements(achievementRes.data as Achievement[]);
@@ -109,7 +116,9 @@ export default function WorkspacePage() {
       const applicationItems=await Promise.all(applicationRows.map(async row=>({row,opportunity:await loadOpportunityById(row.opportunity_id)})));
       if(alive) setApplications(applicationItems);
       setLoading(false);
-      const errors=[profileRes.error,sportRes.error,athleteRes.error,achievementRes.error,savedRes.error,applicationRes.error,orgRes.error].filter(Boolean);
+      const {data:mediaRows,error:mediaError}=await supabase.from("athlete_media").select("id,media_type,title,url,is_public,display_order,created_at").eq("athlete_id",user.id).order("display_order",{ascending:true});
+      if (alive && mediaRows) setMediaItems(mediaRows as AthleteMedia[]);
+      const errors=[profileRes.error,sportRes.error,athleteRes.error,achievementRes.error,savedRes.error,applicationRes.error,orgRes.error,mediaError].filter(Boolean);
       if(errors.length) setNotice({kind:"info",text:"Some workspace data could not be loaded. Confirm the latest Sport Supabase migrations have been applied."});
     })().catch(() => { if(alive) {setLoading(false);setNotice({kind:"error",text:"Workspace data could not be loaded. Check the Sport database migrations and access policies."});} });
     return () => { alive = false; };
@@ -121,7 +130,7 @@ export default function WorkspacePage() {
     try {
       const profileUpdate=await supabase.from("profiles").update({display_name:member?.display_name??"",location:member?.location??"",country:member?.country??"South Africa",bio:member?.bio??""}).eq("id",user.id);
       if(profileUpdate.error)throw profileUpdate.error;
-      const athleteUpdate=await supabase.from("athlete_profiles").upsert({user_id:user.id,primary_sport_id:sportId||null,position:position||null,playing_level:level||null,availability:availability||null,career_goals:goals||null,visibility,location:member?.location??""},{onConflict:"user_id"});
+      const athleteUpdate=await supabase.from("athlete_profiles").upsert({user_id:user.id,primary_sport_id:sportId||null,position:position||null,playing_level:level||null,availability:availability||null,career_goals:goals||null,visibility,location:member?.location??"",highlight_video_url:highlightUrl.trim()||null},{onConflict:"user_id"});
       if(athleteUpdate.error)throw athleteUpdate.error;
       setNotice({kind:"success",text:"Your profile changes have been saved."});
     } catch(error) {setNotice({kind:"error",text:error instanceof Error?error.message:"Profile could not be saved. Check the schema and your account permissions."});}
@@ -139,6 +148,27 @@ export default function WorkspacePage() {
   async function deleteAchievement(id:string){
     if(!user||!supabase)return;const {error}=await supabase.from("athlete_achievements").delete().eq("id",id).eq("athlete_id",user.id);
     if(error){setNotice({kind:"error",text:error.message});return;}setAchievements(rows=>rows.filter(row=>row.id!==id));setNotice({kind:"success",text:"Achievement removed."});
+  }
+
+  async function addMedia(event:FormEvent<HTMLFormElement>){
+    event.preventDefault();if(!user||!supabase)return;
+    let parsed:URL;
+    try{parsed=new URL(mediaUrl.trim());}catch{setNotice({kind:"error",text:"Enter a valid full media URL, starting with https://"});return;}
+    if(parsed.protocol!=="https:"){setNotice({kind:"error",text:"Only secure HTTPS media links are accepted."});return;}
+    setBusy(true);setNotice(null);
+    try{
+      const {data,error}=await supabase.from("athlete_media").insert({athlete_id:user.id,media_type:mediaType,title:mediaTitle.trim(),url:parsed.toString(),is_public:mediaPublic,display_order:mediaItems.length}).select("id,media_type,title,url,is_public,display_order,created_at").single();
+      if(error)throw error;
+      setMediaItems(rows=>[...rows,data as AthleteMedia]);setMediaTitle("");setMediaUrl("");
+      setNotice({kind:"success",text:"Media link added to your athlete portfolio."});
+    }catch(error){setNotice({kind:"error",text:error instanceof Error?error.message:"Media link could not be saved."});}
+    finally{setBusy(false);}
+  }
+  async function deleteMedia(item:AthleteMedia){
+    if(!user||!supabase)return;
+    const {error}=await supabase.from("athlete_media").delete().eq("id",item.id).eq("athlete_id",user.id);
+    if(error){setNotice({kind:"error",text:error.message});return;}
+    setMediaItems(rows=>rows.filter(row=>row.id!==item.id));setNotice({kind:"success",text:"Media link removed from your portfolio."});
   }
 
   async function saveOrganisation(event:FormEvent<HTMLFormElement>){
@@ -246,8 +276,12 @@ export default function WorkspacePage() {
           <div className="workspace-mini-list"><div className="workspace-section-title"><div><p className="workspace-kicker">RECENT SAVES</p><h2>Keep an eye on these.</h2></div><button className="workspace-text-link" onClick={()=>setTab("saved")}>View all <ArrowUpRight size={15}/></button></div>{saved.length?saved.slice(0,3).map(item=><div className="workspace-list-row" key={item.id}><span className="workspace-row-icon"><Heart size={17}/></span><div><strong>{item.title}</strong><small>{item.sport} · {item.organisation}</small></div><Link to={"/opportunities/"+item.id} aria-label={"Open "+item.title}><ArrowUpRight size={16}/></Link></div>):<p className="workspace-muted">Your saved list is empty. Visit the opportunity catalogue to save suitable listings.</p>}</div>
         </>}
         {tab==="profile"&&<><div className="workspace-section-title"><div><p className="workspace-kicker">DIGITAL SPORTS CV</p><h2>Your profile, your story.</h2><p className="workspace-subtitle">A clear profile makes it easier for legitimate organisations to understand your sporting background.</p></div></div>
-          <form className="workspace-form-card" onSubmit={saveProfile}><div className="workspace-form-grid"><label>Display name<input required value={member?.display_name??""} onChange={e=>setMember(p=>p?{...p,display_name:e.target.value}:p)}/></label><label>Email address<input disabled value={member?.email??user.email??""}/></label><label>Location<input value={member?.location??""} onChange={e=>setMember(p=>p?{...p,location:e.target.value}:p)} placeholder="City or region"/></label><label>Country<input value={member?.country??"South Africa"} onChange={e=>setMember(p=>p?{...p,country:e.target.value}:p)}/></label><label>Primary sport<select value={sportId} onChange={e=>setSportId(e.target.value)}><option value="">Choose your sport</option>{sports.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</select></label><label>Position / discipline<input value={position} onChange={e=>setPosition(e.target.value)} placeholder="e.g. winger, goalkeeper, 100m"/></label><label>Competition level<input value={level} onChange={e=>setLevel(e.target.value)} placeholder="e.g. junior, school, regional, senior"/></label><label>Availability<input value={availability} onChange={e=>setAvailability(e.target.value)} placeholder="e.g. weekends, next season"/></label><label>Profile visibility<select value={visibility} onChange={e=>setVisibility(e.target.value)}><option value="public">Public sports profile</option><option value="private">Private profile</option></select></label><label className="workspace-span-2">What are your sporting goals?<textarea value={goals} onChange={e=>setGoals(e.target.value)} rows={3} placeholder="What are you working towards?"/></label><label className="workspace-span-2">Short biography<textarea value={member?.bio??""} onChange={e=>setMember(p=>p?{...p,bio:e.target.value}:p)} rows={4} placeholder="Share your sporting story, experience and ambition."/></label></div><div className="workspace-form-footer"><span><ShieldCheck size={16}/> Edit your own profile; keep private contact details private.</span><button className="button button-dark" type="submit" disabled={busy}><Save size={16}/>{busy?"Saving…":"Save profile"}</button></div></form>
+          <form className="workspace-form-card" onSubmit={saveProfile}><div className="workspace-form-grid"><label>Display name<input required value={member?.display_name??""} onChange={e=>setMember(p=>p?{...p,display_name:e.target.value}:p)}/></label><label>Email address<input disabled value={member?.email??user.email??""}/></label><label>Location<input value={member?.location??""} onChange={e=>setMember(p=>p?{...p,location:e.target.value}:p)} placeholder="City or region"/></label><label>Country<input value={member?.country??"South Africa"} onChange={e=>setMember(p=>p?{...p,country:e.target.value}:p)}/></label><label>Primary sport<select value={sportId} onChange={e=>setSportId(e.target.value)}><option value="">Choose your sport</option>{sports.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</select></label><label>Position / discipline<input value={position} onChange={e=>setPosition(e.target.value)} placeholder="e.g. winger, goalkeeper, 100m"/></label><label>Competition level<input value={level} onChange={e=>setLevel(e.target.value)} placeholder="e.g. junior, school, regional, senior"/></label><label>Availability<input value={availability} onChange={e=>setAvailability(e.target.value)} placeholder="e.g. weekends, next season"/></label><label>Profile visibility<select value={visibility} onChange={e=>setVisibility(e.target.value)}><option value="public">Public sports profile</option><option value="private">Private profile</option></select></label><label>Highlight reel URL<input type="url" value={highlightUrl} onChange={e=>setHighlightUrl(e.target.value)} placeholder="https://…"/></label><label className="workspace-span-2">What are your sporting goals?<textarea value={goals} onChange={e=>setGoals(e.target.value)} rows={3} placeholder="What are you working towards?"/></label><label className="workspace-span-2">Short biography<textarea value={member?.bio??""} onChange={e=>setMember(p=>p?{...p,bio:e.target.value}:p)} rows={4} placeholder="Share your sporting story, experience and ambition."/></label></div><div className="workspace-form-footer"><span><ShieldCheck size={16}/> Edit your own profile; keep private contact details private.</span><button className="button button-dark" type="submit" disabled={busy}><Save size={16}/>{busy?"Saving…":"Save profile"}</button></div></form>
           <div className="workspace-form-card achievement-card"><div className="workspace-section-title"><div><p className="workspace-kicker">PROOF OF PROGRESS</p><h2>Achievements & experience.</h2></div></div><form className="workspace-form-grid" onSubmit={addAchievement}><label>Achievement / qualification<input value={achievementTitle} onChange={e=>setAchievementTitle(e.target.value)} required placeholder="e.g. Regional tournament selection"/></label><label>Club / school / organisation<input value={achievementOrg} onChange={e=>setAchievementOrg(e.target.value)} placeholder="Optional"/></label><label>Date<input type="date" value={achievementDate} onChange={e=>setAchievementDate(e.target.value)}/></label><label className="workspace-span-2">Details<textarea rows={2} value={achievementDescription} onChange={e=>setAchievementDescription(e.target.value)} placeholder="Add context or notable results."/></label><div className="workspace-span-2"><button className="button button-dark" type="submit" disabled={busy}><Plus size={16}/> Add achievement</button></div></form><div className="achievement-list">{achievements.map(item=><div key={item.id} className="achievement-row"><span className="achievement-icon"><Trophy size={17}/></span><div><strong>{item.title}</strong><small>{[item.organisation_name,item.achievement_date].filter(Boolean).join(" · ")}</small>{item.description&&<p>{item.description}</p>}</div><button onClick={()=>deleteAchievement(item.id)} aria-label={"Remove "+item.title}><X size={16}/></button></div>)}{!achievements.length&&<p className="workspace-muted">Your achievements will appear here as you add them.</p>}</div></div>
+          <div className="workspace-form-card media-card"><div className="workspace-section-title"><div><p className="workspace-kicker">ATHLETE PORTFOLIO</p><h2>Media & evidence links.</h2><p className="workspace-subtitle">Add secure external links to your highlight videos, portfolio, or sporting documents. Only items you mark public will be shown on a public profile, and uploads are not stored by this form.</p></div></div>
+            <form className="workspace-form-grid" onSubmit={addMedia}><label>Link title<input required minLength={2} value={mediaTitle} onChange={e=>setMediaTitle(e.target.value)} placeholder="e.g. 2026 season highlights"/></label><label>Media type<select value={mediaType} onChange={e=>setMediaType(e.target.value as "video"|"link"|"photo"|"document")}><option value="video">Video</option><option value="link">Website / portfolio</option><option value="photo">Photo / gallery link</option><option value="document">Document link</option></select></label><label className="workspace-span-2">Secure media URL<input type="url" required value={mediaUrl} onChange={e=>setMediaUrl(e.target.value)} placeholder="https://…" /></label><label className="media-public-check"><input type="checkbox" checked={mediaPublic} onChange={e=>setMediaPublic(e.target.checked)}/><span>Show this link on my public athlete profile</span></label><div className="workspace-span-2"><button className="button button-dark" type="submit" disabled={busy}><Plus size={16}/> Add portfolio link</button></div></form>
+            <div className="achievement-list">{mediaItems.map(item=><div className="achievement-row" key={item.id}><span className="achievement-icon"><FileText size={17}/></span><div><strong>{item.title}</strong><small>{item.media_type} · {item.is_public?"Public profile":"Private to you"}</small><a href={item.url} target="_blank" rel="noreferrer" className="media-url-preview">{item.url}</a></div><button type="button" onClick={()=>void deleteMedia(item)} aria-label={"Remove "+item.title}><X size={16}/></button></div>)}{!mediaItems.length&&<p className="workspace-muted">No media links added yet. Add a highlight reel or portfolio link to round out your sports CV.</p>}</div>
+          </div>
         </>}
         {tab==="saved"&&<><div className="workspace-section-title"><div><p className="workspace-kicker">BOOKMARKED FOR LATER</p><h2>Saved opportunities.</h2></div><Link className="workspace-text-link" to="/opportunities">Find more <ArrowUpRight size={16}/></Link></div>{saved.length?<div className="workspace-opportunity-list">{saved.map(item=><article className="workspace-opportunity" key={item.id}><div><span className="workspace-type-tag">{item.type}</span><h3>{item.title}</h3><p>{item.sport} · {item.organisation} · {item.location}</p><small>{item.demo?"Example listing only":"Verified listing"}</small></div><div className="workspace-opportunity-actions"><Link to={"/opportunities/"+item.id} className="button button-dark">View <ArrowUpRight size={15}/></Link><button onClick={()=>removeSaved(item.id)} aria-label={"Remove "+item.title}><X size={16}/></button></div></article>)}</div>:<div className="workspace-blank"><Heart size={25}/><h3>Your shortlist starts here.</h3><p>Save opportunities that align with your goals so you can revisit their requirements and status.</p><Link className="button button-dark" to="/opportunities">Explore opportunities</Link></div>}</>}
         {tab==="applications"&&<><div className="workspace-section-title"><div><p className="workspace-kicker">YOUR APPLICATION TRACKER</p><h2>Every next step, in view.</h2></div></div>{applications.length?<div className="workspace-opportunity-list">{applications.map(({row,opportunity})=><article className="workspace-opportunity" key={row.id}><div><span className={"status-tag status-"+row.status}>{row.status.replace("_"," ")}</span><h3>{opportunity?.title??"Opportunity listing"}</h3><p>{opportunity?.organisation??"Listing details unavailable"}{opportunity?" · "+opportunity.sport:""}</p><small>Submitted {new Intl.DateTimeFormat("en-ZA",{day:"numeric",month:"short",year:"numeric"}).format(new Date(row.created_at))}</small></div>{opportunity&&<Link to={"/opportunities/"+opportunity.id} className="workspace-text-link">View listing <ArrowUpRight size={15}/></Link>}</article>)}</div>:<div className="workspace-blank"><ClipboardList size={25}/><h3>No applications yet.</h3><p>When you apply to a real, verified opportunity, your application status will appear here.</p><Link className="button button-dark" to="/opportunities">Browse the catalogue</Link></div>}</>}
