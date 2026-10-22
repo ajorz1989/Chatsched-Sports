@@ -54,14 +54,37 @@ export default function MessagesPage(){
   return()=>{alive=false;};
  },[userId,requestedPartner,requestedConversation]);
  useEffect(()=>{
-  if(!activeId||!userId||!supabase)return;let alive=true;
-  (async()=>{const {data,error}=await supabase.from("messages").select("id,conversation_id,sender_id,body,created_at,read_at").eq("conversation_id",activeId).order("created_at",{ascending:true}).limit(250);
-   if(!alive)return;if(error){setNotice(error.message);return;}
-   const rows=(data??[]) as Message[];setMessages(rows);
+  const client=supabase;
+  if(!activeId||!userId||!client)return;
+  let alive=true;
+  const channel=client.channel("sport-messages-"+activeId)
+   .on("postgres_changes",{event:"INSERT",schema:"public",table:"messages",filter:"conversation_id=eq."+activeId},payload=>{
+    if(!alive)return;
+    const incoming=payload.new as Message;
+    setMessages(rows=>Array.from(new Map([...rows,incoming].map(item=>[item.id,item])).values()).sort((a,b)=>a.created_at.localeCompare(b.created_at)));
+    if(incoming.sender_id!==userId&&!incoming.read_at){
+      const timestamp=new Date().toISOString();
+      void client.from("messages").update({read_at:timestamp}).eq("id",incoming.id).then(({error})=>{
+        if(error&&alive)setNotice("A new message arrived but could not be marked read.");
+      });
+    }
+   })
+   .on("postgres_changes",{event:"UPDATE",schema:"public",table:"messages",filter:"conversation_id=eq."+activeId},payload=>{
+    if(!alive)return;
+    const updated=payload.new as Message;
+    setMessages(rows=>rows.map(item=>item.id===updated.id?{...item,...updated}:item));
+   })
+   .subscribe();
+  (async()=>{
+   const {data,error}=await client.from("messages").select("id,conversation_id,sender_id,body,created_at,read_at").eq("conversation_id",activeId).order("created_at",{ascending:true}).limit(250);
+   if(!alive)return;
+   if(error){setNotice(error.message);return;}
+   const rows=(data??[]) as Message[];
+   setMessages(current=>Array.from(new Map([...rows,...current].map(item=>[item.id,item])).values()).sort((a,b)=>a.created_at.localeCompare(b.created_at)));
    const unread=rows.filter(item=>item.sender_id!==userId&&!item.read_at).map(item=>item.id);
-   if(unread.length)await supabase.from("messages").update({read_at:new Date().toISOString()}).in("id",unread);
+   if(unread.length)await client.from("messages").update({read_at:new Date().toISOString()}).in("id",unread);
   })().catch(error=>{if(alive)setNotice(error instanceof Error?error.message:"Conversation could not be loaded.");});
-  return()=>{alive=false;};
+  return()=>{alive=false;void client.removeChannel(channel);};
  },[activeId,userId]);
  async function send(event:FormEvent<HTMLFormElement>){
   event.preventDefault();if(!supabase||!userId||!activeId||!draft.trim())return;
