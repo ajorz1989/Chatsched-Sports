@@ -72,7 +72,7 @@ export default function AdminPage(){
    if(error)throw error;
    const recorded=await audit("opportunity_"+status,"opportunity",item.id,{title:item.title,previous_status:item.verification_status,new_status:status});
    await refresh();
-   setNotice(recorded?{kind:"success",text:item.title+" marked "+status+(status==="verified"&&org?.verification_status!=="verified"?"; it will not appear publicly until the organisation is verified.":"."):"}:{kind:"info",text:item.title+" updated, but its audit event could not be recorded."});
+   setNotice(recorded?{kind:"success",text:item.title+" marked "+status+(status==="verified"&&org?.verification_status!=="verified"?"; it will not appear publicly until the organisation is verified.":".")}:{kind:"info",text:item.title+" updated, but its audit event could not be recorded."});
   }catch(error){setNotice({kind:"error",text:error instanceof Error?error.message:"Opportunity decision could not be saved."});}
   finally{setBusyId("");}
  }
