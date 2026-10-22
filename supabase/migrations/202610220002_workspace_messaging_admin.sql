@@ -98,11 +98,30 @@ create table if not exists public.admin_audit_log (
 create index if not exists admin_audit_created_idx on public.admin_audit_log(created_at desc);
 create index if not exists admin_audit_target_idx on public.admin_audit_log(target_type, target_id, created_at desc);
 
+create table if not exists public.safety_reports (
+  id uuid primary key default gen_random_uuid(),
+  reporter_id uuid not null references public.profiles(id) on delete restrict,
+  target_type text not null check (target_type in ('opportunity','organisation','athlete','message','other')),
+  target_id uuid not null,
+  reason text not null check (reason in ('fraud_or_scam','impersonation','harassment_or_abuse','unsafe_request','misleading_listing','privacy_concern','spam','other')),
+  details text not null check (length(trim(details)) between 10 and 4000),
+  status text not null default 'pending' check (status in ('pending','in_review','resolved','dismissed')),
+  resolution text,
+  reviewed_by uuid references auth.users(id) on delete set null,
+  reviewed_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists safety_reports_status_created_idx on public.safety_reports(status, created_at desc);
+create index if not exists safety_reports_target_idx on public.safety_reports(target_type, target_id, created_at desc);
+create index if not exists safety_reports_reporter_idx on public.safety_reports(reporter_id, created_at desc);
+
 alter table public.athlete_media enable row level security;
 alter table public.conversations enable row level security;
 alter table public.messages enable row level security;
 alter table public.notifications enable row level security;
 alter table public.admin_audit_log enable row level security;
+alter table public.safety_reports enable row level security;
 
 create policy "Public media follows athlete profile visibility"
   on public.athlete_media for select to anon, authenticated
@@ -178,6 +197,20 @@ create policy "Sport admins read audit log"
 create policy "Sport admins add audit events"
   on public.admin_audit_log for insert to authenticated with check (private.is_sport_admin() and actor_id = (select auth.uid()));
 
+create policy "Members can submit safety reports"
+  on public.safety_reports for insert to authenticated
+  with check (reporter_id = (select auth.uid()));
+create policy "Members can view their own safety reports"
+  on public.safety_reports for select to authenticated
+  using (reporter_id = (select auth.uid()));
+create policy "Sport admins can review safety reports"
+  on public.safety_reports for select to authenticated
+  using (private.is_sport_admin());
+create policy "Sport admins can update safety reports"
+  on public.safety_reports for update to authenticated
+  using (private.is_sport_admin())
+  with check (private.is_sport_admin());
+
 -- Admins can review pending data; rows remain invisible to ordinary members unless
 -- they own the organisation or the organisation has been verified.
 create policy "Sport admins can review all profiles"
@@ -206,6 +239,9 @@ grant select, insert on public.messages to authenticated;
 grant update (read_at) on public.messages to authenticated;
 grant select, update (read_at) on public.notifications to authenticated;
 grant select, insert on public.admin_audit_log to authenticated;
+grant select, insert on public.safety_reports to authenticated;
+grant update (status, resolution, reviewed_by, reviewed_at, updated_at) on public.safety_reports to authenticated;
+comment on table public.safety_reports is 'Private safety-report submissions and moderated outcomes. Only the reporter and allow-listed Sport administrators can read reports.';
 
 -- Verification columns require admin membership in a trigger as well as an RLS policy.
 -- The column grants alone must never let a normal organisation owner self-verify.
