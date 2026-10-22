@@ -128,6 +128,10 @@ export default function WorkspacePage() {
     event.preventDefault(); if(!user||!supabase)return;
     setBusy(true);setNotice(null);
     try {
+      if(highlightUrl.trim()){
+        const parsed=new URL(highlightUrl.trim());
+        if(parsed.protocol!=="https:")throw new Error("Highlight reel links must use HTTPS.");
+      }
       const profileUpdate=await supabase.from("profiles").update({display_name:member?.display_name??"",location:member?.location??"",country:member?.country??"South Africa",bio:member?.bio??""}).eq("id",user.id);
       if(profileUpdate.error)throw profileUpdate.error;
       const athleteUpdate=await supabase.from("athlete_profiles").upsert({user_id:user.id,primary_sport_id:sportId||null,position:position||null,playing_level:level||null,availability:availability||null,career_goals:goals||null,visibility,location:member?.location??"",highlight_video_url:highlightUrl.trim()||null},{onConflict:"user_id"});
