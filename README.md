@@ -25,14 +25,14 @@ React 19, TypeScript, Vite, Tailwind CSS, Supabase Auth/PostgreSQL and Cloudflar
 1. Install dependencies with `npm install`.
 2. Copy `.env.example` to `.env.local`.
 3. Create a separate Supabase project for ChatSched Sport. Never reuse the advertising database.
-4. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in `.env.local`.
+4. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in `.env.local`.
 5. Apply `supabase/migrations/202610220001_initial_sports_network.sql` in the new project's SQL editor.
 6. Run `npm run dev` locally and `npm run build` to create `dist`.
 
 Only a public Supabase publishable/anon key belongs in browser code. Never commit a service-role key, secret or actual environment file. Without Supabase configuration, the app explains that accounts are not connected and the catalogue uses clearly labelled sample listings.
 
 ## Cloudflare Pages
-Connect GitHub repository `ajorz1989/Chatsched-Sports` as a separate Cloudflare Pages project. Use build command `npm run build`, output directory `dist`, and environment variables `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. Configure SPA fallback for `/join`, `/opportunities` and opportunity detail routes to resolve to `index.html`. Do not deploy this project through Vercel.
+Connect GitHub repository `ajorz1989/Chatsched-Sports` as a separate Cloudflare Pages project. Use build command `npm run build`, output directory `dist`, and environment variables `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. Configure SPA fallback for `/join`, `/opportunities` and opportunity detail routes to resolve to `index.html`. Do not deploy this project through Vercel.
 
 ## Trust and security
 - RLS is enabled on all application tables in the initial migration.
