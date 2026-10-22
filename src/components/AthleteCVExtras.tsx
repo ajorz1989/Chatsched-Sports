@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { BarChart3, CalendarDays, CircleAlert, Plus, ShieldCheck, Trophy, X } from "lucide-react";
+import { BarChart3, CircleAlert, Plus, Trophy, X } from "lucide-react";
 import { supabase } from "../lib/supabase";
 
 type Props = { userId: string; isAthlete: boolean };
