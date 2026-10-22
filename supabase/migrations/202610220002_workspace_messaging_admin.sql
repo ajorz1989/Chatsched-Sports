@@ -239,6 +239,60 @@ comment on table private.sport_admins is 'Manually maintained administrator allo
 comment on table public.admin_audit_log is 'Append-only record of platform moderation decisions; write actions should be paired with successful moderation updates.';
 comment on table public.messages is 'Private conversation messages; visible only to the two authenticated participants.';
 
+-- Notify an organisation owner when a new application arrives.
+create or replace function private.notify_opportunity_owner_on_application()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $application_notice$
+declare
+  recipient_id uuid;
+  listing_title text;
+begin
+  select organisation.owner_id, opportunity.title
+  into recipient_id, listing_title
+  from public.opportunities opportunity
+  join public.organisations organisation on organisation.id = opportunity.organisation_id
+  where opportunity.id = new.opportunity_id;
+
+  if recipient_id is not null and recipient_id <> new.athlete_id then
+    insert into public.notifications (user_id, notification_type, title, body, target_path)
+    values (recipient_id, 'application', 'New opportunity application',
+      'An athlete has applied to "' || coalesce(listing_title, 'your opportunity') || '".',
+      '/workspace');
+  end if;
+  return new;
+end;
+$application_notice$;
+revoke all on function private.notify_opportunity_owner_on_application() from public, anon, authenticated;
+create trigger notify_organisation_after_application
+  after insert on public.opportunity_applications
+  for each row execute function private.notify_opportunity_owner_on_application();
+
+-- Notify the applicant when an organisation/admin changes application status.
+create or replace function private.notify_athlete_on_application_status()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $application_status_notice$
+begin
+  if new.status is distinct from old.status then
+    insert into public.notifications (user_id, notification_type, title, body, target_path)
+    values (new.athlete_id, 'application_status', 'Application status updated',
+      'Your application status is now "' || new.status || '".',
+      '/workspace');
+  end if;
+  return new;
+end;
+$application_status_notice$;
+revoke all on function private.notify_athlete_on_application_status() from public, anon, authenticated;
+create trigger notify_athlete_after_application_status
+  after update of status on public.opportunity_applications
+  for each row execute function private.notify_athlete_on_application_status();
+
+
 -- Expose only explicitly public athlete/member fields through directory views.
 -- The views intentionally omit emails, private biography fields, and login metadata.
 create or replace view public.member_directory
@@ -287,6 +341,36 @@ grant select on public.member_directory to anon, authenticated;
 grant select on public.athlete_directory to anon, authenticated;
 comment on view public.member_directory is 'Public allow-listed fields for public athlete profiles and owners of verified organisations; never include email or private contact fields.';
 comment on view public.athlete_directory is 'Athlete-only public directory; constrained by explicit public profile visibility and excludes private contact fields.';
+
+create or replace view public.opportunity_applicant_directory
+with (security_barrier = true)
+as
+select
+  p.id,
+  p.display_name,
+  p.avatar_url,
+  coalesce(ap.location, p.location) as location,
+  p.country,
+  sp.name as sport,
+  ap.discipline,
+  ap.position,
+  ap.playing_level,
+  ap.visibility
+from public.profiles p
+left join public.athlete_profiles ap on ap.user_id = p.id
+left join public.sports sp on sp.id = ap.primary_sport_id and sp.is_active = true
+where exists (
+  select 1
+  from public.opportunity_applications application
+  join public.opportunities opportunity on opportunity.id = application.opportunity_id
+  join public.organisations organisation on organisation.id = opportunity.organisation_id
+  where application.athlete_id = p.id
+    and organisation.owner_id = (select auth.uid())
+);
+
+grant select on public.opportunity_applicant_directory to authenticated;
+comment on view public.opportunity_applicant_directory is 'Limited applicant details only for owners of the opportunities that athlete applied to; no email or private contact fields.';
+
 
 -- Public visibility must be an explicit athlete choice; make the privacy-first default consistent.
 alter table public.athlete_profiles alter column visibility set default 'private';
