@@ -46,6 +46,17 @@ export default function OpportunityDetailPage(){
     return()=>{alive=false;};
   },[userId,item]);
 
+  useEffect(()=>{
+    if(!item)return;
+    const title=item.title+(item.demo?" (Example listing)":"")+" | ChatSched Sport";
+    const description=(item.demo?"Illustrative example only. ":"")+item.summary;
+    document.title=title;
+    document.querySelector('meta[name="description"]')?.setAttribute("content",description.slice(0,160));
+    document.querySelector('meta[property="og:title"]')?.setAttribute("content",title);
+    document.querySelector('meta[property="og:description"]')?.setAttribute("content",description.slice(0,160));
+    document.querySelector('meta[name="robots"]')?.setAttribute("content",item.demo?"noindex,nofollow":"index,follow");
+  },[item]);
+
   async function toggleSaved(){
     if(!item||item.demo||!supabaseConfigured||!supabase)return;
     if(!userId){navigate("/join?mode=login&next="+encodeURIComponent("/opportunities/"+item.id));return;}
