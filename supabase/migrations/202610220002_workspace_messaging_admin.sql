@@ -45,7 +45,7 @@ create table if not exists public.athlete_media (
   athlete_id uuid not null references public.profiles(id) on delete cascade,
   media_type text not null check (media_type in ('photo','video','link','document')),
   title text not null,
-  url text not null,
+  url text not null check (url ~* '^https://'),
   is_public boolean not null default true,
   display_order integer not null default 0,
   created_at timestamptz not null default now()
