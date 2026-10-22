@@ -119,13 +119,17 @@ insert into public.sports (name, slug) values
   ('Esports','esports'), ('Other','other')
 on conflict (slug) do nothing;
 
+-- Keep the privileged auth trigger handler outside the exposed public API schema.
 -- account_type is self-declared and never provides administrative permission.
-create or replace function public.handle_new_sports_user()
+create schema if not exists private;
+revoke all on schema private from PUBLIC, anon, authenticated;
+
+create or replace function private.handle_new_sports_user()
 returns trigger
 language plpgsql
 security definer
 set search_path = public
-as $$
+as $
 declare
   requested_type text;
 begin
@@ -150,7 +154,8 @@ $$;
 drop trigger if exists on_auth_user_created_sports_profile on auth.users;
 create trigger on_auth_user_created_sports_profile
   after insert on auth.users
-  for each row execute procedure public.handle_new_sports_user();
+  for each row execute procedure private.handle_new_sports_user();
+revoke all on function private.handle_new_sports_user() from PUBLIC, anon, authenticated;
 
 alter table public.profiles enable row level security;
 alter table public.sports enable row level security;
