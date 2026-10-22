@@ -40,6 +40,12 @@ export default function OpportunityDetailPage(){
 
   useEffect(()=>{
     if(!userId||!item||item.demo||!supabase)return;
+    const client=supabase;
+    void client.from("opportunity_member_views").insert({opportunity_id:item.id,viewer_id:userId});
+  },[userId,item]);
+
+  useEffect(()=>{
+    if(!userId||!item||item.demo||!supabase)return;
     let alive=true;
     supabase.from("saved_opportunities").select("opportunity_id").eq("athlete_id",userId).eq("opportunity_id",item.id).maybeSingle()
       .then(({data})=>{if(alive)setIsSaved(Boolean(data));});
