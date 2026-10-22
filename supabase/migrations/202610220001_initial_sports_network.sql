@@ -238,7 +238,9 @@ create policy "Athletes and organisation owners can view applications"
   );
 create policy "Athletes can apply to verified published opportunities"
   on public.opportunity_applications for insert to authenticated with check (
-    athlete_id = (select auth.uid()) and exists (
+    athlete_id = (select auth.uid())
+    and exists (select 1 from public.profiles member where member.id = (select auth.uid()) and member.account_type = 'athlete')
+    and exists (
       select 1 from public.opportunities p
       join public.organisations o on o.id = p.organisation_id
       where p.id = opportunity_id and p.status = 'published' and p.verification_status = 'verified'
