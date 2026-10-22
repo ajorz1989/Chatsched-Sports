@@ -238,3 +238,86 @@ grant update (verification_status) on public.opportunities to authenticated;
 comment on table private.sport_admins is 'Manually maintained administrator allow-list; do not derive admin access from self-declared profile metadata.';
 comment on table public.admin_audit_log is 'Append-only record of platform moderation decisions; write actions should be paired with successful moderation updates.';
 comment on table public.messages is 'Private conversation messages; visible only to the two authenticated participants.';
+
+-- Expose only explicitly public athlete/member fields through directory views.
+-- The views intentionally omit emails, private biography fields, and login metadata.
+create or replace view public.member_directory
+with (security_barrier = true)
+as
+select
+  p.id,
+  p.display_name,
+  p.avatar_url,
+  coalesce(ap.location, p.location) as location,
+  p.country,
+  p.account_type,
+  sp.name as primary_sport,
+  ap.position,
+  ap.playing_level
+from public.profiles p
+left join public.athlete_profiles ap on ap.user_id = p.id and ap.visibility = 'public'
+left join public.sports sp on sp.id = ap.primary_sport_id and sp.is_active = true
+where ap.user_id is not null
+   or exists (
+     select 1 from public.organisations o
+     where o.owner_id = p.id and o.verification_status = 'verified'
+   );
+
+create or replace view public.athlete_directory
+with (security_barrier = true)
+as
+select
+  p.id,
+  p.display_name,
+  p.avatar_url,
+  coalesce(ap.location, p.location) as location,
+  p.country,
+  sp.name as sport,
+  ap.discipline,
+  ap.position,
+  ap.playing_level,
+  ap.availability,
+  ap.career_goals,
+  ap.highlight_video_url
+from public.profiles p
+join public.athlete_profiles ap on ap.user_id = p.id and ap.visibility = 'public'
+left join public.sports sp on sp.id = ap.primary_sport_id and sp.is_active = true;
+
+grant select on public.member_directory to anon, authenticated;
+grant select on public.athlete_directory to anon, authenticated;
+comment on view public.member_directory is 'Public allow-listed fields for public athlete profiles and owners of verified organisations; never include email or private contact fields.';
+comment on view public.athlete_directory is 'Athlete-only public directory; constrained by explicit public profile visibility and excludes private contact fields.';
+
+-- Notify the other participant on an inserted message; message sender cannot pick the recipient.
+create or replace function private.create_message_notification()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $notification$
+declare
+  recipient_id uuid;
+begin
+  select case
+    when c.participant_a = new.sender_id then c.participant_b
+    else c.participant_a
+  end
+  into recipient_id
+  from public.conversations c
+  where c.id = new.conversation_id
+    and (c.participant_a = new.sender_id or c.participant_b = new.sender_id);
+
+  if recipient_id is not null then
+    insert into public.notifications (user_id, notification_type, title, body, target_path)
+    values (recipient_id, 'message', 'New ChatSched Sport message',
+      'You have received a new message in your sports network inbox.',
+      '/messages?conversation=' || new.conversation_id::text);
+  end if;
+  return new;
+end;
+$notification$;
+revoke all on function private.create_message_notification() from public, anon, authenticated;
+create trigger notify_recipient_after_message
+  after insert on public.messages
+  for each row execute function private.create_message_notification();
+
