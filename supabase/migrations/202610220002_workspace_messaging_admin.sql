@@ -200,8 +200,10 @@ grant insert (athlete_id, media_type, title, url, is_public, display_order) on p
 grant update (media_type, title, url, is_public, display_order) on public.athlete_media to authenticated;
 grant delete on public.athlete_media to authenticated;
 
-grant select, insert, update on public.conversations to authenticated;
-grant select, insert, update on public.messages to authenticated;
+grant select, insert on public.conversations to authenticated;
+grant update (updated_at) on public.conversations to authenticated;
+grant select, insert on public.messages to authenticated;
+grant update (read_at) on public.messages to authenticated;
 grant select, update (read_at) on public.notifications to authenticated;
 grant select, insert on public.admin_audit_log to authenticated;
 
