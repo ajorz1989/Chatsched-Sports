@@ -4,6 +4,17 @@ export default function OrganisationProfilePage(){
  const {organisationId=""}=useParams();const [org,setOrg]=useState<Organisation|null>(null);const [listings,setListings]=useState<Opportunity[]>([]);const [loading,setLoading]=useState(true);const [error,setError]=useState("");
  useEffect(()=>{let alive=true;(async()=>{if(!supabaseConfigured||!supabase){setError("The organisation directory requires the dedicated Sport Supabase project and migrations.");setLoading(false);return;}
  try{const [orgResult,feed]=await Promise.all([supabase.from("organisations").select("id,name,organisation_type,description,website,location,country,verification_status").eq("id",organisationId).eq("verification_status","verified").maybeSingle(),loadOpportunityFeed()]);if(orgResult.error)throw orgResult.error;if(!orgResult.data){setError("This organisation is not publicly listed, may be unverified, or is no longer available.");setLoading(false);return;}if(alive){setOrg(orgResult.data as Organisation);setListings(feed.opportunities.filter(item=>item.organisationId===organisationId&&!item.demo));}}catch(e){if(alive)setError(e instanceof Error?e.message:"The organisation profile could not be loaded.");}finally{if(alive)setLoading(false);}})();return()=>{alive=false;};},[organisationId]);
+ useEffect(()=>{
+  if(org){
+   const title=org.name+" — Verified Sports Organisation | ChatSched Sport";
+   const description=[org.name,org.organisation_type,org.location,org.country,org.description].filter(Boolean).join(" · ");
+   document.title=title;
+   document.querySelector('meta[name="description"]')?.setAttribute("content",description.slice(0,160));
+   document.querySelector('meta[property="og:title"]')?.setAttribute("content",title);
+   document.querySelector('meta[property="og:description"]')?.setAttribute("content",description.slice(0,160));
+   document.querySelector('meta[name="robots"]')?.setAttribute("content","index,follow");
+  } else if(!loading&&error) document.querySelector('meta[name="robots"]')?.setAttribute("content","noindex,nofollow");
+ },[org,loading,error]);
  if(loading)return <section className="workspace-wrap"><div className="workspace-loading">Loading verified organisation…</div></section>;
  if(!org)return <section className="workspace-wrap"><div className="workspace-empty"><span className="workspace-icon"><Building2 size={26}/></span><p className="workspace-kicker">ORGANISATION PROFILE</p><h1>Profile unavailable.</h1><p>{error||"This organisation is not publicly available."}</p><Link className="button button-dark" to="/organisations"><ArrowLeft size={16}/> Back to directory</Link></div></section>;
  return <section className="org-profile-page"><div className="org-profile-top"><Link className="back-link" to="/organisations"><ArrowLeft size={16}/> Verified organisations</Link><span className="verified-pill"><ShieldCheck size={13}/> Verified organisation</span></div>
