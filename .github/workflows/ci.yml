@@ -28,5 +28,9 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Run unit tests
         run: npm run test
+      - name: Type-check Cloudflare Pages Functions
+        run: npx tsc --noEmit --target ES2022 --module ESNext --moduleResolution Bundler --lib ES2022,DOM --skipLibCheck functions/sitemap.xml.ts functions/robots.txt.ts
+      - name: Validate Cloudflare Pages route config
+        run: node -e "JSON.parse(require('node:fs').readFileSync('public/_routes.json', 'utf8'))"
       - name: Type-check and build
         run: npm run build
