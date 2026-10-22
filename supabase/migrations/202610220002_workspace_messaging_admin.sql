@@ -315,6 +315,14 @@ where ap.user_id is not null
    or exists (
      select 1 from public.organisations o
      where o.owner_id = p.id and o.verification_status = 'verified'
+   )
+   or exists (
+     select 1
+     from public.opportunity_applications application
+     join public.opportunities opportunity on opportunity.id = application.opportunity_id
+     join public.organisations organisation on organisation.id = opportunity.organisation_id
+     where (application.athlete_id = p.id and organisation.owner_id = (select auth.uid()))
+        or (organisation.owner_id = p.id and application.athlete_id = (select auth.uid()))
    );
 
 create or replace view public.athlete_directory
