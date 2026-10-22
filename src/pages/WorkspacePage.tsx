@@ -183,18 +183,19 @@ export default function WorkspacePage() {
   }
 
   async function loadManaged(orgs:Org[]){
-    if(!supabase||!orgs.length){setManaged([]);setReceivedApplications([]);return;}
+    const client=supabase;
+    if(!client||!orgs.length){setManaged([]);setReceivedApplications([]);return;}
     const activeOrgIds=selectedOrg?orgs.filter(org=>org.id===selectedOrg).map(org=>org.id):orgs.map(org=>org.id);
     if(!activeOrgIds.length){setManaged([]);setReceivedApplications([]);return;}
-    const {data,error}=await supabase.from("opportunities").select("id,title,status,verification_status,closing_date,created_at,opportunity_type").in("organisation_id",activeOrgIds).order("created_at",{ascending:false});
+    const {data,error}=await client.from("opportunities").select("id,title,status,verification_status,closing_date,created_at,opportunity_type").in("organisation_id",activeOrgIds).order("created_at",{ascending:false});
     if(error){setNotice({kind:"info",text:"Opportunity management needs the current Sport migration and organisation owner permissions."});return;}
     const listingRows=(data??[]) as ManagedOpportunity[];
     setManaged(listingRows);
     if(!listingRows.length){setReceivedApplications([]);return;}
-    const {data:applicationRows,error:applicationError}=await supabase.from("opportunity_applications").select("id,opportunity_id,athlete_id,status,message,created_at").in("opportunity_id",listingRows.map(row=>row.id)).order("created_at",{ascending:false});
+    const {data:applicationRows,error:applicationError}=await client.from("opportunity_applications").select("id,opportunity_id,athlete_id,status,message,created_at").in("opportunity_id",listingRows.map(row=>row.id)).order("created_at",{ascending:false});
     if(applicationError){setNotice({kind:"info",text:"Listings loaded, but application review requires the current Sport schema and access policies."});setReceivedApplications([]);return;}
     const detailed=await Promise.all((applicationRows??[]).map(async row=>{
-      const {data:applicant}=await supabase.from("opportunity_applicant_directory").select("id,display_name,location,country,sport,position,playing_level,visibility").eq("id",row.athlete_id).maybeSingle();
+      const {data:applicant}=await client.from("opportunity_applicant_directory").select("id,display_name,location,country,sport,position,playing_level,visibility").eq("id",row.athlete_id).maybeSingle();
       const applicantRow=applicant as {display_name?:string;location?:string|null;country?:string|null;sport?:string|null;position?:string|null;playing_level?:string|null;visibility?:string|null}|null;
       const listing=listingRows.find(value=>value.id===row.opportunity_id);
       return {...row,opportunity_title:listing?.title??"Opportunity listing",applicant_name:applicantRow?.display_name??"Applicant",applicant_location:[applicantRow?.location,applicantRow?.country].filter(Boolean).join(", ")||null,applicant_sport:applicantRow?.sport??null,applicant_position:applicantRow?.position??null,applicant_level:applicantRow?.playing_level??null,profile_visibility:applicantRow?.visibility??null} as ReceivedApplication;
