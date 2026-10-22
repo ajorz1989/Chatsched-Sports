@@ -14,6 +14,7 @@ import MatchingPage from "./pages/MatchingPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import AudiencePage from "./pages/AudiencePage";
 
 export default function App() {
   return (
@@ -26,6 +27,14 @@ export default function App() {
           <Route path="/join" element={<JoinPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/about" element={<AudiencePage />} />
+          <Route path="/how-it-works" element={<AudiencePage />} />
+          <Route path="/for-athletes" element={<AudiencePage />} />
+          <Route path="/for-organisations" element={<AudiencePage />} />
+          <Route path="/for-partners" element={<AudiencePage />} />
+          <Route path="/safeguarding" element={<AudiencePage />} />
+          <Route path="/privacy" element={<AudiencePage />} />
+          <Route path="/terms" element={<AudiencePage />} />
           <Route path="/workspace" element={<WorkspacePage />} />
           <Route path="/talent" element={<TalentDirectoryPage />} />
           <Route path="/talent/:athleteId" element={<TalentProfilePage />} />
