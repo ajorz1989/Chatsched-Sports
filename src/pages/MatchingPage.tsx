@@ -1,4 +1,4 @@
-import {useEffect,useMemo,useState} from "react";import {ArrowUpRight,CheckCircle2,Compass,Info,SlidersHorizontal,Sparkles,Target,Trophy} from "lucide-react";import {Link} from "react-router-dom";import {loadOpportunityFeed} from "../lib/opportunities";import {scoreOpportunityMatch} from "../lib/matching";import {supabase,supabaseConfigured} from "../lib/supabase";import type {AthleteMatchProfile,Opportunity} from "../lib/types";import "../styles-workspace.css";
+import {useEffect,useMemo,useState} from "react";import {ArrowUpRight,CheckCircle2,Info,SlidersHorizontal,Sparkles,Target} from "lucide-react";import {Link} from "react-router-dom";import {loadOpportunityFeed} from "../lib/opportunities";import {scoreOpportunityMatch} from "../lib/matching";import {supabase,supabaseConfigured} from "../lib/supabase";import type {AthleteMatchProfile,Opportunity} from "../lib/types";import "../styles-workspace.css";
 type Sport={id:string;name:string};
 export default function MatchingPage(){
  const [opportunities,setOpportunities]=useState<Opportunity[]>([]);const [demo,setDemo]=useState(true);const [loading,setLoading]=useState(true);const [sports,setSports]=useState<Sport[]>([]);
@@ -8,7 +8,7 @@ export default function MatchingPage(){
  const {data:{user}}=await supabase.auth.getUser();if(user){const [athleteResult,profileResult]=await Promise.all([supabase.from("athlete_profiles").select("primary_sport_id,position,playing_level,location,career_goals").eq("user_id",user.id).maybeSingle(),supabase.from("profiles").select("location").eq("id",user.id).maybeSingle()]);
  if(alive&&athleteResult.data){const athlete=athleteResult.data as {primary_sport_id:string|null;position:string|null;playing_level:string|null;location:string|null;career_goals:string|null};const selected=sportRows?.find(row=>row.id===athlete.primary_sport_id);if(selected)setSport(selected.name);if(athlete.position)setPosition(athlete.position);if(athlete.playing_level)setLevel(athlete.playing_level);if(athlete.location||profileResult.data?.location)setLocation(athlete.location??profileResult.data?.location??"");if(athlete.career_goals)setGoals(athlete.career_goals);}
  }
- }catch(error){if(alive)setNotice(error instanceof Error?error.message:"Matching inputs could not be loaded.");}finally{if(alive)setLoading(false);}})();return()=>{alive=false;};},[]);
+ }}catch(error){if(alive)setNotice(error instanceof Error?error.message:"Matching inputs could not be loaded.");}finally{if(alive)setLoading(false);}})();return()=>{alive=false;};},[]);
  const athlete:AthleteMatchProfile=useMemo(()=>({sport,position,location,level,goals:goals.split(/[,\n]/).map(x=>x.trim()).filter(Boolean)}),[sport,position,location,level,goals]);
  const ranked=useMemo(()=>opportunities.map(opportunity=>({opportunity,match:scoreOpportunityMatch(athlete,opportunity)})).sort((a,b)=>b.match.score-a.match.score),[opportunities,athlete]);
  const hasProfile=Boolean(sport.trim());
