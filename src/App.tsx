@@ -17,6 +17,8 @@ import ResetPasswordPage from "./pages/ResetPasswordPage";
 import AudiencePage from "./pages/AudiencePage";
 import OrganisationsPage from "./pages/OrganisationsPage";
 import OrganisationProfilePage from "./pages/OrganisationProfilePage";
+import TalentSearchPage from "./pages/TalentSearchPage";
+import OrganisationInsightsPage from "./pages/OrganisationInsightsPage";
 
 export default function App() {
   return (
@@ -42,6 +44,8 @@ export default function App() {
           <Route path="/organisations" element={<OrganisationsPage />} />
           <Route path="/organisations/:organisationId" element={<OrganisationProfilePage />} />
           <Route path="/talent/:athleteId" element={<TalentProfilePage />} />
+          <Route path="/talent-discover" element={<TalentSearchPage />} />
+          <Route path="/insights" element={<OrganisationInsightsPage />} />
           <Route path="/messages" element={<MessagesPage />} />
           <Route path="/matching" element={<MatchingPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
