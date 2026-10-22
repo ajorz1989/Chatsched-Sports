@@ -11,6 +11,7 @@ import MessagesPage from "./pages/MessagesPage";
 import TalentDirectoryPage from "./pages/TalentDirectoryPage";
 import TalentProfilePage from "./pages/TalentProfilePage";
 import MatchingPage from "./pages/MatchingPage";
+import NotificationsPage from "./pages/NotificationsPage";
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
           <Route path="/talent/:athleteId" element={<TalentProfilePage />} />
           <Route path="/messages" element={<MessagesPage />} />
           <Route path="/matching" element={<MatchingPage />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
