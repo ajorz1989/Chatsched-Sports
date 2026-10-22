@@ -13,6 +13,7 @@ type AthleteMedia = { id: string; media_type: "photo"|"video"|"link"|"document";
 type SavedRow = { opportunity_id: string; created_at: string };
 type ApplicationRow = { id: string; opportunity_id: string; status: string; message: string | null; created_at: string };
 type Org = { id: string; name: string; organisation_type: string; verification_status: string; location: string | null; country: string; website: string | null; description: string | null };
+type OrganisationVerificationRequest = { id: string; organisation_id: string; submitted_by: string; evidence_type: string; evidence_url: string | null; evidence_notes: string | null; status: string; admin_notes: string | null; created_at: string; reviewed_at: string | null };
 type ManagedOpportunity = { id: string; title: string; status: string; verification_status: string; closing_date: string | null; created_at: string; opportunity_type: string };
 type CareerSupportRequest = {id:string;service_type:string;goals:string;preferred_outcome:string|null;status:string;admin_notes:string|null;created_at:string;updated_at:string};
 type ReceivedApplication = { id: string; opportunity_id: string; athlete_id: string; status: string; message: string | null; created_at: string; opportunity_title: string; applicant_name: string; applicant_location: string | null; applicant_sport: string | null; applicant_position: string | null; applicant_level: string | null; profile_visibility: string | null };
@@ -50,6 +51,10 @@ export default function WorkspacePage() {
   const [saved, setSaved] = useState<Opportunity[]>([]);
   const [applications, setApplications] = useState<{row:ApplicationRow;opportunity:Opportunity|null}[]>([]);
   const [organisations, setOrganisations] = useState<Org[]>([]);
+  const [verificationRequests, setVerificationRequests] = useState<OrganisationVerificationRequest[]>([]);
+  const [verificationEvidenceType, setVerificationEvidenceType] = useState("official_website");
+  const [verificationEvidenceUrl, setVerificationEvidenceUrl] = useState("");
+  const [verificationEvidenceNotes, setVerificationEvidenceNotes] = useState("");
   const [selectedOrg, setSelectedOrg] = useState("");
   const [managed, setManaged] = useState<ManagedOpportunity[]>([]);
   const [receivedApplications, setReceivedApplications] = useState<ReceivedApplication[]>([]);
@@ -126,7 +131,14 @@ export default function WorkspacePage() {
       const {data:supportRows,error:supportError}=await supabase.from("career_support_requests").select("id,service_type,goals,preferred_outcome,status,admin_notes,created_at,updated_at").eq("athlete_id",user.id).order("created_at",{ascending:false});
       if (alive && mediaRows) setMediaItems(mediaRows as AthleteMedia[]);
       if (alive && supportRows) setSupportRequests(supportRows as CareerSupportRequest[]);
-      const errors=[profileRes.error,sportRes.error,athleteRes.error,achievementRes.error,savedRes.error,applicationRes.error,orgRes.error,mediaError,supportError].filter(Boolean);
+      const ownedOrganisationIds=((orgRes.data??[]) as Org[]).map(org=>org.id);
+      let verificationError: {message:string}|null=null;
+      if(ownedOrganisationIds.length){
+        const verificationRes=await supabase.from("organisation_verification_requests").select("id,organisation_id,submitted_by,evidence_type,evidence_url,evidence_notes,status,admin_notes,created_at,reviewed_at").in("organisation_id",ownedOrganisationIds).order("created_at",{ascending:false});
+        verificationError=verificationRes.error;
+        if(alive&&verificationRes.data)setVerificationRequests(verificationRes.data as OrganisationVerificationRequest[]);
+      } else if(alive) setVerificationRequests([]);
+      const errors=[profileRes.error,sportRes.error,athleteRes.error,achievementRes.error,savedRes.error,applicationRes.error,orgRes.error,mediaError,supportError,verificationError].filter(Boolean);
       if(errors.length) setNotice({kind:"info",text:"Some workspace data could not be loaded. Confirm the latest Sport Supabase migrations have been applied."});
     })().catch(() => { if(alive) {setLoading(false);setNotice({kind:"error",text:"Workspace data could not be loaded. Check the Sport database migrations and access policies."});} });
     return () => { alive = false; };
@@ -210,6 +222,29 @@ export default function WorkspacePage() {
         if(error)throw error;const org=data as Org;setOrganisations(rows=>[org,...rows]);setSelectedOrg(org.id);setNotice({kind:"success",text:"Organisation created and placed in the verification queue."});
       }
     }catch(error){setNotice({kind:"error",text:error instanceof Error?error.message:"Organisation details could not be saved."});}finally{setBusy(false);}
+  }
+
+  async function submitVerificationRequest(event:FormEvent<HTMLFormElement>){
+    event.preventDefault();if(!user||!supabase||!selectedOrg)return;
+    const evidenceNotes=verificationEvidenceNotes.trim();
+    if(evidenceNotes.length<10){setNotice({kind:"error",text:"Add at least 10 characters explaining the verification evidence."});return;}
+    let evidenceUrl:string|null=null;
+    if(verificationEvidenceUrl.trim()){
+      try{const parsed=new URL(verificationEvidenceUrl.trim());if(parsed.protocol!=="https:")throw new Error("Use an HTTPS evidence link.");evidenceUrl=parsed.toString();}
+      catch(error){setNotice({kind:"error",text:error instanceof Error?error.message:"Enter a valid HTTPS evidence link."});return;}
+    }
+    setBusy(true);setNotice(null);
+    try{
+      const {data,error}=await supabase.from("organisation_verification_requests").insert({
+        organisation_id:selectedOrg,submitted_by:user.id,evidence_type:verificationEvidenceType,
+        evidence_url:evidenceUrl,evidence_notes:evidenceNotes
+      }).select("id,organisation_id,submitted_by,evidence_type,evidence_url,evidence_notes,status,admin_notes,created_at,reviewed_at").single();
+      if(error)throw error;
+      setVerificationRequests(rows=>[data as OrganisationVerificationRequest,...rows]);
+      setVerificationEvidenceType("official_website");setVerificationEvidenceUrl("");setVerificationEvidenceNotes("");
+      setNotice({kind:"success",text:"Verification evidence submitted privately. Your organisation remains unverified until a Sport administrator reviews it."});
+    }catch(error){setNotice({kind:"error",text:error instanceof Error?error.message:"Evidence could not be submitted. You may already have a request in review."});}
+    finally{setBusy(false);}
   }
 
   async function createOpportunity(event:FormEvent<HTMLFormElement>){
