@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AlertTriangle, CheckCircle2, ClipboardCheck, History, LoaderCircle, RefreshCw, ShieldCheck, XCircle } from "lucide-react";
+import { AlertTriangle, ArrowUpRight, CheckCircle2, ClipboardCheck, History, LoaderCircle, RefreshCw, ShieldCheck, XCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase, supabaseConfigured } from "../lib/supabase";
 import "../styles-workspace.css";
