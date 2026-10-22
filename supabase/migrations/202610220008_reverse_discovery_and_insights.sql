@@ -24,8 +24,12 @@ create table if not exists public.opportunity_member_views (
   viewed_at timestamptz not null default now()
 );
 
+alter table public.opportunity_member_views
+  add column if not exists viewed_day date
+  generated always as ((viewed_at at time zone 'UTC')::date) stored;
+
 create unique index if not exists one_member_view_per_opportunity_per_day
-  on public.opportunity_member_views(opportunity_id, viewer_id, (date(viewed_at)));
+  on public.opportunity_member_views(opportunity_id, viewer_id, viewed_day);
 create index if not exists opportunity_member_views_opportunity_idx
   on public.opportunity_member_views(opportunity_id, viewed_at desc);
 
