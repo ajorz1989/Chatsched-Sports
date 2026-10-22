@@ -214,15 +214,21 @@ export default function WorkspacePage() {
   }
 
   async function saveOrganisation(event:FormEvent<HTMLFormElement>){
-    event.preventDefault();if(!user||!supabase)return;setBusy(true);setNotice(null);
+    event.preventDefault();if(!user||!supabase)return;
+    let secureWebsite:string|null=null;
+    if(orgWebsite.trim()){
+      try{const parsed=new URL(orgWebsite.trim());if(parsed.protocol!=="https:")throw new Error("Organisation websites must use HTTPS.");secureWebsite=parsed.toString();}
+      catch(error){setNotice({kind:"error",text:error instanceof Error?error.message:"Enter a valid HTTPS organisation website."});return;}
+    }
+    setBusy(true);setNotice(null);
     try{
       if(selectedOrg){
-        const {error}=await supabase.from("organisations").update({name:orgName.trim(),organisation_type:orgType,location:orgLocation.trim()||null,country:member?.country??"South Africa",website:orgWebsite.trim()||null,description:orgDescription.trim()||null}).eq("id",selectedOrg);
+        const {error}=await supabase.from("organisations").update({name:orgName.trim(),organisation_type:orgType,location:orgLocation.trim()||null,country:member?.country??"South Africa",website:secureWebsite,description:orgDescription.trim()||null}).eq("id",selectedOrg);
         if(error)throw error;
         setOrganisations(rows=>rows.map(row=>row.id===selectedOrg?{...row,name:orgName,organisation_type:orgType,location:orgLocation,website:orgWebsite,description:orgDescription}:row));
         setNotice({kind:"success",text:"Organisation details saved. Verification status cannot be changed by an organisation owner."});
       }else{
-        const {data,error}=await supabase.from("organisations").insert({owner_id:user.id,name:orgName.trim(),organisation_type:orgType,location:orgLocation.trim()||null,country:member?.country??"South Africa",website:orgWebsite.trim()||null,description:orgDescription.trim()||null}).select("id,name,organisation_type,verification_status,location,country,website,description").single();
+        const {data,error}=await supabase.from("organisations").insert({owner_id:user.id,name:orgName.trim(),organisation_type:orgType,location:orgLocation.trim()||null,country:member?.country??"South Africa",website:secureWebsite,description:orgDescription.trim()||null}).select("id,name,organisation_type,verification_status,location,country,website,description").single();
         if(error)throw error;const org=data as Org;setOrganisations(rows=>[org,...rows]);setSelectedOrg(org.id);setNotice({kind:"success",text:"Organisation created and placed in the verification queue."});
       }
     }catch(error){setNotice({kind:"error",text:error instanceof Error?error.message:"Organisation details could not be saved."});}finally{setBusy(false);}
