@@ -15,12 +15,15 @@ Build trusted infrastructure for sporting opportunity—not just a brochure or u
 - Premium responsive marketing site with editorial home, journey and audience sections.
 - Opportunity catalogue with search and filters, individual detail pages and authenticated save/apply actions.
 - Fictional opportunity examples explicitly labelled as demonstrations; they are not live openings or verified organisations.
-- Supabase signup/sign-in UI with safe return routing.
-- Member workspace with sports profile editor, achievements, profile visibility control, saved opportunities, application tracker and organisation listing tools.
+- Supabase signup/sign-in UI, password-reset email flow, reset completion and safe return routing.
+- Member workspace with sports profile editor, achievements, private-by-default visibility, highlight reel, HTTPS portfolio-link management, saved opportunities, application tracker and organisation listing tools.
 - Athlete talent directory and public profile/media-link pages that exclude email and private login data.
-- Private conversations, inbox, message sending/reading and notification creation for new messages.
+- Private conversations, inbox, message read states, notifications for messages, applications and application-status updates.
+- Organisation application-review tools that show limited applicant details, update application statuses and link to the conversation flow.
 - Restricted admin moderation for organisations, opportunities and application status, with an administrator allow-list and audit events.
 - Transparent, deterministic opportunity-match explorer that explains which criteria contribute to each score.
+- Public About, How it Works, audience, privacy overview, platform principles and safeguarding information pages.
+- Automated unit tests for explainable match scoring and a CI workflow that runs tests, type-checks and builds.
 - Two initial Supabase/PostgreSQL migrations for data, RLS, column-level grants, moderation, directory views, messaging and notifications.
 - Cloudflare Pages SPA fallback and a GitHub Actions production build workflow.
 
@@ -38,7 +41,7 @@ React 19 · TypeScript · Vite · Tailwind CSS · Lucide · Supabase Auth/Postgr
 4. Create a **new, separate** Supabase project for ChatSched Sport.
 5. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in `.env.local`.
 6. Apply, in order, `supabase/migrations/202610220001_initial_sports_network.sql` and `supabase/migrations/202610220002_workspace_messaging_admin.sql` in the new Sport project's SQL editor.
-7. Run `npm run dev` for development and `npm run build` for type-checking plus the production build.
+7. Run `npm run dev` for development, `npm run test` for unit tests, and `npm run build` for type-checking plus the production build.
 
 **Never use the existing ChatSched advertising database for Sport.** Only a browser-safe Supabase publishable/anon key belongs in Vite client environment variables; never put a service-role or secret key in the browser or commit real environment files.
 
@@ -60,7 +63,7 @@ Connect `ajorz1989/Chatsched-Sports` as a **separate** Cloudflare Pages project:
 - Build output directory: `dist`
 - Environment variables: `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`
 
-The repo includes a `_redirects` SPA fallback for client routes such as `/workspace`, `/talent`, `/messages`, `/matching` and `/opportunities/:id`. Do not configure this project through Vercel.
+The repo includes a `_redirects` SPA fallback for client routes such as `/workspace`, `/talent`, `/messages`, `/notifications`, `/matching`, `/privacy`, `/safeguarding` and `/opportunities/:id`. Add the deployed recovery URL ending in `/reset-password` to the Sport project's Supabase Auth redirect allow-list. Do not configure this project through Vercel.
 
 ## Security, privacy and safeguarding
 
