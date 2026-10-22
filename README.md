@@ -2,61 +2,92 @@
 
 **The Sports Opportunity Network.** Your Game. Your Opportunity. Your Future.
 
-ChatSched Sport is a distinct product and repository from the existing ChatSched advertising marketplace. That product and its live site must remain untouched while Sport is developed.
+ChatSched Sport is a separate product and GitHub repository from the existing ChatSched advertising marketplace. Do not change or deploy over the advertising product while developing Sport.
 
-## Vision
+## Product vision
+
 **DISCOVER → MATCH → DEVELOP → CONNECT → REPRESENT → GROW**
 
-Connect athletes, clubs, scouts, academies, coaches, brands, sponsors, agents and events through professional sports profiles, verified organisations, structured opportunities, transparent matching and clear next steps. The ambition is trusted infrastructure for sporting opportunity—not just a brochure or unmoderated directory.
+Build trusted infrastructure for sporting opportunity—not just a brochure or unmoderated directory. The network brings athletes, clubs, scouts, academies, coaches, brands, sponsors, agents and events into a structured journey with professional sports profiles, public talent discovery, verified organisations, explainable matching and opportunity applications.
 
-## Current foundation
-- Premium responsive public product experience.
-- Searchable opportunity catalogue with sport/type filters and detail views.
-- Fictional sample listings clearly labelled as examples, not current openings or verified organisations.
-- Supabase Auth registration/login integration when configured.
-- Explainable deterministic opportunity-match scoring helper.
-- Initial PostgreSQL schema for profiles, sports, athlete profiles/achievements, organisations, opportunities, applications and saved opportunities.
-- Row Level Security, verification gates and column-level grants in the initial migration.
+## What is in the repository now
+
+- Premium responsive marketing site with editorial home, journey and audience sections.
+- Opportunity catalogue with search and filters, individual detail pages and authenticated save/apply actions.
+- Fictional opportunity examples explicitly labelled as demonstrations; they are not live openings or verified organisations.
+- Supabase signup/sign-in UI with safe return routing.
+- Member workspace with sports profile editor, achievements, profile visibility control, saved opportunities, application tracker and organisation listing tools.
+- Athlete talent directory and public profile/media-link pages that exclude email and private login data.
+- Private conversations, inbox, message sending/reading and notification creation for new messages.
+- Restricted admin moderation for organisations, opportunities and application status, with an administrator allow-list and audit events.
+- Transparent, deterministic opportunity-match explorer that explains which criteria contribute to each score.
+- Two initial Supabase/PostgreSQL migrations for data, RLS, column-level grants, moderation, directory views, messaging and notifications.
+- Cloudflare Pages SPA fallback and a GitHub Actions production build workflow.
+
+Some account and database-backed flows require the dedicated Sport Supabase project. The UI intentionally stays in preview mode without it. A source-code push is not proof that the database has been provisioned or the site deployed.
 
 ## Stack
-React 19, TypeScript, Vite, Tailwind CSS, Supabase Auth/PostgreSQL and Cloudflare Pages.
 
-## Setup
-1. Install dependencies with `npm install`.
-2. Copy `.env.example` to `.env.local`.
-3. Create a separate Supabase project for ChatSched Sport. Never reuse the advertising database.
-4. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in `.env.local`.
-5. Apply `supabase/migrations/202610220001_initial_sports_network.sql` in the new project's SQL editor.
-6. Run `npm run dev` locally and `npm run build` to create `dist`.
+React 19 · TypeScript · Vite · Tailwind CSS · Lucide · Supabase Auth/PostgreSQL · Cloudflare Pages.
 
-Only a public Supabase publishable/anon key belongs in browser code. Never commit a service-role key, secret or actual environment file. Without Supabase configuration, the app explains that accounts are not connected and the catalogue uses clearly labelled sample listings.
+## Local development
+
+1. Install a Node.js version supported by the Vite toolchain.
+2. Run `npm install`.
+3. Copy `.env.example` to `.env.local`.
+4. Create a **new, separate** Supabase project for ChatSched Sport.
+5. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in `.env.local`.
+6. Apply, in order, `supabase/migrations/202610220001_initial_sports_network.sql` and `supabase/migrations/202610220002_workspace_messaging_admin.sql` in the new Sport project's SQL editor.
+7. Run `npm run dev` for development and `npm run build` for type-checking plus the production build.
+
+**Never use the existing ChatSched advertising database for Sport.** Only a browser-safe Supabase publishable/anon key belongs in Vite client environment variables; never put a service-role or secret key in the browser or commit real environment files.
+
+## Admin bootstrap
+
+Administrator status is deliberately **not** inferred from the member's self-declared account type. After creating your own Sport account, copy your authenticated Supabase user UUID from the Supabase Auth users page. As the database owner in the Sport SQL editor, add it to the private allow-list:
+
+```sql
+insert into private.sport_admins (user_id)
+values ('YOUR-AUTH-USER-UUID');
+```
+
+Only do this for a trusted administrator. The private admin table is not exposed to ordinary API users. Moderation decisions should be recorded in `public.admin_audit_log`.
 
 ## Cloudflare Pages
-Connect GitHub repository `ajorz1989/Chatsched-Sports` as a separate Cloudflare Pages project. Use build command `npm run build`, output directory `dist`, and environment variables `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. Configure SPA fallback for `/join`, `/opportunities` and opportunity detail routes to resolve to `index.html`. Do not deploy this project through Vercel.
 
-## Trust and security
-- RLS is enabled on all application tables in the initial migration.
-- Public feed queries only published opportunities marked verified.
-- Column-level grants prevent ordinary members editing verification fields and application ownership.
-- Application creation checks published/verified status and closing date.
-- Account type is self-declared and is not an admin permission.
-- Initial registration is adult-only. Design and review a safeguarded guardian-assisted journey before onboarding minors.
-- Never guarantee selection, contracts, representation, scholarships or sponsorships.
-- Verify real organisations and listings before presenting them as genuine.
+Connect `ajorz1989/Chatsched-Sports` as a **separate** Cloudflare Pages project:
+- Build command: `npm run build`
+- Build output directory: `dist`
+- Environment variables: `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`
 
-This is an initial foundation, not a full production security audit. Test every RLS policy and grant in a separate non-production project before launch. Admin verification, storage policies, complete profile flows, moderation, abuse prevention and safeguarding still need implementation and testing.
+The repo includes a `_redirects` SPA fallback for client routes such as `/workspace`, `/talent`, `/messages`, `/matching` and `/opportunities/:id`. Do not configure this project through Vercel.
 
-## Roadmap
-1. Foundation, auth and account types.
-2. Athlete profile builder and sports CV.
-3. Organisation onboarding and verification.
-4. Opportunity creation, moderation, search and detail.
-5. Applications and saved opportunities.
-6. Explainable matching and reverse talent discovery.
-7. Admin console, reporting and safeguarding.
-8. Messaging, notifications, agency support and commercial partnerships.
+## Security, privacy and safeguarding
+
+- All public application tables are intended to have RLS enabled. Database policies—not only client UI checks—control access to applications, saved listings, profile edits and messages.
+- Athlete profiles default to **private**. A member must explicitly choose public visibility before they appear in the public talent directory.
+- Directory views expose selected public fields only, never profile email or private contact details.
+- Only organisations and opportunities that pass their respective verification gates can appear in the public catalogue. Ordinary users cannot self-verify via the app's column grants and database trigger guard.
+- Application inserts are limited to accounts declared as athletes and require a published, verified opportunity that has not passed its closing date.
+- Messaging is restricted to participants; conversations started through the app require the other member to be discoverable.
+- Account type is self-declared and is not administrator permission.
+- Signup asks the user to self-confirm they are 18+. This is a **client-side safeguard, not independent age verification or server-enforced age assurance**. Do not onboard minors until an appropriately safeguarded, guardian-assisted pathway and server-side eligibility controls have been designed and reviewed.
+- Never guarantee selection, contracts, scholarships, sponsorships or representation, and do not present sample data as actual opportunities.
+
+Before a public launch, apply and test both migrations in a non-production Sport Supabase project, verify every RLS/grant/trigger/view, configure Auth redirect URLs and email settings, add rate-limiting and abuse-reporting, review data retention and POPIA obligations, and complete security/safeguarding review. No live Sport database or Cloudflare deployment is provisioned by a GitHub commit alone.
+
+## Product roadmap after this foundation
+
+1. Complete live verification workflow with evidence capture, admin history and rejection reasons.
+2. Finish production profile management, media upload/storage policy, organisation verification and publishing.
+3. Add club/scout talent search with robust query, consent and privacy filters.
+4. Add application review dashboards and richer notification controls.
+5. Add sports-specific profile fields, verified achievements, performance statistics and portfolio/kit generation.
+6. Improve matching with user feedback and audited, explainable factors before considering predictive AI.
+7. Build service/agency workflows, commercial partnership tools, analytics and payments only after validating demand.
 
 ## Engineering discipline
+
 **INSPECT → PLAN → IMPLEMENT → TEST → AUDIT → COMMIT → PUSH**
 
-A push is not a successful build. A successful build is not a deployment. Verify each state separately and report it accurately.
+A successful GitHub push is not a successful build. A successful build is not a deployed website. Verify each state separately and report it honestly.
