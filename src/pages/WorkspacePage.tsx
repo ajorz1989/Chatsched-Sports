@@ -184,7 +184,9 @@ export default function WorkspacePage() {
 
   async function loadManaged(orgs:Org[]){
     if(!supabase||!orgs.length){setManaged([]);setReceivedApplications([]);return;}
-    const {data,error}=await supabase.from("opportunities").select("id,title,status,verification_status,closing_date,created_at,opportunity_type").in("organisation_id",orgs.map(org=>org.id)).order("created_at",{ascending:false});
+    const activeOrgIds=selectedOrg?orgs.filter(org=>org.id===selectedOrg).map(org=>org.id):orgs.map(org=>org.id);
+    if(!activeOrgIds.length){setManaged([]);setReceivedApplications([]);return;}
+    const {data,error}=await supabase.from("opportunities").select("id,title,status,verification_status,closing_date,created_at,opportunity_type").in("organisation_id",activeOrgIds).order("created_at",{ascending:false});
     if(error){setNotice({kind:"info",text:"Opportunity management needs the current Sport migration and organisation owner permissions."});return;}
     const listingRows=(data??[]) as ManagedOpportunity[];
     setManaged(listingRows);
