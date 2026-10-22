@@ -1,5 +1,5 @@
 import {ArrowRight,ArrowUpRight,CheckCircle2,Compass,Flag,Heart,ShieldCheck,Sparkles,Trophy,Users,Waypoints} from "lucide-react";
-import {Link,useParams} from "react-router-dom";
+import {Link,useLocation,useParams} from "react-router-dom";
 import "../styles-workspace.css";
 
 type GuideSection={eyebrow:string;title:string;body:string;bullets:string[]};
@@ -81,7 +81,7 @@ const guides:Record<string,Guide>={
 };
 const fallback:Guide={kicker:"THE SPORTS OPPORTUNITY NETWORK",title:"Find your next sporting pathway.",accent:"",intro:"Discover, match, develop, connect and grow within a network built around sporting opportunity.",cta:"Explore opportunities",secondary:"Learn how it works",sections:[],principles:[]};
 export default function AudiencePage(){
- const {slug=""}=useParams();const guide=guides[slug]??fallback;
+ const {slug:routeSlug}=useParams();const location=useLocation();const slug=routeSlug??location.pathname.split("/").filter(Boolean).at(-1)??"";const guide=guides[slug]??fallback;
  const primary=guide.cta==="Explore opportunities"?"/opportunities":guide.cta==="Manage your profile"?"/workspace":"/join";
  const secondary=guide.secondary==="Trust & safeguarding"?"/safeguarding":guide.secondary==="Read the privacy overview"?"/privacy":guide.secondary==="Learn how it works"?"/how-it-works":"/workspace";
  return <section className="audience-page">
