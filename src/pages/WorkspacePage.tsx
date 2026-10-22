@@ -27,7 +27,7 @@ export default function WorkspacePage() {
   const [level, setLevel] = useState("");
   const [availability, setAvailability] = useState("");
   const [goals, setGoals] = useState("");
-  const [visibility, setVisibility] = useState("public");
+  const [visibility, setVisibility] = useState("private");
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [achievementTitle, setAchievementTitle] = useState("");
   const [achievementOrg, setAchievementOrg] = useState("");
