@@ -288,6 +288,26 @@ grant select on public.athlete_directory to anon, authenticated;
 comment on view public.member_directory is 'Public allow-listed fields for public athlete profiles and owners of verified organisations; never include email or private contact fields.';
 comment on view public.athlete_directory is 'Athlete-only public directory; constrained by explicit public profile visibility and excludes private contact fields.';
 
+-- Public visibility must be an explicit athlete choice; make the privacy-first default consistent.
+alter table public.athlete_profiles alter column visibility set default 'private';
+
+-- The database, not only the UI, limits new conversations to discoverable public members.
+drop policy if exists "Participants can start conversations" on public.conversations;
+create policy "Only discoverable members can start conversations"
+  on public.conversations for insert to authenticated
+  with check (
+    (participant_a = (select auth.uid()) or participant_b = (select auth.uid()))
+    and participant_a <> participant_b
+    and exists (
+      select 1 from public.member_directory m
+      where m.id = case
+        when participant_a = (select auth.uid()) then participant_b
+        else participant_a
+      end
+    )
+  );
+
+
 -- Notify the other participant on an inserted message; message sender cannot pick the recipient.
 create or replace function private.create_message_notification()
 returns trigger
