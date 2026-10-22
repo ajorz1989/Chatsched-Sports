@@ -13,6 +13,7 @@ type SavedRow = { opportunity_id: string; created_at: string };
 type ApplicationRow = { id: string; opportunity_id: string; status: string; message: string | null; created_at: string };
 type Org = { id: string; name: string; organisation_type: string; verification_status: string; location: string | null; country: string; website: string | null; description: string | null };
 type ManagedOpportunity = { id: string; title: string; status: string; verification_status: string; closing_date: string | null; created_at: string; opportunity_type: string };
+type ReceivedApplication = { id: string; opportunity_id: string; athlete_id: string; status: string; message: string | null; created_at: string; opportunity_title: string; applicant_name: string; applicant_location: string | null; applicant_sport: string | null; applicant_position: string | null; applicant_level: string | null; profile_visibility: string | null };
 const opportunityTypes: OpportunityType[] = ["trial","academy","scholarship","scouting","sponsorship","coaching","event","development"];
 
 export default function WorkspacePage() {
@@ -38,6 +39,7 @@ export default function WorkspacePage() {
   const [organisations, setOrganisations] = useState<Org[]>([]);
   const [selectedOrg, setSelectedOrg] = useState("");
   const [managed, setManaged] = useState<ManagedOpportunity[]>([]);
+  const [receivedApplications, setReceivedApplications] = useState<ReceivedApplication[]>([]);
   const [orgName, setOrgName] = useState("");
   const [orgType, setOrgType] = useState("club");
   const [orgLocation, setOrgLocation] = useState("");
@@ -181,12 +183,34 @@ export default function WorkspacePage() {
   }
 
   async function loadManaged(orgs:Org[]){
-    if(!supabase||!orgs.length)return;
+    if(!supabase||!orgs.length){setManaged([]);setReceivedApplications([]);return;}
     const {data,error}=await supabase.from("opportunities").select("id,title,status,verification_status,closing_date,created_at,opportunity_type").in("organisation_id",orgs.map(org=>org.id)).order("created_at",{ascending:false});
     if(error){setNotice({kind:"info",text:"Opportunity management needs the current Sport migration and organisation owner permissions."});return;}
-    setManaged((data??[]) as ManagedOpportunity[]);
+    const listingRows=(data??[]) as ManagedOpportunity[];
+    setManaged(listingRows);
+    if(!listingRows.length){setReceivedApplications([]);return;}
+    const {data:applicationRows,error:applicationError}=await supabase.from("opportunity_applications").select("id,opportunity_id,athlete_id,status,message,created_at").in("opportunity_id",listingRows.map(row=>row.id)).order("created_at",{ascending:false});
+    if(applicationError){setNotice({kind:"info",text:"Listings loaded, but application review requires the current Sport schema and access policies."});setReceivedApplications([]);return;}
+    const detailed=await Promise.all((applicationRows??[]).map(async row=>{
+      const {data:applicant}=await supabase.from("opportunity_applicant_directory").select("id,display_name,location,country,sport,position,playing_level,visibility").eq("id",row.athlete_id).maybeSingle();
+      const applicantRow=applicant as {display_name?:string;location?:string|null;country?:string|null;sport?:string|null;position?:string|null;playing_level?:string|null;visibility?:string|null}|null;
+      const listing=listingRows.find(value=>value.id===row.opportunity_id);
+      return {...row,opportunity_title:listing?.title??"Opportunity listing",applicant_name:applicantRow?.display_name??"Applicant",applicant_location:[applicantRow?.location,applicantRow?.country].filter(Boolean).join(", ")||null,applicant_sport:applicantRow?.sport??null,applicant_position:applicantRow?.position??null,applicant_level:applicantRow?.playing_level??null,profile_visibility:applicantRow?.visibility??null} as ReceivedApplication;
+    }));
+    setReceivedApplications(detailed);
   }
   useEffect(()=>{if(organisations.length)void loadManaged(organisations);},[organisations,selectedOrg]);
+
+  async function updateReceivedApplication(item:ReceivedApplication,status:string){
+    if(!supabase)return;setBusy(true);setNotice(null);
+    try{
+      const {error}=await supabase.from("opportunity_applications").update({status,updated_at:new Date().toISOString()}).eq("id",item.id);
+      if(error)throw error;
+      setReceivedApplications(rows=>rows.map(row=>row.id===item.id?{...row,status}:row));
+      setNotice({kind:"success",text:"Application status updated. The applicant will receive a notification."});
+    }catch(error){setNotice({kind:"error",text:error instanceof Error?error.message:"Application status could not be changed."});}
+    finally{setBusy(false);}
+  }
 
   async function removeSaved(id:string){
     if(!user||!supabase)return;const {error}=await supabase.from("saved_opportunities").delete().eq("athlete_id",user.id).eq("opportunity_id",id);
@@ -230,6 +254,9 @@ export default function WorkspacePage() {
           {selectedOrg&&<div className="workspace-form-card"><div className="workspace-section-title"><div><p className="workspace-kicker">OPPORTUNITY MANAGEMENT</p><h2>Your listings.</h2></div><button className="button button-dark" onClick={()=>setShowCreateOpportunity(v=>!v)}><Plus size={16}/>{showCreateOpportunity?"Close form":"New opportunity"}</button></div>
             {showCreateOpportunity&&<form className="workspace-form-grid workspace-create-opportunity" onSubmit={createOpportunity}><label className="workspace-span-2">Opportunity title<input required minLength={4} value={opTitle} onChange={e=>setOpTitle(e.target.value)} placeholder="e.g. U19 trials, scholarship intake, coaching programme"/></label><label>Opportunity type<select value={opType} onChange={e=>setOpType(e.target.value as OpportunityType)}>{opportunityTypes.map(x=><option key={x} value={x}>{x.charAt(0).toUpperCase()+x.slice(1)}</option>)}</select></label><label>Sport<select value={opSport} onChange={e=>setOpSport(e.target.value)}><option value="">Multi-sport / not specified</option>{sports.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</select></label><label>Positions / disciplines<input value={opPosition} onChange={e=>setOpPosition(e.target.value)} placeholder="Comma-separated, optional"/></label><label>Level<input value={opLevel} onChange={e=>setOpLevel(e.target.value)} placeholder="e.g. U19, regional, senior"/></label><label>Location<input value={opLocation} onChange={e=>setOpLocation(e.target.value)} placeholder={orgLocation||"City / region"}/></label><label>Closing date<input type="date" value={opClosing} onChange={e=>setOpClosing(e.target.value)}/></label><label className="workspace-span-2">Summary<textarea required minLength={20} rows={4} value={opSummary} onChange={e=>setOpSummary(e.target.value)} placeholder="Explain the opportunity, who is eligible, what is included, and how selection works."/></label><div className="workspace-span-2 workspace-form-footer"><span>New listings are saved as drafts and are not publicly visible until reviewed.</span><button className="button button-lime" type="submit" disabled={busy}><Plus size={16}/>Save draft</button></div></form>}
             {managed.length?<div className="workspace-managed-list">{managed.map(item=><div className="workspace-list-row" key={item.id}><span className="workspace-row-icon"><FileText size={17}/></span><div><strong>{item.title}</strong><small>{item.opportunity_type} · {item.status} · verification {item.verification_status}</small></div><span className={"status-tag status-"+item.verification_status}>{item.verification_status}</span>{(item.status==="published"||(item.verification_status==="verified"&&organisations.find(o=>o.id===selectedOrg)?.verification_status==="verified"))&&<button className="listing-state-button" type="button" disabled={busy} onClick={()=>void changeOpportunityStatus(item)}>{item.status==="published"?"Close":"Publish"}</button>}</div>)}</div>:<p className="workspace-muted">No listings yet. Create an opportunity draft to start the review process.</p>}
+          </div>}
+          {selectedOrg&&<div className="workspace-form-card workspace-applicants-card"><div className="workspace-section-title"><div><p className="workspace-kicker">APPLICATION REVIEW</p><h2>People interested in your listings.</h2><p className="workspace-subtitle">Review applications for opportunities owned by this organisation. Applicant email addresses are not exposed in this view.</p></div><span className="status-tag">{receivedApplications.length} applications</span></div>
+            {receivedApplications.length?receivedApplications.map(item=><article className="received-application" key={item.id}><div className="received-app-top"><div className="received-app-avatar">{(item.applicant_name.trim()[0]||"A").toUpperCase()}</div><div className="received-app-identity"><strong>{item.applicant_name}</strong><small>{[item.applicant_sport,item.applicant_position,item.applicant_level].filter(Boolean).join(" · ")||"Sporting profile details not supplied"}</small><small>{item.applicant_location??"Location not supplied"}{item.profile_visibility==="private"?" · Private profile":""}</small></div><span className={"status-tag status-"+item.status}>{item.status}</span></div><div className="received-app-listing"><strong>{item.opportunity_title}</strong><small>Received {new Intl.DateTimeFormat("en-ZA",{day:"numeric",month:"short",year:"numeric"}).format(new Date(item.created_at))}</small></div>{item.message&&<p className="received-app-message">{item.message}</p>}<div className="received-app-actions"><label>Application status<select value={item.status} disabled={busy} onChange={event=>void updateReceivedApplication(item,event.target.value)}>{["submitted","reviewing","shortlisted","declined","accepted"].map(value=><option key={value} value={value}>{value.charAt(0).toUpperCase()+value.slice(1)}</option>)}</select></label><Link className="received-app-contact" to={"/messages?with="+item.athlete_id}>Message applicant <ArrowUpRight size={14}/></Link></div></article>):<div className="workspace-blank"><ClipboardList size={24}/><h3>No applications received yet.</h3><p>Applications submitted to your organisation's verified opportunities will appear here.</p></div>}
           </div>}
           {!selectedOrg&&<div className="workspace-blank"><BriefcaseBusiness size={25}/><h3>One network. More pathways.</h3><p>Organisation verification helps athletes distinguish legitimate opportunities from unverified listings.</p></div>}
         </>}
