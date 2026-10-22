@@ -5,13 +5,6 @@ export const onRequestGet = ({ request }: SportRobotsContext): Response => {
   const body = [
     "User-agent: *",
     "Allow: /",
-    "Disallow: /workspace",
-    "Disallow: /messages",
-    "Disallow: /notifications",
-    "Disallow: /admin",
-    "Disallow: /join",
-    "Disallow: /forgot-password",
-    "Disallow: /reset-password",
     "Sitemap: " + origin + "/sitemap.xml",
     ""
   ].join("\n");
