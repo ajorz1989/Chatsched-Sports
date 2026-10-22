@@ -47,7 +47,7 @@ create table if not exists public.athlete_profiles (
   availability text,
   location text,
   career_goals text,
-  highlight_video_url text,
+  highlight_video_url text check (highlight_video_url is null or highlight_video_url ~* '^https://'),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
