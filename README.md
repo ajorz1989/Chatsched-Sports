@@ -20,11 +20,13 @@ Build trusted infrastructure for sporting opportunity—not just a brochure or u
 - Athlete talent directory and public profile/media-link pages that exclude email and private login data.
 - Private conversations, inbox, message read states, notifications for messages, applications and application-status updates.
 - Organisation application-review tools that show limited applicant details, update application statuses and link to the conversation flow.
-- Restricted admin moderation for organisations, opportunities and application status, with an administrator allow-list and audit events.
+- Restricted admin moderation for organisations, opportunities, application statuses, safety reports and career-support requests, with an administrator allow-list and audit events.
+- Private safety reports from opportunity, organisation and athlete pages, reviewed in a restricted moderator queue.
+- Athlete career-support/representation requests with explicit contact consent, status tracking, admin notes and notifications; requests do not promise representation.
 - Transparent, deterministic opportunity-match explorer that explains which criteria contribute to each score.
 - Public About, How it Works, audience, privacy overview, platform principles and safeguarding information pages.
 - Automated unit tests for explainable match scoring and a CI workflow that runs tests, type-checks and builds.
-- Two initial Supabase/PostgreSQL migrations for data, RLS, column-level grants, moderation, directory views, messaging and notifications.
+- Two initial Supabase/PostgreSQL migrations for data, RLS, column-level grants, moderation, safety reports, career-support requests, directory views, messaging and notifications.
 - Cloudflare Pages SPA fallback and a GitHub Actions production build workflow.
 
 Some account and database-backed flows require the dedicated Sport Supabase project. The UI intentionally stays in preview mode without it. A source-code push is not proof that the database has been provisioned or the site deployed.
