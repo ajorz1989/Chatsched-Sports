@@ -1,0 +1,2 @@
+import {ArrowLeft,Compass} from "lucide-react";import {Link} from "react-router-dom";
+export default function NotFoundPage(){return <section className="not-found-page"><span className="not-found-icon"><Compass size={28}/></span><p className="section-kicker">404 / OFF THE MAP</p><h1>This path doesn't exist.<br/><span>Yet.</span></h1><p>The page may have moved, or the link may be incorrect. Let's get you back to the network.</p><Link to="/" className="button button-dark"><ArrowLeft size={16}/> Back to home</Link></section>;}
