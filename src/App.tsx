@@ -15,6 +15,8 @@ import NotificationsPage from "./pages/NotificationsPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import AudiencePage from "./pages/AudiencePage";
+import OrganisationsPage from "./pages/OrganisationsPage";
+import OrganisationProfilePage from "./pages/OrganisationProfilePage";
 
 export default function App() {
   return (
@@ -37,6 +39,8 @@ export default function App() {
           <Route path="/terms" element={<AudiencePage />} />
           <Route path="/workspace" element={<WorkspacePage />} />
           <Route path="/talent" element={<TalentDirectoryPage />} />
+          <Route path="/organisations" element={<OrganisationsPage />} />
+          <Route path="/organisations/:organisationId" element={<OrganisationProfilePage />} />
           <Route path="/talent/:athleteId" element={<TalentProfilePage />} />
           <Route path="/messages" element={<MessagesPage />} />
           <Route path="/matching" element={<MatchingPage />} />
