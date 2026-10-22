@@ -116,7 +116,7 @@ export default function WorkspacePage() {
       if (sportRes.data) setSports(sportRes.data as Sport[]);
       if (athleteRes.data) {
         const a = athleteRes.data as unknown as {primary_sport_id:string|null;position:string|null;playing_level:string|null;availability:string|null;career_goals:string|null;visibility:string;highlight_video_url:string|null};
-        setSportId(a.primary_sport_id ?? "");setPosition(a.position ?? "");setLevel(a.playing_level ?? "");setAvailability(a.availability ?? "");setGoals(a.career_goals ?? "");setVisibility(a.visibility ?? "public");
+        setSportId(a.primary_sport_id ?? "");setPosition(a.position ?? "");setLevel(a.playing_level ?? "");setAvailability(a.availability ?? "");setGoals(a.career_goals ?? "");setVisibility(a.visibility ?? "private");
       }
       if (achievementRes.data) setAchievements(achievementRes.data as Achievement[]);
       if (orgRes.data) {
