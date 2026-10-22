@@ -6,6 +6,18 @@ export default function NotificationsPage(){
  useEffect(()=>{let alive=true;if(!supabaseConfigured||!supabase){setChecked(true);setLoading(false);return;}supabase.auth.getUser().then(({data})=>{if(!alive)return;setUserId(data.user?.id??"");setChecked(true);if(data.user)void load(data.user.id);else setLoading(false);}).catch(()=>{if(alive){setChecked(true);setLoading(false);}});return()=>{alive=false;};},[]);
  async function markRead(item:NotificationRow){if(!supabase||!userId||item.read_at)return;const timestamp=new Date().toISOString();const {error}=await supabase.from("notifications").update({read_at:timestamp}).eq("id",item.id).eq("user_id",userId);if(error){setNotice(error.message);return;}setItems(rows=>rows.map(row=>row.id===item.id?{...row,read_at:timestamp}:row));}
  async function markAllRead(){if(!supabase||!userId)return;const timestamp=new Date().toISOString();const {error}=await supabase.from("notifications").update({read_at:timestamp}).eq("user_id",userId).is("read_at",null);if(error){setNotice(error.message);return;}setItems(rows=>rows.map(row=>row.read_at?row:{...row,read_at:timestamp}));}
+
+ useEffect(()=>{
+  if(!supabase||!userId)return;
+  let active=true;
+  const channel=supabase.channel("sport-notifications-"+userId)
+   .on("postgres_changes",{event:"INSERT",schema:"public",table:"notifications",filter:"user_id=eq."+userId},payload=>{
+    if(!active)return;
+    const fresh=payload.new as NotificationRow;
+    setItems(current=>current.some(item=>item.id===fresh.id)?current:[fresh,...current].sort((a,b)=>b.created_at.localeCompare(a.created_at)));
+   }).subscribe();
+  return()=>{active=false;void supabase?.removeChannel(channel);};
+ },[userId]);
  const unread=items.filter(item=>!item.read_at).length;
  if(!checked||loading&&!userId)return <section className="workspace-wrap"><div className="workspace-loading"><LoaderCircle size={22} className="spin"/>Loading notifications…</div></section>;
  if(!supabaseConfigured||!supabase)return <section className="workspace-wrap"><div className="workspace-empty"><Bell size={28}/><h1>Keep up with your next step.</h1><p>Connect the Sport Supabase project and apply the migrations to enable notification history.</p><Link className="button button-dark" to="/join">Join the network</Link></div></section>;
