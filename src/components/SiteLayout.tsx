@@ -14,7 +14,7 @@ const routeMeta:Record<string,{title:string;description:string;noindex?:boolean}
  "/safeguarding":{title:"Trust and Safeguarding",description:"Review ChatSched Sport's verification principles, user safety guidance and safeguards around sporting opportunities."},
  "/privacy":{title:"Privacy Overview",description:"Learn how public profile visibility works and how private contact details are kept out of the public directory."},
  "/terms":{title:"Platform Principles",description:"Read the expectations, limits and trust principles for using ChatSched Sport."},
- "/join":{title:"Join the Sports Opportunity Network",description:"Create a ChatSched Sport account to start building a sports profile or organisation presence."},
+ "/join":{title:"Join the Sports Opportunity Network",description:"Create a ChatSched Sport account to start building a sports profile or organisation presence.",noindex:true},
  "/forgot-password":{title:"Recover Your Account",description:"Request a secure email link to reset your ChatSched Sport password.",noindex:true},
  "/reset-password":{title:"Set a New Password",description:"Complete your secure ChatSched Sport password reset.",noindex:true},
  "/workspace":{title:"Member Workspace",description:"Manage your sports profile, saved opportunities, applications, organisation and career-support requests.",noindex:true},
