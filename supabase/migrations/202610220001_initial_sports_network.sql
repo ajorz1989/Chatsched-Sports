@@ -128,8 +128,8 @@ create or replace function private.handle_new_sports_user()
 returns trigger
 language plpgsql
 security definer
-set search_path = public
-as $
+set search_path = ''
+as $sports$
 declare
   requested_type text;
 begin
@@ -149,7 +149,7 @@ begin
 
   return new;
 end;
-$$;
+$sports$;
 
 drop trigger if exists on_auth_user_created_sports_profile on auth.users;
 create trigger on_auth_user_created_sports_profile
@@ -240,7 +240,9 @@ create policy "Athletes can apply to verified published opportunities"
   on public.opportunity_applications for insert to authenticated with check (
     athlete_id = (select auth.uid()) and exists (
       select 1 from public.opportunities p
+      join public.organisations o on o.id = p.organisation_id
       where p.id = opportunity_id and p.status = 'published' and p.verification_status = 'verified'
+        and o.verification_status = 'verified'
         and (p.closing_date is null or p.closing_date >= current_date)
     )
   );
@@ -260,7 +262,10 @@ create policy "Saved opportunities are private to their athlete"
 create policy "Athletes can save verified published opportunities"
   on public.saved_opportunities for insert to authenticated with check (
     athlete_id = (select auth.uid()) and exists (
-      select 1 from public.opportunities p where p.id = opportunity_id and p.status = 'published' and p.verification_status = 'verified'
+      select 1 from public.opportunities p
+      join public.organisations o on o.id = p.organisation_id
+      where p.id = opportunity_id and p.status = 'published' and p.verification_status = 'verified'
+        and o.verification_status = 'verified'
     )
   );
 create policy "Athletes can remove their saved opportunities"
