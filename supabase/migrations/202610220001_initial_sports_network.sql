@@ -43,7 +43,7 @@ create table if not exists public.athlete_profiles (
   discipline text,
   position text,
   playing_level text,
-  visibility text not null default 'public' check (visibility in ('public','private')),
+  visibility text not null default 'private' check (visibility in ('public','private')),
   availability text,
   location text,
   career_goals text,
