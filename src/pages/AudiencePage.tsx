@@ -1,4 +1,4 @@
-import {ArrowRight,ArrowUpRight,CheckCircle2,Compass,Flag,Heart,ShieldCheck,Sparkles,Trophy,Users,Waypoints} from "lucide-react";
+import {ArrowRight,ArrowUpRight,CheckCircle2} from "lucide-react";
 import {Link,useLocation,useParams} from "react-router-dom";
 import "../styles-workspace.css";
 
