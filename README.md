@@ -20,13 +20,13 @@ Build trusted infrastructure for sporting opportunity—not just a brochure or u
 - Athlete talent directory and public profile/media-link pages that exclude email and private login data.
 - Private conversations, inbox, message read states, notifications for messages, applications and application-status updates.
 - Organisation application-review tools that show limited applicant details, update application statuses and link to the conversation flow.
-- Restricted admin moderation for organisations, opportunities, application statuses, safety reports and career-support requests, with an administrator allow-list and audit events.
+- Restricted admin moderation for organisations, opportunity listings, applications, safety reports and career-support requests, plus evidence-based organisation verification and an administrator audit viewer.
 - Private safety reports from opportunity, organisation and athlete pages, reviewed in a restricted moderator queue.
 - Athlete career-support/representation requests with explicit contact consent, status tracking, admin notes and notifications; requests do not promise representation.
 - Transparent, deterministic opportunity-match explorer that explains which criteria contribute to each score.
 - Public About, How it Works, audience, privacy overview, platform principles and safeguarding information pages.
 - Automated unit tests for explainable match scoring and a CI workflow that runs tests, type-checks and builds.
-- Two initial Supabase/PostgreSQL migrations for data, RLS, column-level grants, moderation, safety reports, career-support requests, directory views, messaging and notifications.
+- Four Supabase/PostgreSQL migrations for data, RLS, column-level grants, moderation, safety reports, career-support requests, directory views, messaging, notifications, Realtime and evidence-led organisation verification.
 - Cloudflare Pages SPA fallback and a GitHub Actions production build workflow.
 
 Some account and database-backed flows require the dedicated Sport Supabase project. The UI intentionally stays in preview mode without it. A source-code push is not proof that the database has been provisioned or the site deployed.
@@ -42,7 +42,7 @@ React 19 · TypeScript · Vite · Tailwind CSS · Lucide · Supabase Auth/Postgr
 3. Copy `.env.example` to `.env.local`.
 4. Create a **new, separate** Supabase project for ChatSched Sport.
 5. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in `.env.local`.
-6. Apply these migrations in order in the new Sport project's SQL editor: `supabase/migrations/202610220001_initial_sports_network.sql`, `supabase/migrations/202610220002_workspace_messaging_admin.sql`, then `supabase/migrations/202610220003_enable_sport_realtime.sql`.
+6. Apply these migrations in order in the new Sport project's SQL editor: `supabase/migrations/202610220001_initial_sports_network.sql`, `supabase/migrations/202610220002_workspace_messaging_admin.sql`, then `supabase/migrations/202610220003_enable_sport_realtime.sql`, then `supabase/migrations/202610220004_organisation_verification_evidence.sql`.
 7. Run `npm run dev` for development, `npm run test` for unit tests, and `npm run build` for type-checking plus the production build.
 
 **Never use the existing ChatSched advertising database for Sport.** Only a browser-safe Supabase publishable/anon key belongs in Vite client environment variables; never put a service-role or secret key in the browser or commit real environment files.
