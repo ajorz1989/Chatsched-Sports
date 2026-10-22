@@ -1,3 +1,23 @@
-import { ArrowRight, Search, Trophy, Users, Zap } from "lucide-react";
-const journeys=[["DISCOVER","Find real opportunities across clubs, academies, scouting, events and sponsorships.",Search],["MATCH","Get explainable opportunity matches based on your sport, position, experience and goals.",Zap],["DEVELOP","Build a professional athlete profile, track achievements and plan your next move.",Trophy],["CONNECT","Move from opportunity to application, support, representation and long-term growth.",Users]];
-export default function App(){return <main className="min-h-screen bg-[#080a0c] text-white"><nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6"><div className="text-xl font-black tracking-tight">ChatSched <span className="text-lime-300">Sport</span></div><button className="rounded-full border border-white/15 px-5 py-2 text-sm font-semibold hover:bg-white/10">Join the network</button></nav><section className="mx-auto max-w-7xl px-6 pb-24 pt-16 lg:pt-28"><div className="max-w-4xl"><p className="mb-5 text-xs font-bold uppercase tracking-[0.3em] text-lime-300">The Sports Opportunity Network</p><h1 className="text-5xl font-black tracking-tight sm:text-7xl">Your Game.<br/>Your Opportunity.<br/><span className="text-white/45">Your Future.</span></h1><p className="mt-7 max-w-2xl text-lg leading-8 text-white/60">One professional network connecting athletes with clubs, scouts, academies, coaches, brands, sponsors, agents and events.</p><div className="mt-9 flex flex-wrap gap-3"><button className="flex items-center gap-2 rounded-full bg-lime-300 px-6 py-3 font-bold text-black">Create athlete profile <ArrowRight size={18}/></button><button className="rounded-full border border-white/15 px-6 py-3 font-bold">Explore opportunities</button></div></div><div className="mt-20 grid gap-4 md:grid-cols-2 lg:grid-cols-4">{journeys.map(([title,desc,Icon])=>{const I=Icon as typeof Search;return <article key={title as string} className="rounded-3xl border border-white/10 bg-white/[.035] p-6"><I size={22} className="text-lime-300"/><h2 className="mt-12 text-lg font-extrabold">{title as string}</h2><p className="mt-3 text-sm leading-6 text-white/50">{desc as string}</p></article>})}</div></section></main>}
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import SiteLayout from "./components/SiteLayout";
+import HomePage from "./pages/HomePage";
+import OpportunitiesPage from "./pages/OpportunitiesPage";
+import OpportunityDetailPage from "./pages/OpportunityDetailPage";
+import JoinPage from "./pages/JoinPage";
+import NotFoundPage from "./pages/NotFoundPage";
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route element={<SiteLayout />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/opportunities" element={<OpportunitiesPage />} />
+          <Route path="/opportunities/:opportunityId" element={<OpportunityDetailPage />} />
+          <Route path="/join" element={<JoinPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
+}
