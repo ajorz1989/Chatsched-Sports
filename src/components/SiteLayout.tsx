@@ -23,8 +23,13 @@ const routeMeta:Record<string,{title:string;description:string;noindex?:boolean}
  "/admin":{title:"Platform Moderation",description:"Restricted moderation, verification and audit tools.",noindex:true}
 };
 function setMeta(selector:string,attribute:string,value:string){
- let element=document.head.querySelector<HTMLMetaElement|HTMLLinkElement>(selector);
- if(!element){element=document.createElement(selector.startsWith("link")?"link":"meta");document.head.appendChild(element);}
+ let element=document.head.querySelector(selector);
+ if(!element){
+  element=document.createElement(selector.startsWith("link")?"link":"meta");
+  const match=selector.match(/\[(name|property|rel)="([^"]+)"\]/);
+  if(match)element.setAttribute(match[1],match[2]);
+  document.head.appendChild(element);
+ }
  element.setAttribute(attribute,value);
 }
 export default function SiteLayout(){
@@ -38,6 +43,10 @@ export default function SiteLayout(){
   setMeta('meta[property="og:title"]',"content",meta.title+" | ChatSched Sport");
   setMeta('meta[property="og:description"]',"content",meta.description);
   setMeta('meta[property="og:type"]',"content","website");
+  setMeta('meta[property="og:url"]',"content",window.location.origin+pathname);
+  setMeta('meta[name="twitter:card"]',"content","summary");
+  setMeta('meta[name="twitter:title"]',"content",meta.title+" | ChatSched Sport");
+  setMeta('meta[name="twitter:description"]',"content",meta.description);
   setMeta('meta[name="robots"]',"content",meta.noindex?"noindex,nofollow":"index,follow");
   setMeta('link[rel="canonical"]',"href",window.location.origin+pathname);
  },[location.pathname]);
