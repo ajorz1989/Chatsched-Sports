@@ -18,7 +18,8 @@ export default function TalentProfilePage(){
  if(alive){setProfile(data as Athlete);setMedia((mediaResult.data??[]) as Media[]);setAchievements((achievementResult.data??[]) as Achievement[]);setStatistics((statResult.data??[]) as unknown as Statistic[]);setExperience((experienceResult.data??[]) as unknown as Experience[]);}
  }catch(e){if(alive)setError(e instanceof Error?e.message:"The athlete profile could not be loaded.");}finally{if(alive)setLoading(false);}})();return()=>{alive=false;};},[athleteId]);
  useEffect(()=>{
-  if(profile){
+  useEffect(()=>{if(!profile||!supabaseConfigured||!supabase)return;let alive=true;void supabase.auth.getSession().then(({data})=>{const viewerId=data.session?.user.id;if(!viewerId||viewerId===profile.id)return;void supabase.from("athlete_profiles").select("profile_view_analytics_consent").eq("user_id",profile.id).maybeSingle().then(({data:consent})=>{if(alive&&consent?.profile_view_analytics_consent)void supabase.from("athlete_profile_views").insert({athlete_id:profile.id,viewer_id:viewerId,source:"talent_directory"});});});return()=>{alive=false;};},[profile]);
+ if(profile){
    const title=profile.display_name+" — Athlete Profile | ChatSched Sport";
    const description=[profile.display_name,profile.sport,profile.position,profile.location,profile.career_goals].filter(Boolean).join(" · ");
    document.title=title;
