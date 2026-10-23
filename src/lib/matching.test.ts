@@ -59,4 +59,17 @@ describe("scoreOpportunityMatch", () => {
     expect(result.score).toBe(40);
     expect(result.reasons).toEqual(["Sport matches your profile"]);
   });
+
+  it("explains every criterion and flags missing data instead of guessing", () => {
+    const result = scoreOpportunityMatch({ sport: "Football" }, opportunity);
+    expect(result.checks.map((c) => c.key)).toEqual(["sport", "position", "location", "level", "goals"]);
+    expect(result.checks.find((c) => c.key === "sport")?.status).toBe("met");
+    expect(result.checks.find((c) => c.key === "position")?.status).toBe("missing");
+    expect(result.strength).toBe("incomplete");
+  });
+  it("marks a different sport as unmet", () => {
+    const result = scoreOpportunityMatch({ sport: "Rugby", position: "Striker" }, opportunity);
+    expect(result.checks.find((c) => c.key === "sport")?.status).toBe("unmet");
+    expect(result.score).toBe(20);
+  });
 });

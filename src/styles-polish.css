@@ -137,3 +137,118 @@ main:focus{outline:none}
 /* Community cards are informational, not links: drop the misleading arrow */
 .community-arrow{display:none}
 .footer-links a svg{vertical-align:-1px;margin-left:3px}
+
+/* ======================= Design feature layer ======================= */
+
+/* Verification badges */
+.vbadge{display:inline-flex;align-items:center;gap:5px;font:600 11px var(--mono);padding:4px 8px;border-radius:999px;border:1px solid transparent;white-space:nowrap;line-height:1}
+.vbadge-compact{font-size:10px;padding:3px 7px}
+.vbadge-verified{background:#e8eefb;color:#16336e;border-color:#c3d2f1}
+.vbadge-professional{background:#16336e;color:#fff}
+.vbadge-official{background:#ff4757;color:#fff}
+.vbadge-pending{background:#fff7e0;color:#7a5600;border-color:#f0dca0}
+.vbadge-unverified{background:#eef1f6;color:var(--muted);border-color:#d5dce8}
+.vbadge-example{background:#fff7e0;color:#7a5600;border-color:#f0dca0}
+.card-badges{display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.closing-tag{font:700 10px var(--mono);letter-spacing:.04em;text-transform:uppercase;color:#fff;background:#d61f30;border-radius:999px;padding:4px 8px;line-height:1}
+.opportunity-sport{display:flex;align-items:center;gap:6px}
+
+/* Progress ring */
+.progress-ring{position:relative;flex:0 0 auto;display:grid;place-items:center}
+.progress-ring svg{position:absolute;inset:0}
+.progress-ring strong{font:700 17px var(--display);position:relative}
+.progress-ring-bg{stroke:#dbe2ef}
+.progress-ring-fg{stroke:#ff4757;transition:stroke-dashoffset .6s ease}
+.completion-ring-row{display:flex;align-items:center;gap:16px;margin-top:8px}
+.completion-ring-row>div{display:grid;gap:4px;min-width:0}
+.completion-ring-row>div>strong{font-size:0;height:0;overflow:hidden}
+.completion-ring-row small{font-size:12px;line-height:1.5}
+
+/* Skeleton loaders */
+.skeleton-card{background:#fff;border:1px solid #dee4ed;padding:22px;display:grid;gap:12px;border-radius:2px}
+.sk{display:block;border-radius:6px;background:linear-gradient(90deg,#e8edf5 25%,#f4f6fb 50%,#e8edf5 75%);background-size:200% 100%;animation:sk-shimmer 1.3s linear infinite}
+.sk-pill{width:90px;height:20px}.sk-line{height:12px}.sk-short{width:55%}.sk-title{height:22px;width:80%}
+@keyframes sk-shimmer{to{background-position:-200% 0}}
+
+/* Filter chips and mobile drawer */
+.filters-toggle{display:none;align-items:center;gap:8px;min-height:44px;padding:0 16px;background:#fff;border:1px solid #cbd4e3;font:700 13px Manrope,sans-serif;color:var(--ink);margin-bottom:12px}
+.filters-toggle em{font:700 11px var(--mono);font-style:normal;background:#ff4757;color:#fff;border-radius:999px;padding:2px 7px}
+.filter-chips{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 4px}
+.filter-chip{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:0 12px;background:#e8eefb;color:#16336e;border:1px solid #c3d2f1;border-radius:999px;font:700 12px Manrope,sans-serif;transition:background .15s}
+.filter-chip:hover{background:#d6e1f7}
+.filter-chip-clear{background:transparent;border-color:transparent;color:#d61f30;text-decoration:underline}
+@media(max-width:760px){
+  .filters-toggle{display:inline-flex}
+  .catalogue-controls{display:none}
+  .catalogue-controls.is-open{display:grid}
+}
+
+/* Match explanation */
+.match-score.match-strength-strong strong{color:#16336e}
+.match-score.match-strength-incomplete small{color:#7a5600}
+.match-why{margin:14px 0 4px;border:1px solid #dee4ed;background:#f9fbfe;border-radius:2px}
+.match-why summary{cursor:pointer;padding:11px 14px;font:700 12px Manrope,sans-serif;color:var(--ink);list-style:none;display:flex;justify-content:space-between;align-items:center;min-height:44px}
+.match-why summary::after{content:"+";font:700 16px var(--mono);color:var(--muted)}
+.match-why[open] summary::after{content:"−"}
+.match-why summary::-webkit-details-marker{display:none}
+.match-why ul{list-style:none;margin:0;padding:2px 14px 12px;display:grid;gap:10px}
+.match-check{display:flex;gap:10px;align-items:flex-start}
+.match-check svg{flex:0 0 auto;margin-top:2px}
+.match-check span{display:grid;gap:1px;font-size:12px}
+.match-check b{font-weight:700;color:var(--ink)}
+.match-check em{font-style:normal;font:600 11px var(--mono)}
+.match-check small{color:var(--muted);font-size:12px}
+.match-check-met svg,.match-check-met em{color:#16336e}
+.match-check-unmet svg,.match-check-unmet em{color:#d61f30}
+.match-check-missing svg,.match-check-missing em{color:#7a5600}
+
+/* Sticky apply bar (mobile) */
+.apply-bar{display:none}
+@media(max-width:1000px){
+  .apply-bar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:50;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid #cbd4e3;box-shadow:0 -10px 24px -14px rgba(10,31,68,.3)}
+  .apply-bar small{display:block;font:11px var(--mono);color:var(--muted)}
+  .apply-bar strong{font-size:14px}
+  .detail-page{padding-bottom:76px}
+}
+
+/* Auth-aware header */
+.header-icon-link{position:relative;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;color:var(--ink);transition:background .15s}
+.header-icon-link:hover{background:#e3e9f4}
+.header-badge{position:absolute;top:2px;right:0;min-width:17px;height:17px;padding:0 4px;border-radius:999px;background:#ff4757;color:#fff;font:700 10px var(--mono);display:grid;place-items:center}
+.header-avatar{width:38px;height:38px;display:grid;place-items:center;background:#ff4757;color:var(--ink);font:700 16px var(--display);border-radius:12px 12px 12px 3px;border:1px solid var(--ink)}
+
+/* Athlete profile actions, stat tiles, print */
+.profile-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.button-light-outline-dark{background:transparent;color:var(--ink);border:1px solid var(--ink)}
+.button-light-outline-dark:hover{background:#e3e9f4}
+.talent-profile-sport{display:flex;align-items:center;gap:8px}
+.talent-stat-card strong{font-size:clamp(26px,4vw,34px);letter-spacing:-.03em}
+.talent-stat-card{border-top:3px solid #ff4757}
+@media print{
+  .no-print,.site-header,.top-strip,.site-footer,.skip-link,.apply-bar{display:none!important}
+  body,.talent-profile-page{background:#fff!important}
+  .talent-profile-columns{display:block!important}
+  .talent-profile-section{break-inside:avoid;border:0!important;padding-left:0!important}
+  a[href]::after{content:""!important}
+  *{box-shadow:none!important}
+}
+
+/* Scroll reveal (motion only when the user allows it) */
+@media(prefers-reduced-motion:no-preference){
+  .reveal{opacity:0;transform:translateY(14px);transition:opacity .45s ease,transform .45s ease}
+  .reveal.is-visible{opacity:1;transform:none}
+}
+@media(prefers-reduced-motion:reduce){
+  .sk{animation:none}
+  .progress-ring-fg{transition:none}
+}
+
+/* Mobile header: keep the menu button inside the viewport */
+@media(max-width:760px){
+  .site-header{gap:10px}
+  .brand-lockup{min-width:0;flex:1 1 auto}
+  .brand-wordmark{min-width:0}
+  .brand-wordmark small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:calc(100vw - 150px);letter-spacing:.02em}
+  .mobile-menu-toggle{flex:0 0 44px}
+  .filters-toggle{margin-top:16px}
+}

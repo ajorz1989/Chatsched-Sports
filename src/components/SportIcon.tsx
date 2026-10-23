@@ -1,0 +1,3 @@
+import {Activity,Bike,CircleDot,Dumbbell,Flag,Gamepad2,Goal,Medal,Swords,Target,Timer,Volleyball,Waves} from "lucide-react";
+const map:Record<string,typeof Activity>={football:Goal,soccer:Goal,rugby:CircleDot,cricket:Target,basketball:CircleDot,netball:Volleyball,volleyball:Volleyball,athletics:Timer,running:Timer,swimming:Waves,cycling:Bike,boxing:Swords,mma:Swords,esports:Gamepad2,golf:Flag,hockey:Target,tennis:Medal,gym:Dumbbell};
+export default function SportIcon({sport,size=16}:{sport?:string|null;size?:number}){const Icon=map[(sport??"").trim().toLowerCase()]??Activity;return <Icon size={size} aria-hidden="true"/>;}

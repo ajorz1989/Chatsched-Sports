@@ -4,6 +4,7 @@ import {Link,useNavigate,useParams} from "react-router-dom";
 import {loadOpportunityById} from "../lib/opportunities";
 import ReportForm from "../components/ReportForm";
 import SupportRequestButton from "../components/SupportRequestButton";
+import VerificationBadge,{levelFromStatus} from "../components/VerificationBadge";
 import {supabase,supabaseConfigured} from "../lib/supabase";
 import type {Opportunity} from "../lib/types";
 
@@ -132,8 +133,8 @@ export default function OpportunityDetailPage(){
         <div className="detail-copy-block"><div className="section-kicker">Overview</div><p>{item.summary}</p></div>{item.description&&<div className="detail-copy-block"><div className="section-kicker">Full description</div><p className="opportunity-detail-longcopy">{item.description}</p></div>}{item.eligibility&&<div className="detail-copy-block"><div className="section-kicker">Eligibility & requirements</div><p className="opportunity-detail-longcopy">{item.eligibility}</p></div>}{!item.description&&!item.eligibility&&<div className="demo-note"><span className="note-symbol">i</span><p>Full eligibility details are not included in this listing yet. Ask the organisation for selection stages, dates and any costs before sharing sensitive information.</p></div>}
         <div className="detail-copy-block"><div className="section-kicker">Before you apply</div><div className="detail-check"><CheckCircle2 size={17}/><span>Review eligibility and requirements with the official organisation.</span></div><div className="detail-check"><CheckCircle2 size={17}/><span>Confirm dates, location, costs and who will contact you.</span></div><div className="detail-check"><CheckCircle2 size={17}/><span>Never pay an unverified person who promises selection or a contract.</span></div></div>
       </div>
-      <aside className="detail-sidebar">
-        <div className="detail-side-head"><span className="side-head-icon"><ShieldCheck size={18}/></span><span>{item.demo?"Example listing":"Platform verification passed"}</span></div>
+      <aside className="detail-sidebar" id="detail-apply">
+        <div className="detail-side-head"><span className="side-head-icon"><ShieldCheck size={18}/></span><VerificationBadge level={levelFromStatus(item.verificationStatus,item.demo)}/></div>
         <div className="detail-side-row"><span>Sport</span><strong>{item.sport}</strong></div>
         <div className="detail-side-row"><span>Location</span><strong>{item.location}</strong></div>
         <div className="detail-side-row"><span>Opportunity type</span><strong>{item.type.charAt(0).toUpperCase()+item.type.slice(1)}</strong></div>
@@ -150,5 +151,6 @@ export default function OpportunityDetailPage(){
         {userId&&<Link className="detail-workspace-link" to="/workspace">View your workspace <ArrowUpRight size={14}/></Link>}
       </aside>
     </div>
+    {!item.demo&&<div className="apply-bar"><div><small>Closes</small><strong>{formatDate(item.closingDate)}</strong></div><a className="button button-lime" href="#detail-apply">{userId?"Apply or save":"Sign in to apply"} <ArrowUpRight size={15}/></a></div>}
   </section>;
 }
