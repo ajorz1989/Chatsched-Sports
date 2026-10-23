@@ -33,16 +33,14 @@ export default function RecruiterHubPage(){
  }catch(e){if(alive)setNotice(e instanceof Error?e.message:"Recruiter workspace could not be loaded.");}finally{if(alive)setLoading(false);}})();return()=>{alive=false;};},[]);
 
  useEffect(()=>{if(!orgId||!supabase)return;let alive=true;(async()=>{setNotice("");
-   const [o,s,p]=await Promise.all([
+   const [o,s]=await Promise.all([
     supabase.from("opportunities").select("id,title,organisation_id,positions,competition_level,location,status,verification_status,sports(name)").eq("organisation_id",orgId).order("created_at",{ascending:false}),
-    supabase.from("recruiter_saved_searches").select("id,name,query,sport_id,position,level,location,alert_enabled").eq("organisation_id",orgId).order("created_at",{ascending:false}),
-    supabase.from("opportunity_applications").select("id,opportunity_id,athlete_id,status,message,created_at").in("opportunity_id",[] as string[])
+    supabase.from("recruiter_saved_searches").select("id,name,query,sport_id,position,level,location,alert_enabled").eq("organisation_id",orgId).order("created_at",{ascending:false})
    ]);
    if(!alive)return;
    if(o.error){setNotice(o.error.message);return;}
    const mapped=(o.data??[]).map((x:any)=>({...x,sport:x.sports?.name??"Multi-sport"})) as Opportunity[];setOpps(mapped);if(mapped[0])setSelectedOpp(current=>mapped.some(x=>x.id===current)?current:mapped[0].id);
    if(s.data)setSaved(s.data as SavedSearch[]);
-   if(p.error&&p.error.code!=="PGRST100")setNotice(p.error.message);
  })();return()=>{alive=false;};},[orgId]);
 
  useEffect(()=>{if(!selectedOpp||!supabase)return;let alive=true;(async()=>{const {data,error}=await supabase.rpc("match_opportunity_athletes",{target_opportunity:selectedOpp});if(!alive)return;if(error){setNotice(error.message);setMatches([]);return;}setMatches((data??[]) as Match[]);})();return()=>{alive=false;};},[selectedOpp]);
