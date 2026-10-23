@@ -1,0 +1,135 @@
+/* ChatSched Sport — design-audit polish layer.
+   Loaded last (see main.tsx). Overrides only: type size, WCAG AA contrast,
+   touch targets, focus states, hover depth and a few previously unstyled classes.
+   Brand theme (ink / paper / lime, Space Grotesk / Manrope / DM Mono) is unchanged. */
+
+:root{
+  --muted:#5d6358;        /* secondary text on light surfaces, ~6:1 */
+  --muted-dark:#8a9083;   /* secondary text on ink, ~5:1 */
+  --olive-700:#4f6123;    /* accent text/icons on light surfaces */
+  --focus-light:#6a8c00;
+}
+
+/* ---- Accessibility: skip link & focus ---- */
+.skip-link{position:absolute;left:12px;top:-60px;z-index:100;background:var(--lime);color:var(--ink);padding:10px 16px;font-size:13px;font-weight:800;border-radius:4px;transition:top .15s}
+.skip-link:focus{top:12px}
+main:focus{outline:none}
+.hero-section :focus-visible,.catalogue-hero :focus-visible,.journey-section :focus-visible,.final-cta-section :focus-visible,.site-footer :focus-visible,.talent-profile-side :focus-visible,.matching-disclaimer :focus-visible,.representation-hero :focus-visible,.join-side-panel :focus-visible,.top-strip :focus-visible,.audience-principles :focus-visible{outline-color:var(--lime)}
+
+/* ---- Type scale: nothing meaningful below 12px; body copy 13–14px ---- */
+.top-strip{font-size:11px}
+.top-strip-region{color:var(--muted-dark)}
+.brand-wordmark small{font-size:9px;color:var(--muted)}
+.site-footer .brand-wordmark small{color:var(--muted-dark)}
+.eyebrow,.section-kicker,.workspace-kicker,.join-form-kicker{font-size:11px}
+.section-kicker,.workspace-kicker,.join-form-kicker{color:var(--muted)}
+.section-kicker-light{color:#a9b399}
+.hero-proof,.hero-bottomline,.hero-art-caption,.catalogue-hero-ctas>span,.catalogue-hero-index,.join-side-footer{font-size:11px}
+.hero-bottomline,.hero-art-caption{color:var(--muted-dark)}
+.floating-label b{font-size:11px}.floating-label small{font-size:10px;color:#a3a99c}
+.community-card p,.pathway-card p,.opportunity-summary,.detail-copy-block .detail-check,.talent-details span,.talent-goals,.org-directory-description,.notification-copy>p{font-size:13px}
+.opportunity-summary{line-height:1.7;color:var(--muted)}
+.opportunity-meta,.opportunity-org,.talent-details span,.org-directory-location{font-size:12px}
+.opportunity-sport,.level-label,.kind-pill,.demo-pill,.verified-pill,.org-type-label,.talent-sport{font-size:11px}
+.opportunity-sport,.level-label,.org-type-label,.talent-sport{color:var(--muted)}
+.opportunity-meta,.opportunity-meta svg,.org-directory-location,.talent-details span{color:var(--muted)}
+.demo-note,.config-note,.live-note,.match-note,.matching-disclaimer p,.workspace-footnote,.workspace-footer-note,.talent-safety,.detail-safety,.cv-self-reported-note,.insight-disclaimer{font-size:12px}
+.detail-safety,.workspace-footer-note,.talent-safety{color:var(--muted)}
+.adult-check,.field-help,.join-security,.join-switch,.form-message{font-size:12px}
+.adult-check{color:var(--muted);line-height:1.6}
+.join-form-intro,.workspace-subtitle,.workspace-muted,.catalogue-title-row>p,.section-heading-row>p{font-size:13px}
+.workspace-sidebar-label{color:var(--muted)}
+.workspace-sidebar-foot,.workspace-kicker{color:var(--muted)}
+.workspace-metrics small,.workspace-list-row small,.workspace-opportunity small,.achievement-row small,.received-app-identity small,.conversation-summary small,.message-panel-header small,.message-bubble small{font-size:11px;color:var(--muted)}
+.workspace-list-row strong,.workspace-tab,.workspace-action-grid span,.workspace-opportunity p,.achievement-row p{font-size:12px}
+.workspace-action-grid span{color:var(--muted)}
+.status-tag,.workspace-type-tag,.notification-unread-pill{font-size:10px}
+.match-reasons span,.match-score small,.match-result-footer>span,.match-result-subtitle,.match-count{font-size:11px;color:var(--muted)}
+.match-reasons span{color:#44532a}
+.match-result-footer>a{font-size:12px}
+.footer-links{font-size:12px}
+.footer-main>p{font-size:12px;color:#b4b9ac}
+.footer-bottom{font-size:11px;color:#8f9588}
+.search-field input,.select-field select{font-size:13px}
+.search-field input::placeholder,.form-label>input::placeholder,.workspace-form-grid textarea::placeholder,.workspace-form-grid input::placeholder{color:#6b7165;opacity:1}
+.message-bubble p,.message-composer textarea{font-size:13px}
+.message-composer>span{font-size:11px}
+.detail-copy-block>p{font-size:13px}
+.audience-bullets span,.detail-side-row>span,.detail-side-row strong{font-size:12px}
+.audience-section-copy>p{font-size:13px}
+.audience-bottom-cta p{font-size:12px}
+.report-open-button,.report-auth-note p,.report-auth-note a,.report-form>p,.report-form label,.report-notice,.report-component-note{font-size:11px}
+.report-form>span{font-size:10px}
+.talent-profile-safety{font-size:11px;color:#a4ac99}
+.talent-profile-section .talent-profile-safety{color:var(--muted);margin-top:12px}
+
+/* ---- Tight tracking only where the type is large enough ---- */
+.opportunity-card h3,.talent-card h3,.org-directory-card h3,.match-result-card h3,.workspace-opportunity h3,.admin-item-heading h3,.community-card h3,.cv-stat-card h3{letter-spacing:-.02em}
+.workspace-blank h3,.empty-state h3,.workspace-section-title h2{letter-spacing:-.035em}
+
+/* ---- Long-form copy that previously had no styles ---- */
+.opportunity-detail-longcopy{white-space:pre-line;line-height:1.85}
+.detail-report-wrap{border-top:1px solid #eceee6;margin-top:12px;padding-top:4px}
+
+/* ---- Inputs: 16px on touch devices prevents iOS zoom-on-focus ---- */
+@media(max-width:900px){
+  input,select,textarea{font-size:16px!important}
+  .search-field input,.select-field select,.form-label>input,.form-label>select,.password-input-wrap>input,
+  .workspace-form-grid input,.workspace-form-grid select,.workspace-form-grid textarea,
+  .match-input-panel input,.match-input-panel select,.match-input-panel textarea,
+  .message-composer textarea,.detail-apply-form textarea,.report-form select,.report-form textarea,
+  .received-app-actions select,.talent-search-toolbar select,.insights-org-select select,.admin-status-select select{font-size:16px!important}
+  .workspace-form-grid input[type=checkbox],.adult-check input,.media-public-check input,.support-consent input,.cv-check input{font-size:inherit!important}
+}
+
+/* ---- Touch targets (minimum ~40px hit area, visuals unchanged) ---- */
+.workspace-user-card button,.workspace-opportunity-actions>button,.achievement-row>button,.cv-stat-card-top button,.cv-experience-row>button,.password-toggle{min-width:40px;min-height:40px}
+.achievement-row>button,.cv-stat-card-top button,.cv-experience-row>button{display:grid;place-items:center}
+.workspace-notice button{min-width:36px;min-height:36px;display:grid;place-items:center}
+.mobile-menu-toggle{width:44px;height:44px}
+.workspace-tab{min-height:44px}
+.conversation-item{min-height:56px}
+.listing-state-button{min-height:36px}
+
+/* ---- Interaction states ---- */
+.workspace-user-card button,.workspace-opportunity-actions>button,.achievement-row>button,.cv-stat-card-top button,.cv-experience-row>button,.workspace-notice button,.password-toggle,.mobile-menu-toggle,.talent-shortlist-btn,.listing-state-button{transition:background .15s,color .15s,border-color .15s,transform .1s}
+.workspace-user-card button:active,.workspace-opportunity-actions>button:active,.achievement-row>button:active,.cv-stat-card-top button:active,.cv-experience-row>button:active,.talent-shortlist-btn:active,.listing-state-button:active{transform:scale(.95)}
+.achievement-row>button:hover,.cv-stat-card-top button:hover,.cv-experience-row>button:hover,.workspace-opportunity-actions>button:hover{background:#fbeae4;color:#8b3a28}
+.password-toggle:hover{color:var(--ink)}
+.save-opportunity-button[aria-pressed=true]{background:#eaf3e0;border-color:#c5dba8;color:#375b2b}
+.button:focus-visible{outline-offset:2px}
+.button:active{transform:translateY(0) scale(.99)}
+.desktop-nav a{position:relative;padding:6px 0}
+.desktop-nav a.nav-active{color:var(--ink);box-shadow:inset 0 -2px 0 var(--lime);border-radius:0}
+
+/* ---- Cards: depth on hover, whole-card click target via stretched link ---- */
+.opportunity-card,.talent-card,.org-directory-card,.community-card,.talent-discovery-card{position:relative}
+.opportunity-card,.talent-card,.org-directory-card{transition:transform .18s,border-color .18s,box-shadow .18s}
+.opportunity-card:hover,.talent-card:hover,.org-directory-card:hover,.community-card:hover{box-shadow:0 16px 30px -18px rgba(23,25,22,.28)}
+.opportunity-card h3 a::after,.org-directory-card h3 a::after{content:"";position:absolute;inset:0;z-index:1}
+.opportunity-card .text-link,.org-directory-card-actions>*{position:relative;z-index:2}
+
+/* ---- Skeleton / loading polish ---- */
+.workspace-loading,.loading-text{color:var(--muted)}
+
+/* ---- Toast-style notices (only those with a dismiss button) so feedback is
+   visible after saving at the bottom of a long form ---- */
+.workspace-notice:has(button){position:fixed;right:16px;bottom:16px;left:16px;z-index:60;max-width:420px;margin:0 0 0 auto;box-shadow:0 14px 34px -12px rgba(23,25,22,.35)}
+@media(max-width:760px){.workspace-notice:has(button){right:12px;left:12px;bottom:12px;max-width:none}}
+
+/* ---- Colour consistency: accent text on light surfaces uses olive, not lime ---- */
+.back-link:hover,.workspace-text-link:hover{color:var(--olive-700)}
+
+/* ---- Sticky detail sidebar on desktop; mobile gets spacing for the stacked CTA ---- */
+@media(min-width:1001px){.detail-sidebar{position:sticky;top:16px}}
+
+/* ---- Footer: grouped columns instead of one long list ---- */
+.footer-links{display:grid;grid-template-columns:repeat(2,minmax(150px,1fr));gap:11px 28px}
+@media(max-width:760px){.footer-links{display:flex;flex-wrap:wrap;gap:12px 18px}}
+
+/* ---- Mobile workspace tabs: horizontal scroller instead of a 2-column wall ---- */
+@media(max-width:760px){
+  .workspace-sidebar{display:flex;overflow-x:auto;gap:6px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+  .workspace-sidebar-label,.workspace-sidebar-foot{display:none}
+  .workspace-tab{flex:0 0 auto;width:auto;white-space:nowrap;scroll-snap-align:start;padding:0 14px}
+}
