@@ -57,11 +57,6 @@ create policy "Organisation owners create billing account"
 on public.sport_billing_accounts for insert to authenticated
 with check (exists(select 1 from public.organisations o where o.id=organisation_id and o.owner_id=(select auth.uid())));
 
-create policy "Organisation owners update billing account"
-on public.sport_billing_accounts for update to authenticated
-using (exists(select 1 from public.organisations o where o.id=organisation_id and o.owner_id=(select auth.uid())))
-with check (exists(select 1 from public.organisations o where o.id=organisation_id and o.owner_id=(select auth.uid())));
-
 create policy "Organisation owners read service orders"
 on public.sport_service_orders for select to authenticated
 using (exists(select 1 from public.organisations o where o.id=organisation_id and o.owner_id=(select auth.uid())) or private.is_sport_admin());
@@ -119,32 +114,3 @@ $$;
 revoke all on function public.request_sport_service(uuid,text) from public,anon;
 grant execute on function public.request_sport_service(uuid,text) to authenticated;
 
-create or replace function private.sync_sport_billing_account_from_order()
-returns trigger
-language plpgsql
-security invoker
-set search_path=public,private
-as $$
-begin
-  if new.status='paid' then
-    insert into public.sport_billing_accounts(organisation_id,plan_code,billing_status,updated_at)
-    values(
-      new.organisation_id,
-      case new.service_code when 'club_pro' then 'club_pro' when 'academy_pro' then 'academy_pro' when 'agency_pro' then 'agency_pro' else 'free' end,
-      case when new.service_code='trial_day' then 'active' else 'active' end,
-      now()
-    )
-    on conflict (organisation_id) do update set
-      plan_code=excluded.plan_code,
-      billing_status='active',
-      updated_at=now();
-  end if;
-  return new;
-end;
-$$;
-
-revoke all on function private.sync_sport_billing_account_from_order() from public,anon,authenticated;
-drop trigger if exists sync_sport_billing_account_from_order on public.sport_service_orders;
-create trigger sync_sport_billing_account_from_order
-after insert or update of status on public.sport_service_orders
-for each row execute function private.sync_sport_billing_account_from_order();
