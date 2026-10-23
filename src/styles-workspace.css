@@ -102,3 +102,8 @@
 .phase4-orders{margin-top:26px;padding-top:18px;border-top:1px solid rgba(20,20,20,.1)}
 @media(max-width:900px){.phase4-plan-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:640px){.phase4-plan-grid{grid-template-columns:1fr}}
+
+
+/* Phase 5 — commercial entitlements */
+.phase5-entitlement-strip{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:14px 0;padding:14px 16px;border:1px solid rgba(34,197,94,.22);border-radius:14px;background:rgba(34,197,94,.06)}
+.phase5-entitlement-strip div{display:grid;gap:3px}.phase5-entitlement-strip strong{font-size:.9rem}.phase5-entitlement-strip span{font-size:.82rem;color:var(--workspace-muted,#6b7280);line-height:1.5}
