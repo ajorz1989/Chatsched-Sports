@@ -1,5 +1,5 @@
 import {useEffect,useState} from "react";
-import {BookOpenCheck,CheckCircle2,ShieldCheck} from "lucide-react";
+import {BookOpenCheck,CheckCircle2} from "lucide-react";
 import {supabase} from "../lib/supabase";
 type Row={id:string;athlete_id:string;referee_id:string;relationship_title:string;organisation_name:string|null;sport:string|null;playing_period:string|null;reference_text:string;status:string;created_at:string};
 export default function ReferencePanel({userId,isAthlete}:{userId:string;isAthlete:boolean}){
