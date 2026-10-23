@@ -103,12 +103,13 @@ returns trigger
 language plpgsql
 security definer
 set search_path = ''
+as $organisation_sync$
 begin
   if new.verification_status is distinct from old.verification_status
      and new.verification_status <> 'verified'
   then
     update public.opportunities
-      set verification_status = case when private.is_sport_admin() then verification_status else 'pending' end,
+      set verification_status = 'pending',
           status = case when status = 'published' then 'draft' else status end,
           updated_at = now()
     where organisation_id = new.id
