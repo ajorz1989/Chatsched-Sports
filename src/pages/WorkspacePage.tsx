@@ -5,6 +5,9 @@ import { supabase, supabaseConfigured } from "../lib/supabase";
 import { loadOpportunityById } from "../lib/opportunities";
 import AthleteCVExtras from "../components/AthleteCVExtras";
 import AdvancedWorkspacePanels from "../components/AdvancedWorkspacePanels";
+import AthletePremiumPanel from "../components/AthletePremiumPanel";
+import CareerSupportCRM from "../components/CareerSupportCRM";
+import TrialManagementPanel from "../components/TrialManagementPanel";
 import type { AccountType, Opportunity, OpportunityType } from "../lib/types";
 import "../styles-workspace.css";
 
@@ -351,7 +354,7 @@ export default function WorkspacePage() {
   return <section className="workspace-wrap">
     <div className="workspace-hero"><div><div className="workspace-kicker"><span className="status-dot"/> MEMBER WORKSPACE</div><h1>Welcome back,<br/><span>{displayName.split(" ")[0]}.</span></h1><p>Your sporting journey, organised around your next opportunity.</p></div><div className="workspace-user-card"><div className="workspace-avatar">{displayName.trim().charAt(0).toUpperCase()}</div><div><strong>{displayName}</strong><small>{member?.account_type??"Member"} account</small><small>{user.email}</small></div><button title="Sign out" aria-label="Sign out" onClick={signOut}><LogOut size={17}/></button></div></div>
     {notice&&<div className={"workspace-notice notice-"+notice.kind} role="status"><span>{notice.text}</span><button aria-label="Dismiss notice" onClick={()=>setNotice(null)}><X size={16}/></button></div>}
-    <AdvancedWorkspacePanels userId={user.id} accountType={member?.account_type??"athlete"}/>
+    <AdvancedWorkspacePanels userId={user.id} accountType={member?.account_type??"athlete"}/>\n    <AthletePremiumPanel userId={user.id} isAthlete={(member?.account_type??"athlete")==="athlete"}/>\n    <CareerSupportCRM userId={user.id} isAgent={(member?.account_type??"athlete")==="agent"} />\n    <TrialManagementPanel userId={user.id} isClub={(member?.account_type??"athlete")==="club"} />
     <div className="workspace-layout"><aside className="workspace-sidebar"><div className="workspace-sidebar-label">YOUR SPACE</div>{tabs.map(item=>{const Icon=item.icon;return <button key={item.id} className={tab===item.id?"workspace-tab is-active":"workspace-tab"} onClick={()=>setTab(item.id)}><Icon size={17}/><span>{item.label}</span>{item.id==="saved"&&<em>{saved.length}</em>}{item.id==="applications"&&<em>{applications.length}</em>}</button>;})}<div className="workspace-sidebar-foot"><ShieldCheck size={17}/><span>Verified opportunities only appear in the public catalogue.</span></div></aside>
       <div className="workspace-content">
         {tab==="overview"&&<><div className="workspace-section-title"><div><p className="workspace-kicker">YOUR DASHBOARD</p><h2>Keep your momentum.</h2></div><Link to="/opportunities" className="workspace-text-link">Browse opportunities <ArrowUpRight size={16}/></Link></div>
