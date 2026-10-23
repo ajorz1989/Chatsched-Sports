@@ -4,10 +4,10 @@
    Brand theme (ink / paper / lime, Space Grotesk / Manrope / DM Mono) is unchanged. */
 
 :root{
-  --muted:#5d6358;        /* secondary text on light surfaces, ~6:1 */
-  --muted-dark:#8a9083;   /* secondary text on ink, ~5:1 */
-  --olive-700:#4f6123;    /* accent text/icons on light surfaces */
-  --focus-light:#6a8c00;
+  --muted:#4d5b78;        /* secondary text on light surfaces, ~6:1 */
+  --muted-dark:#98a8c6;   /* secondary text on ink, ~5:1 */
+  --olive-700:#1e3366;    /* accent text/icons on light surfaces */
+  --focus-light:#20376d;
 }
 
 /* ---- Accessibility: skip link & focus ---- */
@@ -23,10 +23,10 @@ main:focus{outline:none}
 .site-footer .brand-wordmark small{color:var(--muted-dark)}
 .eyebrow,.section-kicker,.workspace-kicker,.join-form-kicker{font-size:11px}
 .section-kicker,.workspace-kicker,.join-form-kicker{color:var(--muted)}
-.section-kicker-light{color:#a9b399}
+.section-kicker-light{color:#8c9fc0}
 .hero-proof,.hero-bottomline,.hero-art-caption,.catalogue-hero-ctas>span,.catalogue-hero-index,.join-side-footer{font-size:11px}
 .hero-bottomline,.hero-art-caption{color:var(--muted-dark)}
-.floating-label b{font-size:11px}.floating-label small{font-size:10px;color:#a3a99c}
+.floating-label b{font-size:11px}.floating-label small{font-size:10px;color:#909db5}
 .community-card p,.pathway-card p,.opportunity-summary,.detail-copy-block .detail-check,.talent-details span,.talent-goals,.org-directory-description,.notification-copy>p{font-size:13px}
 .opportunity-summary{line-height:1.7;color:var(--muted)}
 .opportunity-meta,.opportunity-org,.talent-details span,.org-directory-location{font-size:12px}
@@ -45,13 +45,13 @@ main:focus{outline:none}
 .workspace-action-grid span{color:var(--muted)}
 .status-tag,.workspace-type-tag,.notification-unread-pill{font-size:10px}
 .match-reasons span,.match-score small,.match-result-footer>span,.match-result-subtitle,.match-count{font-size:11px;color:var(--muted)}
-.match-reasons span{color:#44532a}
+.match-reasons span{color:#2b3952}
 .match-result-footer>a{font-size:12px}
 .footer-links{font-size:12px}
-.footer-main>p{font-size:12px;color:#b4b9ac}
-.footer-bottom{font-size:11px;color:#8f9588}
+.footer-main>p{font-size:12px;color:#a2aec3}
+.footer-bottom{font-size:11px;color:#7989a4}
 .search-field input,.select-field select{font-size:13px}
-.search-field input::placeholder,.form-label>input::placeholder,.workspace-form-grid textarea::placeholder,.workspace-form-grid input::placeholder{color:#6b7165;opacity:1}
+.search-field input::placeholder,.form-label>input::placeholder,.workspace-form-grid textarea::placeholder,.workspace-form-grid input::placeholder{color:#57667f;opacity:1}
 .message-bubble p,.message-composer textarea{font-size:13px}
 .message-composer>span{font-size:11px}
 .detail-copy-block>p{font-size:13px}
@@ -60,7 +60,7 @@ main:focus{outline:none}
 .audience-bottom-cta p{font-size:12px}
 .report-open-button,.report-auth-note p,.report-auth-note a,.report-form>p,.report-form label,.report-notice,.report-component-note{font-size:11px}
 .report-form>span{font-size:10px}
-.talent-profile-safety{font-size:11px;color:#a4ac99}
+.talent-profile-safety{font-size:11px;color:#8c9cb9}
 .talent-profile-section .talent-profile-safety{color:var(--muted);margin-top:12px}
 
 /* ---- Tight tracking only where the type is large enough ---- */
@@ -69,7 +69,7 @@ main:focus{outline:none}
 
 /* ---- Long-form copy that previously had no styles ---- */
 .opportunity-detail-longcopy{white-space:pre-line;line-height:1.85}
-.detail-report-wrap{border-top:1px solid #eceee6;margin-top:12px;padding-top:4px}
+.detail-report-wrap{border-top:1px solid #e3e8f1;margin-top:12px;padding-top:4px}
 
 /* ---- Inputs: 16px on touch devices prevents iOS zoom-on-focus ---- */
 @media(max-width:900px){
@@ -96,7 +96,7 @@ main:focus{outline:none}
 .workspace-user-card button:active,.workspace-opportunity-actions>button:active,.achievement-row>button:active,.cv-stat-card-top button:active,.cv-experience-row>button:active,.talent-shortlist-btn:active,.listing-state-button:active{transform:scale(.95)}
 .achievement-row>button:hover,.cv-stat-card-top button:hover,.cv-experience-row>button:hover,.workspace-opportunity-actions>button:hover{background:#fbeae4;color:#8b3a28}
 .password-toggle:hover{color:var(--ink)}
-.save-opportunity-button[aria-pressed=true]{background:#eaf3e0;border-color:#c5dba8;color:#375b2b}
+.save-opportunity-button[aria-pressed=true]{background:#fcd7da;border-color:#ff4757;color:#1e3468}
 .button:focus-visible{outline-offset:2px}
 .button:active{transform:translateY(0) scale(.99)}
 .desktop-nav a{position:relative;padding:6px 0}
@@ -105,7 +105,7 @@ main:focus{outline:none}
 /* ---- Cards: depth on hover, whole-card click target via stretched link ---- */
 .opportunity-card,.talent-card,.org-directory-card,.community-card,.talent-discovery-card{position:relative}
 .opportunity-card,.talent-card,.org-directory-card{transition:transform .18s,border-color .18s,box-shadow .18s}
-.opportunity-card:hover,.talent-card:hover,.org-directory-card:hover,.community-card:hover{box-shadow:0 16px 30px -18px rgba(23,25,22,.28)}
+.opportunity-card:hover,.talent-card:hover,.org-directory-card:hover,.community-card:hover{box-shadow:0 16px 30px -18px rgba(10,31,68,.28)}
 .opportunity-card h3 a::after,.org-directory-card h3 a::after{content:"";position:absolute;inset:0;z-index:1}
 .opportunity-card .text-link,.org-directory-card-actions>*{position:relative;z-index:2}
 
@@ -114,7 +114,7 @@ main:focus{outline:none}
 
 /* ---- Toast-style notices (only those with a dismiss button) so feedback is
    visible after saving at the bottom of a long form ---- */
-.workspace-notice:has(button){position:fixed;right:16px;bottom:16px;left:16px;z-index:60;max-width:420px;margin:0 0 0 auto;box-shadow:0 14px 34px -12px rgba(23,25,22,.35)}
+.workspace-notice:has(button){position:fixed;right:16px;bottom:16px;left:16px;z-index:60;max-width:420px;margin:0 0 0 auto;box-shadow:0 14px 34px -12px rgba(10,31,68,.35)}
 @media(max-width:760px){.workspace-notice:has(button){right:12px;left:12px;bottom:12px;max-width:none}}
 
 /* ---- Colour consistency: accent text on light surfaces uses olive, not lime ---- */
