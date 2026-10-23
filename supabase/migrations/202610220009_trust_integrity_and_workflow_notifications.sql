@@ -4,6 +4,84 @@
 -- This migration makes verification and publishing rules database-enforced,
 -- so direct API calls cannot bypass the UI.
 
+-- Reconcile the earlier verification-field guard with the new automatic
+-- re-review behaviour. A non-admin may cause a verified record to return to
+-- pending only as the consequence of a substantive edit; arbitrary status
+-- changes remain blocked.
+create or replace function private.guard_verification_fields()
+returns trigger
+language plpgsql
+security invoker
+set search_path = ''
+as $verification_guard$
+declare
+  substantive_change boolean := false;
+begin
+  if tg_table_name = 'organisations' then
+    substantive_change := (
+      new.name is distinct from old.name
+      or new.organisation_type is distinct from old.organisation_type
+      or new.website is distinct from old.website
+      or new.location is distinct from old.location
+      or new.country is distinct from old.country
+      or new.description is distinct from old.description
+    );
+  elsif tg_table_name = 'opportunities' then
+    substantive_change := (
+      new.title is distinct from old.title
+      or new.opportunity_type is distinct from old.opportunity_type
+      or new.sport_id is distinct from old.sport_id
+      or new.discipline is distinct from old.discipline
+      or new.positions is distinct from old.positions
+      or new.location is distinct from old.location
+      or new.country is distinct from old.country
+      or new.competition_level is distinct from old.competition_level
+      or new.summary is distinct from old.summary
+      or new.description is distinct from old.description
+      or new.eligibility is distinct from old.eligibility
+      or new.closing_date is distinct from old.closing_date
+      or new.compensation_type is distinct from old.compensation_type
+    );
+  end if;
+
+  if new.verification_status is distinct from old.verification_status
+     and not private.is_sport_admin()
+  then
+    if old.verification_status = 'verified'
+       and new.verification_status = 'pending'
+       and substantive_change
+    then
+      return new;
+    end if;
+
+    raise exception 'Only a ChatSched Sport administrator can change verification status except for an automatic re-review caused by substantive edits.';
+  end if;
+
+  if tg_table_name = 'organisations'
+     and new.verification_status = 'verified'
+     and not exists (
+       select 1
+       from public.organisation_verification_requests request
+       where request.organisation_id = new.id
+         and request.status = 'approved'
+         and request.created_at = (
+           select max(latest.created_at)
+           from public.organisation_verification_requests latest
+           where latest.organisation_id = new.id
+         )
+     )
+  then
+    raise exception 'An organisation needs an approved, latest verification evidence request before it can be verified.';
+  end if;
+
+  return new;
+end;
+$verification_guard$;
+
+revoke all on function private.guard_verification_fields() from public, anon, authenticated;
+grant usage on schema private to authenticated;
+
+
 create or replace function private.guard_organisation_trust_fields()
 returns trigger
 language plpgsql
