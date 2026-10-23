@@ -1,10 +1,10 @@
-import {useEffect,useMemo,useState} from "react";
+import {useEffect,useState} from "react";
 import {Bell,CalendarClock,CheckCircle2,FileUp,Heart,Mail,Search,ShieldCheck,Star,Upload,Users, X} from "lucide-react";
 import {supabase,supabaseConfigured} from "../lib/supabase";
 import {loadOpportunityFeed} from "../lib/opportunities";
 import type {AccountType,Opportunity} from "../lib/types";
 
-type Props={userId:string;accountType:AccountType;email?:string};
+type Props={userId:string;accountType:AccountType};
 type SearchRow={id:string;name:string;query:string|null;sport_id:string|null;opportunity_type:string|null;location:string|null;minimum_age:number|null;maximum_age:number|null;alert_enabled:boolean};
 type Prefs={application_updates:boolean;opportunity_recommendations:boolean;saved_search_alerts:boolean;weekly_digest:boolean;marketing:boolean};
 
