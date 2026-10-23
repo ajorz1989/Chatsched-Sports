@@ -1,0 +1,31 @@
+name: ChatSched Sport Email Delivery
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  deliver:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send queued Sport emails
+        if: github.event.schedule != '0 6 * * 1'
+        env:
+          FUNCTION_URL: ${{ secrets.SPORT_EMAIL_FUNCTION_URL }}
+          SERVICE_KEY: ${{ secrets.SPORT_SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          test -n "$FUNCTION_URL"
+          test -n "$SERVICE_KEY"
+          curl -fsS -X POST "$FUNCTION_URL"             -H "Authorization: Bearer $SERVICE_KEY"             -H "Content-Type: application/json"             -d '{"mode":"queue"}'
+
+      - name: Queue weekly Sport digest
+        if: github.event.schedule == '0 6 * * 1'
+        env:
+          FUNCTION_URL: ${{ secrets.SPORT_EMAIL_FUNCTION_URL }}
+          SERVICE_KEY: ${{ secrets.SPORT_SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          test -n "$FUNCTION_URL"
+          test -n "$SERVICE_KEY"
+          curl -fsS -X POST "$FUNCTION_URL"             -H "Authorization: Bearer $SERVICE_KEY"             -H "Content-Type: application/json"             -d '{"mode":"digest"}'
