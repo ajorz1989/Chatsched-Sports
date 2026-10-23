@@ -26,7 +26,7 @@ Build trusted infrastructure for sporting opportunity—not just a brochure or u
 - Transparent, deterministic opportunity-match explorer that explains which criteria contribute to each score.
 - Public About, How it Works, audience, privacy overview, platform principles and safeguarding information pages.
 - Automated unit tests for explainable match scoring and a CI workflow that runs tests, type-checks and builds.
-- Seven Supabase/PostgreSQL migrations for data, RLS, column-level grants, moderation, safety reports, career-support requests, directory views, messaging, notifications, Realtime and evidence-led organisation verification.
+- Nine Supabase/PostgreSQL migrations for data, RLS, column-level grants, moderation, safety reports, career-support requests, directory views, messaging, notifications, Realtime and evidence-led organisation verification.
 - Cloudflare Pages SPA fallback and a GitHub Actions production build workflow.
 
 Some account and database-backed flows require the dedicated Sport Supabase project. The UI intentionally stays in preview mode without it. A source-code push is not proof that the database has been provisioned or the site deployed.
@@ -79,7 +79,7 @@ The built `public/_redirects` file provides the SPA fallback for client routes s
 - Signup asks the user to self-confirm they are 18+. This is a **client-side safeguard, not independent age verification or server-enforced age assurance**. Do not onboard minors until an appropriately safeguarded, guardian-assisted pathway and server-side eligibility controls have been designed and reviewed.
 - Never guarantee selection, contracts, scholarships, sponsorships or representation, and do not present sample data as actual opportunities.
 
-Before a public launch, apply and test both migrations in a non-production Sport Supabase project, verify every RLS/grant/trigger/view, configure Auth redirect URLs and email settings, add rate-limiting and abuse-reporting, review data retention and POPIA obligations, and complete security/safeguarding review. No live Sport database or Cloudflare deployment is provisioned by a GitHub commit alone.
+Before a public launch, apply and test all nine migrations in a non-production Sport Supabase project, verify every RLS/grant/trigger/view, configure Auth redirect URLs and email settings, add rate-limiting and abuse-reporting, review data retention and POPIA obligations, and complete security/safeguarding review. No live Sport database or Cloudflare deployment is provisioned by a GitHub commit alone.
 
 ## Product roadmap after this foundation
 
