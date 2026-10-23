@@ -171,14 +171,17 @@ begin
   if request_id_value is null then
     raise exception 'This reference invitation is invalid or expired.';
   end if;
+  if exists(select 1 from public.athlete_reference_requests where id=request_id_value and athlete_id=(select auth.uid())) then
+    raise exception 'The athlete who created the request cannot accept their own reference invitation.';
+  end if;
 
   update public.athlete_reference_invites
   set accepted_at=now()
   where id=target_invite;
 
   update public.athlete_reference_requests
-  set status='accepted'
-  where id=request_id_value and status='requested';
+  set status='accepted', referee_id=(select auth.uid())
+  where id=request_id_value and status='requested' and athlete_id<>(select auth.uid());
 
   return request_id_value;
 end;
