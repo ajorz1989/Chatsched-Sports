@@ -21,6 +21,9 @@ export default function OpportunityDetailPage(){
   const [authChecked,setAuthChecked]=useState(false);
   const [isSaved,setIsSaved]=useState(false);
   const [applyMessage,setApplyMessage]=useState("");
+  const [cvConsent,setCvConsent]=useState(false);
+  const [cvUrl,setCvUrl]=useState<string|null>(null);
+  const [athleteSnapshot,setAthleteSnapshot]=useState<Record<string,unknown>>({});
   const [busy,setBusy]=useState(false);
   const [feedback,setFeedback]=useState<{kind:"success"|"error"|"info";text:string}|null>(null);
 
@@ -36,6 +39,17 @@ export default function OpportunityDetailPage(){
     let alive=true;
     supabase.auth.getSession().then(({data})=>{if(alive){setUserId(data.session?.user.id??"");setAuthChecked(true);}});
     const {data:{subscription}}=supabase.auth.onAuthStateChange((_event,session)=>{if(alive)setUserId(session?.user.id??"");});
+    if(data.session?.user.id){
+      const uid=data.session.user.id;
+      Promise.all([
+        supabase.from("athlete_profiles").select("cv_url,discipline,position,playing_level,availability,location,career_goals").eq("user_id",uid).maybeSingle(),
+        supabase.from("profiles").select("display_name,location,country").eq("id",uid).maybeSingle()
+      ]).then(([athleteRes,profileRes])=>{
+        if(!alive)return;
+        setCvUrl((athleteRes.data as {cv_url?:string|null}|null)?.cv_url??null);
+        setAthleteSnapshot({...((profileRes.data as Record<string,unknown>|null)??{}),...((athleteRes.data as Record<string,unknown>|null)??{})});
+      });
+    }
     return()=>{alive=false;subscription.unsubscribe();};
   },[]);
 
@@ -86,7 +100,7 @@ export default function OpportunityDetailPage(){
     if(!userId){navigate("/join?mode=login&next="+encodeURIComponent("/opportunities/"+item.id));return;}
     setBusy(true);setFeedback(null);
     try{
-      const {error}=await supabase.from("opportunity_applications").insert({opportunity_id:item.id,athlete_id:userId,message:applyMessage.trim()||null});
+      const {error}=await supabase.from("opportunity_applications").insert({opportunity_id:item.id,athlete_id:userId,message:applyMessage.trim()||null,cv_consent:cvConsent,cv_consent_at:cvConsent&&cvUrl?new Date().toISOString():null,application_snapshot:{captured_at:new Date().toISOString(),opportunity:{id:item.id,title:item.title,sport:item.sport,discipline:item.discipline,level:item.level,location:item.location,country:item.country,startDate:item.startDate,closingDate:item.closingDate},athlete:athleteSnapshot,cv_shared:cvConsent&&Boolean(cvUrl),cv_url:cvConsent&&cvUrl?cvUrl:null}});
       if(error)throw error;
       setFeedback({kind:"success",text:"Your application was submitted. You can track its status in your workspace."});
       setApplyMessage("");
@@ -117,11 +131,11 @@ export default function OpportunityDetailPage(){
         <div className="detail-side-row"><span>Sport</span><strong>{item.sport}</strong></div>
         <div className="detail-side-row"><span>Location</span><strong>{item.location}</strong></div>
         <div className="detail-side-row"><span>Opportunity type</span><strong>{item.type.charAt(0).toUpperCase()+item.type.slice(1)}</strong></div>
-        <div className="detail-side-row"><span>Closing date</span><strong><CalendarDays size={14}/>{formatDate(item.closingDate)}</strong></div>
+        <div className="detail-side-row"><span>Closing date</span><strong><CalendarDays size={14}/>{formatDate(item.closingDate)}</strong></div>{item.startDate&&<div className="detail-side-row"><span>Start date</span><strong><CalendarDays size={14}/>{formatDate(item.startDate)}</strong></div>}{(item.minimumAge!==null&&item.minimumAge!==undefined)||(item.maximumAge!==null&&item.maximumAge!==undefined)&&<div className="detail-side-row"><span>Age eligibility</span><strong>{item.minimumAge??"Any"}–{item.maximumAge??"Any"}</strong></div>}{item.numberOfPlaces&&<div className="detail-side-row"><span>Places</span><strong>{item.numberOfPlaces}</strong></div>}{item.applicationMethod&&<div className="detail-side-row"><span>Application method</span><strong>{item.applicationMethod}</strong></div>}
         {item.compensationType&&<div className="detail-side-row"><span>Compensation / costs</span><strong>{item.compensationType.replaceAll("_"," ")}</strong></div>}
-        {item.demo?<button className="button button-dark button-full" type="button" disabled>Example only — applications closed</button>:<>
+        {item.demo?<button className="button button-dark button-full" type="button" disabled>Example only — applications closed</button>:<>{item.applicationUrl&&<a className="button button-lime button-full" href={item.applicationUrl} target="_blank" rel="noreferrer">Apply externally <ArrowUpRight size={16}/></a>}{item.applicationUrl&&item.applicationMethod==="external"?null:
           <button className="button button-full save-opportunity-button" type="button" onClick={()=>void toggleSaved()} disabled={busy||!supabaseConfigured}><Heart size={15} fill={isSaved?"currentColor":"none"}/>{isSaved?"Saved to workspace":"Save opportunity"}</button>
-          {userId&&<form className="detail-apply-form" onSubmit={apply}><label>Application note <textarea value={applyMessage} onChange={e=>setApplyMessage(e.target.value)} maxLength={2000} rows={3} placeholder="Briefly explain your interest (optional)."/></label><button className="button button-lime button-full" type="submit" disabled={busy||!supabaseConfigured}>{busy?"Please wait…":"Submit application"} <ArrowUpRight size={15}/></button></form>}
+          {userId&&<form className="detail-apply-form" onSubmit={apply}><label>Application note <textarea value={applyMessage} onChange={e=>setApplyMessage(e.target.value)} maxLength={2000} rows={3} placeholder="Briefly explain your interest (optional)."/></label>{cvUrl&&<label className="detail-cv-consent"><input type="checkbox" checked={cvConsent} onChange={e=>setCvConsent(e.target.checked)}/><span><strong>Share my CV with this organisation.</strong> I consent to sharing the CV currently stored on my profile. A snapshot of this application is retained for recruiter review.</span></label>}{!cvUrl&&<p className="detail-cv-note">No CV is stored on your profile. You can apply without one, or upload it from your workspace first.</p>}<button className="button button-lime button-full" type="submit" disabled={busy||!supabaseConfigured}>{busy?"Please wait…":"Submit application"} <ArrowUpRight size={15}/></button></form>}
           {!userId&&<Link className="button button-lime button-full" to={"/join?mode=login&next="+encodeURIComponent("/opportunities/"+item.id)}>Sign in to apply <ArrowUpRight size={16}/></Link>}
         </>}
         <p className="detail-safety">ChatSched Sport does not guarantee selection, contracts, sponsorship or representation. Applying is not a promise of acceptance.</p>{!item.demo&&<div className="detail-report-wrap"><ReportForm targetType="opportunity" targetId={item.id}/>{item.organisationId&&<ReportForm targetType="organisation" targetId={item.organisationId}/>}</div>}
