@@ -4,7 +4,7 @@ import {Link,useNavigate,useParams} from "react-router-dom";
 import {loadOpportunityById} from "../lib/opportunities";
 import ReportForm from "../components/ReportForm";
 import {supabase,supabaseConfigured} from "../lib/supabase";
-import type {Opportunity} from "../lib/types";import ReportForm from "../components/ReportForm";
+import type {Opportunity} from "../lib/types";
 
 function formatDate(value?:string|null){
   if(!value)return "To be confirmed";
@@ -124,7 +124,7 @@ export default function OpportunityDetailPage(){
           {userId&&<form className="detail-apply-form" onSubmit={apply}><label>Application note <textarea value={applyMessage} onChange={e=>setApplyMessage(e.target.value)} maxLength={2000} rows={3} placeholder="Briefly explain your interest (optional)."/></label><button className="button button-lime button-full" type="submit" disabled={busy||!supabaseConfigured}>{busy?"Please wait…":"Submit application"} <ArrowUpRight size={15}/></button></form>}
           {!userId&&<Link className="button button-lime button-full" to={"/join?mode=login&next="+encodeURIComponent("/opportunities/"+item.id)}>Sign in to apply <ArrowUpRight size={16}/></Link>}
         </>}
-        <p className="detail-safety">ChatSched Sport does not guarantee selection, contracts, sponsorship or representation. Applying is not a promise of acceptance.</p><div className="detail-report-wrap"><ReportForm targetType="opportunity" targetId={item.id}/></div>{!item.demo&&<><ReportForm targetType="opportunity" targetId={item.id}/>{item.organisationId&&<ReportForm targetType="organisation" targetId={item.organisationId}/>}</>}
+        <p className="detail-safety">ChatSched Sport does not guarantee selection, contracts, sponsorship or representation. Applying is not a promise of acceptance.</p>{!item.demo&&<div className="detail-report-wrap"><ReportForm targetType="opportunity" targetId={item.id}/>{item.organisationId&&<ReportForm targetType="organisation" targetId={item.organisationId}/>}</div>}
         {userId&&<Link className="detail-workspace-link" to="/workspace">View your workspace <ArrowUpRight size={14}/></Link>}
       </aside>
     </div>
