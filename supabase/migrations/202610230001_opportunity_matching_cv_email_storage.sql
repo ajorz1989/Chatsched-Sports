@@ -275,6 +275,69 @@ create trigger enqueue_notification_email_after_notification
   after insert on public.notifications
   for each row execute function private.enqueue_notification_email();
 
+-- Generate in-app alerts for saved searches and profile-based recommendations.
+create or replace function private.notify_matching_athletes()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, private
+as $$
+declare
+  sport_name text;
+begin
+  if new.status <> 'published' or new.verification_status <> 'verified' then return new; end if;
+  select name into sport_name from public.sports where id=new.sport_id;
+
+  insert into public.notifications(user_id,notification_type,title,body,target_path)
+  select distinct s.athlete_id,'saved_search_alert','A saved search found a new opportunity',
+    '“'||new.title||'” matches one of your saved searches.','/opportunities/'||new.id
+  from public.saved_opportunity_searches s
+  join public.profiles p on p.id=s.athlete_id and p.account_type='athlete'
+  where s.alert_enabled
+    and (
+      s.query is null
+      or lower(new.title||' '||coalesce(new.summary,'')||' '||coalesce(new.location,'')) like '%'||lower(s.query)||'%'
+    )
+    and (s.opportunity_type is null or s.opportunity_type=new.opportunity_type)
+    and (s.location is null or new.location is null or lower(new.location) like '%'||lower(s.location)||'%')
+    and (s.minimum_age is null or new.maximum_age is null or new.maximum_age>=s.minimum_age)
+    and (s.maximum_age is null or new.minimum_age is null or new.minimum_age<=s.maximum_age)
+    and not exists (
+      select 1 from public.notifications n
+      where n.user_id=s.athlete_id and n.target_path='/opportunities/'||new.id
+        and n.notification_type='saved_search_alert'
+        and n.created_at > now()-interval '7 days'
+    );
+
+  insert into public.notifications(user_id,notification_type,title,body,target_path)
+  select distinct ap.user_id,'opportunity_recommendation','A new opportunity may fit your profile',
+    '“'||new.title||'” is relevant to the sport, discipline or level on your profile.','/opportunities/'||new.id
+  from public.athlete_profiles ap
+  join public.profiles p on p.id=ap.user_id and p.account_type='athlete'
+  left join public.sports athlete_sport on athlete_sport.id=ap.primary_sport_id
+  where ap.visibility='public'
+    and (
+      (sport_name is not null and athlete_sport.name=sport_name)
+      or (new.discipline is not null and ap.discipline is not null and ap.discipline ilike '%'||new.discipline||'%')
+      or (new.positions && case when ap.position is null then '{}'::text[] else array[ap.position] end)
+      or (new.competition_level is not null and ap.playing_level is not null and ap.playing_level ilike '%'||new.competition_level||'%')
+    )
+    and not exists (
+      select 1 from public.notifications n
+      where n.user_id=ap.user_id and n.target_path='/opportunities/'||new.id
+        and n.notification_type='opportunity_recommendation'
+        and n.created_at > now()-interval '7 days'
+    );
+  return new;
+end;
+$$;
+
+revoke all on function private.notify_matching_athletes() from public, anon, authenticated;
+drop trigger if exists notify_matching_athletes_after_opportunity on public.opportunities;
+create trigger notify_matching_athletes_after_opportunity
+  after insert or update of status, verification_status on public.opportunities
+  for each row execute function private.notify_matching_athletes();
+
 comment on table public.opportunity_applications is 'Applications retain explicit CV consent timestamp and a point-in-time application snapshot so recruiter review is stable and auditable.';
 comment on table public.saved_opportunity_searches is 'Athlete-owned searches that can generate alerts when matching opportunities are published.';
 comment on table public.opportunity_match_events is 'Explainable opportunity-to-athlete ranking records visible to the owning organisation.';
