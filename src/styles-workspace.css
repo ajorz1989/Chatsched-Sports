@@ -79,3 +79,13 @@
 /* Phase 2 trust & safety */
 .phase2-card{margin-top:14px}.phase2-list{margin-top:15px;border-top:1px solid #e0e5ed}.phase2-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:start;padding:14px 0;border-bottom:1px solid #e0e5ed}.phase2-row>div{min-width:0}.phase2-row strong{display:block;font-size:11px;text-transform:capitalize}.phase2-row small{display:block;font:8px var(--mono);color:#73819a;margin-top:4px}.phase2-row p{font-size:10px;line-height:1.55;color:#566681;margin:8px 0 0;max-width:850px}.phase2-row .button{min-height:32px;font-size:8px}.trust-score{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px;margin-bottom:14px;border:1px solid #d6ddea;background:#f6f8fb}.trust-score>div{display:grid;gap:3px}.trust-score span{text-transform:uppercase;font:800 8px var(--mono);letter-spacing:.08em;color:#71809a}.trust-score strong{font:700 30px var(--display);letter-spacing:-.06em;color:#0a1f44}.trust-score small{font-size:8px;color:#667794}.trust-score svg{color:#294a91}.phase2-card .workspace-section-title svg{color:#294a91}.phase2-card .workspace-form-footer span{display:inline-flex;align-items:center;gap:6px}
 @media(max-width:650px){.phase2-row{grid-template-columns:1fr}.trust-score{align-items:flex-start}}
+
+/* Phase 3 application operations */
+.application-tracker-card{align-items:flex-start}
+.application-timeline{margin-top:18px;border-left:1px solid rgba(20,20,20,.14);padding-left:18px;display:grid;gap:16px}
+.application-timeline-item{position:relative;display:grid;grid-template-columns:22px 1fr;gap:10px}
+.application-timeline-dot{position:absolute;left:-30px;top:0;width:20px;height:20px;border:1px solid rgba(20,20,20,.16);border-radius:50%;display:grid;place-items:center;background:var(--workspace-card,#fff)}
+.application-timeline-item strong{display:block;text-transform:capitalize}
+.application-timeline-item small{display:flex;align-items:center;gap:5px;color:var(--workspace-muted,#667085);font-size:12px}
+.application-timeline-item p{margin:5px 0;color:var(--workspace-muted,#667085)}
+@media(max-width:700px){.application-timeline{padding-left:14px}.application-timeline-dot{left:-25px}}
