@@ -190,75 +190,45 @@ create policy "Public read sport media"
 
 -- Ranked athlete matching. The score is deliberately explainable rather than a black box.
 create or replace function public.match_opportunity_athletes(target_opportunity uuid)
-returns table (
-  athlete_id uuid,
-  display_name text,
-  avatar_url text,
-  sport text,
-  discipline text,
-  position text,
-  playing_level text,
-  location text,
-  score integer,
-  reasons jsonb
-)
-language sql
-security invoker
-set search_path = public
+returns table (athlete_id uuid, display_name text, avatar_url text, sport text, discipline text, position text, playing_level text, location text, score integer, reasons jsonb)
+language sql security invoker set search_path = public
 as $$
   with target as (
     select o.*, s.name as sport_name
-    from opportunities o
-    left join sports s on s.id = o.sport_id
-    where o.id = target_opportunity
+    from opportunities o left join sports s on s.id=o.sport_id
+    where o.id=target_opportunity
   ),
   candidates as (
-    select
-      p.id athlete_id,
-      p.display_name,
-      p.avatar_url,
-      s.name sport,
-      ap.discipline,
-      ap.position,
-      ap.playing_level,
-      coalesce(ap.location,p.location) location,
-      ap.date_of_birth,
-      t.*
+    select p.id athlete_id,p.display_name,p.avatar_url,s.name sport,ap.discipline,ap.position,ap.playing_level,
+      coalesce(ap.location,p.location) location,ap.date_of_birth,t.sport_name,t.discipline target_discipline,
+      t.positions target_positions,t.competition_level,t.minimum_age,t.maximum_age,t.location target_location
     from target t
-    join athlete_profiles ap on ap.visibility = 'public'
-    join profiles p on p.id = ap.user_id and p.account_type = 'athlete'
-    left join sports s on s.id = ap.primary_sport_id
+    join athlete_profiles ap on ap.visibility='public'
+    join profiles p on p.id=ap.user_id and p.account_type='athlete'
+    left join sports s on s.id=ap.primary_sport_id
+  ),
+  scored as (
+    select c.*,
+      (case when c.sport_name is not null and c.sport=c.sport_name then 35 else 0 end
+       + case when c.target_discipline is null then 15 when c.discipline is not null and (
+           c.discipline ilike '%'||c.target_discipline||'%' or c.target_discipline ilike '%'||c.discipline||'%'
+         ) then 15 else 0 end
+       + case when coalesce(array_length(c.target_positions,1),0)=0 or c.position=any(c.target_positions) then 15 else 0 end
+       + case when c.competition_level is null or c.playing_level is null or c.playing_level ilike '%'||c.competition_level||'%' then 15 else 0 end
+       + case when c.date_of_birth is null then 0 when c.minimum_age is null or extract(year from age(current_date,c.date_of_birth))>=c.minimum_age then 5 else 0 end
+       + case when c.date_of_birth is null then 0 when c.maximum_age is null or extract(year from age(current_date,c.date_of_birth))<=c.maximum_age then 5 else 0 end
+       + case when c.target_location is null or c.location is null or c.location ilike '%'||c.target_location||'%' then 5 else 0 end
+      )::integer score_value
+    from candidates c
   )
-  select
-    c.athlete_id, c.display_name, c.avatar_url, c.sport, c.discipline, c.position,
-    c.playing_level, c.location,
-    least(100, (
-      case when c.sport is not null and c.sport = c.sport_name then 35 else 0 end +
-      case when c.discipline is not null and c.discipline ilike '%' || coalesce(c.discipline,'') || '%' then 15 else 0 end +
-      case when c.position is not null and coalesce(c.positions,'{}') && array[c.position] then 15 else 0 end +
-      case when c.level is not null and c.playing_level is not null and c.playing_level ilike '%' || c.level || '%' then 15 else 0 end +
-      case
-        when c.date_of_birth is null then 0
-        when c.minimum_age is not null and extract(year from age(current_date,c.date_of_birth)) >= c.minimum_age then 5
-        when c.minimum_age is null then 5
-        else 0
-      end +
-      case
-        when c.date_of_birth is null then 0
-        when c.maximum_age is not null and extract(year from age(current_date,c.date_of_birth)) <= c.maximum_age then 5
-        when c.maximum_age is null then 5
-        else 0
-      end +
-      case when c.location is not null and c.location ilike '%' || coalesce(c.location,'') || '%' then 5 else 0 end
-    ))::integer score,
+  select athlete_id,display_name,avatar_url,sport,discipline,position,playing_level,location,score_value,
     jsonb_build_array(
-      case when c.sport is not null and c.sport = c.sport_name then 'Sport matches' end,
-      case when c.date_of_birth is null then 'Age unknown' end,
-      case when c.playing_level is null then 'Level unknown' end,
-      case when c.discipline is null then 'Discipline unknown' end
-    ) - 'null'::jsonb reasons
-  from candidates c
-  order by score desc, c.display_name asc;
+      case when sport=sport_name then 'Sport matches' end,
+      case when target_discipline is not null and discipline is null then 'Discipline unknown' end,
+      case when competition_level is not null and playing_level is null then 'Level unknown' end,
+      case when date_of_birth is null and (minimum_age is not null or maximum_age is not null) then 'Age unknown' end
+    ) - 'null' reasons
+  from scored order by score_value desc,display_name asc;
 $$;
 
 revoke all on function public.match_opportunity_athletes(uuid) from public, anon;
