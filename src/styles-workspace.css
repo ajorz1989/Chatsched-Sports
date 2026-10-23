@@ -89,3 +89,16 @@
 .application-timeline-item small{display:flex;align-items:center;gap:5px;color:var(--workspace-muted,#667085);font-size:12px}
 .application-timeline-item p{margin:5px 0;color:var(--workspace-muted,#667085)}
 @media(max-width:700px){.application-timeline{padding-left:14px}.application-timeline-dot{left:-25px}}
+
+/* Phase 4 commercial services */
+.phase4-org-select{display:grid;gap:7px;max-width:520px;margin:18px 0}
+.phase4-plan-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:20px}
+.phase4-plan{border:1px solid rgba(20,20,20,.12);border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:18px;background:rgba(255,255,255,.7)}
+.phase4-plan.active{border-color:rgba(20,20,20,.35);box-shadow:0 12px 35px rgba(20,20,20,.08)}
+.phase4-plan h3{font-size:24px;margin:4px 0}.phase4-plan p{color:var(--workspace-muted,#667085);min-height:44px}
+.phase4-plan strong{font-size:30px}.phase4-plan strong small{font-size:13px;font-weight:500;margin-left:4px}
+.phase4-plan ul{list-style:none;padding:0;margin:0;display:grid;gap:9px;flex:1}.phase4-plan li{display:flex;gap:8px;align-items:center;font-size:13px}
+.phase4-active{display:inline-flex;align-items:center;gap:6px;font-weight:700}
+.phase4-orders{margin-top:26px;padding-top:18px;border-top:1px solid rgba(20,20,20,.1)}
+@media(max-width:900px){.phase4-plan-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){.phase4-plan-grid{grid-template-columns:1fr}}
