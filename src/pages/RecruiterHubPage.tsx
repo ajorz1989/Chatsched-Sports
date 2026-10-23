@@ -19,7 +19,7 @@ export default function RecruiterHubPage(){
  const [pipeline,setPipeline]=useState<Pipeline[]>([]);const [saved,setSaved]=useState<SavedSearch[]>([]);
  const [query,setQuery]=useState("");const [sportFilter,setSportFilter]=useState("all");const [levelFilter,setLevelFilter]=useState("all");const [minScore,setMinScore]=useState(0);
  const [searchName,setSearchName]=useState("");const [searchQuery,setSearchQuery]=useState("");const [searchSport,setSearchSport]=useState("");const [searchPosition,setSearchPosition]=useState("");const [searchLevel,setSearchLevel]=useState("");const [searchLocation,setSearchLocation]=useState("");
- const [tab,setTab]=useState<"match"|"pipeline"|"alerts">("match");const [loading,setLoading]=useState(true);const [busy,setBusy]=useState(false);const [notice,setNotice]=useState("");
+ const [tab,setTab]=useState<"match"|"pipeline"|"alerts">("match");const [loading,setLoading]=useState(true);const [busy,setBusy]=useState(false);const [notice,setNotice]=useState("");const [hasRecruitmentEntitlement,setHasRecruitmentEntitlement]=useState<boolean|null>(null);
 
  useEffect(()=>{let alive=true;(async()=>{if(!supabaseConfigured||!supabase){setLoading(false);return;}try{
    const {data:{user}}=await supabase.auth.getUser();if(!alive)return;if(!user){setLoading(false);return;}setUserId(user.id);
@@ -32,7 +32,7 @@ export default function RecruiterHubPage(){
    if((orgRes.data??[])[0])setOrgId((orgRes.data??[])[0].id);
  }catch(e){if(alive)setNotice(e instanceof Error?e.message:"Recruiter workspace could not be loaded.");}finally{if(alive)setLoading(false);}})();return()=>{alive=false;};},[]);
 
- useEffect(()=>{if(!orgId||!supabase)return;let alive=true;(async()=>{setNotice("");
+ useEffect(()=>{if(!orgId||!supabase)return;let alive=true;(async()=>{const {data,error}=await supabase.rpc("sport_has_entitlement",{target_organisation:orgId,target_entitlement:"recruitment_hub"});if(!alive)return;if(error){setHasRecruitmentEntitlement(false);setNotice(error.message);return;}setHasRecruitmentEntitlement(Boolean(data));})();return()=>{alive=false;};},[orgId]);\n\n useEffect(()=>{if(!orgId||!supabase)return;let alive=true;(async()=>{setNotice("");
    const [o,s]=await Promise.all([
     supabase.from("opportunities").select("id,title,organisation_id,positions,competition_level,location,status,verification_status,sports(name)").eq("organisation_id",orgId).order("created_at",{ascending:false}),
     supabase.from("recruiter_saved_searches").select("id,name,query,sport_id,position,level,location,alert_enabled").eq("organisation_id",orgId).order("created_at",{ascending:false})
