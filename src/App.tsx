@@ -20,6 +20,7 @@ import OrganisationProfilePage from "./pages/OrganisationProfilePage";
 import TalentSearchPage from "./pages/TalentSearchPage";
 import OrganisationInsightsPage from "./pages/OrganisationInsightsPage";
 import RepresentationPage from "./pages/RepresentationPage";
+import RecruiterHubPage from "./pages/RecruiterHubPage";
 
 export default function App() {
   return (
@@ -46,6 +47,7 @@ export default function App() {
           <Route path="/organisations/:organisationId" element={<OrganisationProfilePage />} />
           <Route path="/talent/:athleteId" element={<TalentProfilePage />} />
           <Route path="/talent-discover" element={<TalentSearchPage />} />
+          <Route path="/recruitment" element={<RecruiterHubPage />} />
           <Route path="/insights" element={<OrganisationInsightsPage />} />
           <Route path="/representation" element={<RepresentationPage />} />
           <Route path="/messages" element={<MessagesPage />} />
