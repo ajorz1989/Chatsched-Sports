@@ -3,7 +3,8 @@
 
 alter table public.athlete_profiles
   add column if not exists date_of_birth date,
-  add column if not exists media_kit_url text;
+  add column if not exists media_kit_url text,
+  add column if not exists cv_url text;
 
 alter table public.opportunities
   add column if not exists minimum_age integer check (minimum_age is null or minimum_age >= 0),
@@ -128,7 +129,7 @@ grant select, insert, update on public.email_preferences to authenticated;
 grant select on public.email_queue to authenticated;
 grant select on public.opportunity_match_events to authenticated;
 
-grant update (date_of_birth, media_kit_url, updated_at) on public.athlete_profiles to authenticated;
+grant update (date_of_birth, media_kit_url, cv_url, updated_at) on public.athlete_profiles to authenticated;
 grant update (
   minimum_age, maximum_age, number_of_places, start_date, application_method,
   application_url, updated_at
