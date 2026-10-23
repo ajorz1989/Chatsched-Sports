@@ -133,3 +133,7 @@ main:focus{outline:none}
   .workspace-sidebar-label,.workspace-sidebar-foot{display:none}
   .workspace-tab{flex:0 0 auto;width:auto;white-space:nowrap;scroll-snap-align:start;padding:0 14px}
 }
+
+/* Community cards are informational, not links: drop the misleading arrow */
+.community-arrow{display:none}
+.footer-links a svg{vertical-align:-1px;margin-left:3px}
