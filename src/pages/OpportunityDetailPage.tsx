@@ -23,7 +23,8 @@ export default function OpportunityDetailPage(){
   const [isSaved,setIsSaved]=useState(false);
   const [applyMessage,setApplyMessage]=useState("");
   const [cvConsent,setCvConsent]=useState(false);
-  const [cvUrl,setCvUrl]=useState<string|null>(null);\n  const [isMinor,setIsMinor]=useState(false);
+  const [cvUrl,setCvUrl]=useState<string|null>(null);
+  const [isMinor,setIsMinor]=useState(false);
   const [athleteSnapshot,setAthleteSnapshot]=useState<Record<string,unknown>>({});
   const [busy,setBusy]=useState(false);
   const [feedback,setFeedback]=useState<{kind:"success"|"error"|"info";text:string}|null>(null);
@@ -38,19 +39,23 @@ export default function OpportunityDetailPage(){
   useEffect(()=>{
     if(!supabaseConfigured||!supabase){setAuthChecked(true);return;}
     let alive=true;
-    supabase.auth.getSession().then(({data})=>{if(alive){setUserId(data.session?.user.id??"");setAuthChecked(true);}});
-    const {data:{subscription}}=supabase.auth.onAuthStateChange((_event,session)=>{if(alive)setUserId(session?.user.id??"");});
+    const client=supabase;
+    client.auth.getSession().then(({data})=>{if(alive){setUserId(data.session?.user.id??"");setAuthChecked(true);}
     if(data.session?.user.id){
       const uid=data.session.user.id;
       Promise.all([
-        supabase.from("athlete_profiles").select("cv_url,date_of_birth,discipline,position,playing_level,availability,location,career_goals").eq("user_id",uid).maybeSingle(),
-        supabase.from("profiles").select("display_name,location,country").eq("id",uid).maybeSingle()
+        client.from("athlete_profiles").select("cv_url,date_of_birth,discipline,position,playing_level,availability,location,career_goals").eq("user_id",uid).maybeSingle(),
+        client.from("profiles").select("display_name,location,country").eq("id",uid).maybeSingle()
       ]).then(([athleteRes,profileRes])=>{
         if(!alive)return;
-        setCvUrl((athleteRes.data as {cv_url?:string|null}|null)?.cv_url??null);\n        const dob=(athleteRes.data as {date_of_birth?:string|null}|null)?.date_of_birth;\n        if(dob){const birth=new Date(dob+"T00:00:00");const now=new Date();let age=now.getFullYear()-birth.getFullYear();if(now.getMonth()<birth.getMonth()||(now.getMonth()===birth.getMonth()&&now.getDate()<birth.getDate()))age--;setIsMinor(age<18);}
+        setCvUrl((athleteRes.data as {cv_url?:string|null}|null)?.cv_url??null);
+        const dob=(athleteRes.data as {date_of_birth?:string|null}|null)?.date_of_birth;
+        if(dob){const birth=new Date(dob+"T00:00:00");const now=new Date();let age=now.getFullYear()-birth.getFullYear();if(now.getMonth()<birth.getMonth()||(now.getMonth()===birth.getMonth()&&now.getDate()<birth.getDate()))age--;setIsMinor(age<18);}
         setAthleteSnapshot({...((profileRes.data as Record<string,unknown>|null)??{}),...((athleteRes.data as Record<string,unknown>|null)??{})});
       });
     }
+    });
+    const {data:{subscription}}=client.auth.onAuthStateChange((_event,session)=>{if(alive)setUserId(session?.user.id??"");});
     return()=>{alive=false;subscription.unsubscribe();};
   },[]);
 
@@ -140,7 +145,8 @@ export default function OpportunityDetailPage(){
           {userId&&<form className="detail-apply-form" onSubmit={apply}><label>Application note <textarea value={applyMessage} onChange={e=>setApplyMessage(e.target.value)} maxLength={2000} rows={3} placeholder="Briefly explain your interest (optional)."/></label>{cvUrl&&<label className="detail-cv-consent"><input type="checkbox" checked={cvConsent} onChange={e=>setCvConsent(e.target.checked)}/><span><strong>Share my CV with this organisation.</strong> I consent to sharing the CV currently stored on my profile. A snapshot of this application is retained for recruiter review.</span></label>}{!cvUrl&&<p className="detail-cv-note">No CV is stored on your profile. You can apply without one, or upload it from your workspace first.</p>}<button className="button button-lime button-full" type="submit" disabled={busy||!supabaseConfigured}>{busy?"Please wait…":"Submit application"} <ArrowUpRight size={15}/></button></form>}
           {!userId&&<Link className="button button-lime button-full" to={"/join?mode=login&next="+encodeURIComponent("/opportunities/"+item.id)}>Sign in to apply <ArrowUpRight size={16}/></Link>}</>}
         </>}
-        {userId&&<SupportRequestButton opportunityId={item.id} opportunityTitle={item.title} userId={userId} isMinor={isMinor}/>}\n        <p className="detail-safety">ChatSched Sport does not guarantee selection, contracts, sponsorship or representation. Applying is not a promise of acceptance.</p>{!item.demo&&<div className="detail-report-wrap"><ReportForm targetType="opportunity" targetId={item.id}/>{item.organisationId&&<ReportForm targetType="organisation" targetId={item.organisationId}/>}</div>}
+        {userId&&<SupportRequestButton opportunityId={item.id} opportunityTitle={item.title} userId={userId} isMinor={isMinor}/>}
+        <p className="detail-safety">ChatSched Sport does not guarantee selection, contracts, sponsorship or representation. Applying is not a promise of acceptance.</p>{!item.demo&&<div className="detail-report-wrap"><ReportForm targetType="opportunity" targetId={item.id}/>{item.organisationId&&<ReportForm targetType="organisation" targetId={item.organisationId}/>}</div>}
         {userId&&<Link className="detail-workspace-link" to="/workspace">View your workspace <ArrowUpRight size={14}/></Link>}
       </aside>
     </div>

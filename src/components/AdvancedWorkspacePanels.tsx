@@ -1,5 +1,5 @@
 import {useEffect,useState} from "react";
-import {Bell,CalendarClock,CheckCircle2,FileUp,Heart,Mail,Search,ShieldCheck,Star,Upload,Users, X} from "lucide-react";
+import {Bell,CalendarClock,CheckCircle2,FileUp,Mail,Search,ShieldCheck,Star,Upload,Users, X} from "lucide-react";
 import {supabase,supabaseConfigured} from "../lib/supabase";
 import {loadOpportunityFeed} from "../lib/opportunities";
 import type {AccountType,Opportunity} from "../lib/types";
@@ -10,7 +10,7 @@ type Prefs={application_updates:boolean;opportunity_recommendations:boolean;save
 
 function ageFromDob(value:string|null|undefined){if(!value)return null;const d=new Date(value+"T00:00:00");if(Number.isNaN(d.getTime()))return null;const now=new Date();let age=now.getFullYear()-d.getFullYear();if(now.getMonth()<d.getMonth()||(now.getMonth()===d.getMonth()&&now.getDate()<d.getDate()))age--;return age;}
 
-export default function AdvancedWorkspacePanels({userId,accountType,email}:Props){
+export default function AdvancedWorkspacePanels({userId,accountType}:Props){
  const [profile,setProfile]=useState<any>(null);
  const [recommended,setRecommended]=useState<Opportunity[]>([]);
  const [searches,setSearches]=useState<SearchRow[]>([]);
@@ -40,16 +40,16 @@ export default function AdvancedWorkspacePanels({userId,accountType,email}:Props
    if(s.data)setSearches(s.data as SearchRow[]);
    if(pref.data)setPrefs(pref.data as Prefs);
    if(o.data)setOwned(o.data as {id:string;title:string}[]);
-   if(p.data&&athlete){
+   if(p.data&&athlete){const pd=p.data;
      const feed=await loadOpportunityFeed();
-     const age=ageFromDob(p.data.date_of_birth);
+     const age=ageFromDob(pd.date_of_birth);
      const scored=feed.opportunities.map(item=>{
        let score=0;
        const reasons:string[]=[];
-       if(p.data.primary_sport_id&&item.sport){score+=20;}
-       if(p.data.discipline&&item.discipline&&item.discipline.toLowerCase().includes(p.data.discipline.toLowerCase())){score+=25;reasons.push("Discipline match");}
-       if(p.data.position&&item.positions?.includes(p.data.position)){score+=20;reasons.push("Position match");}
-       if(p.data.playing_level&&item.level&&item.level.toLowerCase().includes(p.data.playing_level.toLowerCase())){score+=15;reasons.push("Level match");}
+       if(pd.primary_sport_id&&item.sport){score+=20;}
+       if(pd.discipline&&item.discipline&&item.discipline.toLowerCase().includes(pd.discipline.toLowerCase())){score+=25;reasons.push("Discipline match");}
+       if(pd.position&&item.positions?.includes(pd.position)){score+=20;reasons.push("Position match");}
+       if(pd.playing_level&&item.level&&item.level.toLowerCase().includes(pd.playing_level.toLowerCase())){score+=15;reasons.push("Level match");}
        if(age!==null&&item.minimumAge!==null&&item.minimumAge!==undefined&&age>=item.minimumAge){score+=10;reasons.push("Age eligible");}
        if(age!==null&&item.maximumAge!==null&&item.maximumAge!==undefined&&age<=item.maximumAge){score+=10;reasons.push("Age eligible");}
        if(age===null&&(item.minimumAge!==null||item.maximumAge!==null))reasons.push("Age eligibility unknown");

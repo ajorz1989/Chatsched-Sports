@@ -32,7 +32,9 @@ export default function RecruiterHubPage(){
    if((orgRes.data??[])[0])setOrgId((orgRes.data??[])[0].id);
  }catch(e){if(alive)setNotice(e instanceof Error?e.message:"Recruiter workspace could not be loaded.");}finally{if(alive)setLoading(false);}})();return()=>{alive=false;};},[]);
 
- useEffect(()=>{if(!orgId||!supabase)return;let alive=true;(async()=>{const {data,error}=await supabase.rpc("sport_has_entitlement",{target_organisation:orgId,target_entitlement:"recruitment_hub"});if(!alive)return;if(error){setHasRecruitmentEntitlement(false);setNotice(error.message);return;}setHasRecruitmentEntitlement(Boolean(data));})();return()=>{alive=false;};},[orgId]);\n\n useEffect(()=>{if(!orgId||!supabase)return;let alive=true;(async()=>{setNotice("");
+ useEffect(()=>{if(!orgId||!supabase)return;let alive=true;(async()=>{const {data,error}=await supabase.rpc("sport_has_entitlement",{target_organisation:orgId,target_entitlement:"recruitment_hub"});if(!alive)return;if(error){setHasRecruitmentEntitlement(false);setNotice(error.message);return;}setHasRecruitmentEntitlement(Boolean(data));})();return()=>{alive=false;};},[orgId]);
+
+ useEffect(()=>{if(!orgId||!supabase)return;let alive=true;(async()=>{setNotice("");
    const [o,s]=await Promise.all([
     supabase.from("opportunities").select("id,title,organisation_id,positions,competition_level,location,status,verification_status,sports(name)").eq("organisation_id",orgId).order("created_at",{ascending:false}),
     supabase.from("recruiter_saved_searches").select("id,name,query,sport_id,position,level,location,alert_enabled").eq("organisation_id",orgId).order("created_at",{ascending:false})
@@ -71,6 +73,7 @@ export default function RecruiterHubPage(){
 
  if(loading)return <section className="workspace-wrap"><div className="workspace-loading"><LoaderCircle size={22} className="spin"/>Loading recruitment hub…</div></section>;
  if(!userId||!orgs.length)return <section className="workspace-wrap"><div className="workspace-empty"><ShieldCheck size={28}/><p className="workspace-kicker">RECRUITMENT HUB</p><h1>Recruit smarter.<br/><span>With permission.</span></h1><p>Recruitment tools are available to verified club, academy, scouting and approved sports organisations. Create and verify an organisation first.</p><Link className="button button-dark" to="/organisations">Open organisations</Link></div></section>;
+ if(hasRecruitmentEntitlement===false)return <section className="workspace-wrap"><div className="workspace-empty"><ShieldCheck size={28}/><p className="workspace-kicker">RECRUITMENT HUB</p><h1>An active plan is required.</h1><p>{notice||"The recruitment hub is included with an active ChatSched Sport organisation plan."}</p><Link className="button button-dark" to="/workspace">Manage organisation plan</Link></div></section>;
 
  return <section className="workspace-wrap recruiter-hub">
   <div className="workspace-hero"><div><div className="workspace-kicker"><span className="status-dot"/> PHASE 1 / RECRUITMENT ENGINE</div><h1>Find talent.<br/><span>Move prospects forward.</span></h1><p>One workspace for reverse opportunity matching, applicant pipeline and recruiter alerts. Rankings are explainable and never guarantee selection.</p></div><Link className="button button-dark" to="/workspace">Workspace <ArrowUpRight size={15}/></Link></div>

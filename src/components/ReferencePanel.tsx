@@ -13,6 +13,7 @@ export default function ReferencePanel({userId,isAthlete}:{userId:string;isAthle
  <div className="phase2-list">{inviteLink&&<div className="workspace-notice notice-success"><strong>Private referee invitation:</strong> <input readOnly value={inviteLink} onFocus={e=>e.currentTarget.select()} /></div>}{rows.map(row=><article className="phase2-row" key={row.id}><div><strong>{row.relationship_title}</strong><small>{[row.organisation_name,row.sport,row.playing_period].filter(Boolean).join(" · ")}</small><p>{row.reference_text}</p></div><span className={"status-tag status-"+row.status}>{row.status==="approved"&&<CheckCircle2 size={12}/>} {row.status}</span>{isAthlete&&row.athlete_id===userId&&row.status==="pending"&&<button className="button button-light-outline" disabled={busy} onClick={()=>void approve(row.id)}>Approve</button>}</article>)}</div>
  {requests.length>0&&<div className="phase2-list"><div className="section-kicker">REFERENCE REQUESTS FOR YOU</div>{requests.map(req=><ReferenceRequest key={req.id} request={req} userId={userId} onDone={()=>void load()}/>)}</div>}
  {!rows.length&&!requests.length&&<p className="workspace-muted">No references yet.</p>}
+ {notice&&<p className="workspace-muted" role="status">{notice}</p>}
  </div>;
 }
 

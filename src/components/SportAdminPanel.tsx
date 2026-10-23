@@ -1,5 +1,5 @@
 import {useEffect,useState} from "react";
-import {CheckSquare,Clock3,FileSearch,ShieldAlert,Users} from "lucide-react";
+import {CheckSquare,FileSearch,ShieldAlert,Users} from "lucide-react";
 import {supabase} from "../lib/supabase";
 type Props={userId:string;isAdmin:boolean};
 type User={id:string;display_name:string;account_type:string;created_at:string};

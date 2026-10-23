@@ -1,5 +1,5 @@
 import {useEffect,useState} from "react";
-import {CheckCircle2,LoaderCircle,ShieldCheck,UserCheck} from "lucide-react";
+import {CheckCircle2,ShieldCheck,UserCheck} from "lucide-react";
 import {supabase} from "../lib/supabase";
 type Row={id:string;athlete_id:string;endorser_id:string;relationship_title:string;sport:string|null;playing_period:string|null;endorsement_text:string;status:string;created_at:string};
 export default function EndorsementPanel({userId,isAthlete}:{userId:string;isAthlete:boolean}){
@@ -12,5 +12,6 @@ export default function EndorsementPanel({userId,isAthlete}:{userId:string;isAth
  {isAthlete&&<div className="workspace-form-grid"><label>Endorser account ID<input value={refereeId} onChange={e=>setRefereeId(e.target.value)} placeholder="Paste the coach / club member profile ID"/></label><label>Relationship<input value={relationship} onChange={e=>setRelationship(e.target.value)} placeholder="Head coach, teammate, director"/></label><label>Sport<input value={sport} onChange={e=>setSport(e.target.value)} placeholder="Football"/></label><label>Playing period<input value={period} onChange={e=>setPeriod(e.target.value)} placeholder="2023–2025"/></label><label className="workspace-span-2">Endorsement<textarea rows={4} minLength={20} maxLength={2000} value={text} onChange={e=>setText(e.target.value)} placeholder="Ask the endorser to confirm the playing relationship and relevant strengths."/></label><div className="workspace-span-2 workspace-form-footer"><span>Only approved endorsements appear as public trust signals.</span><button className="button button-dark" disabled={busy||refereeId.trim().length<10||text.trim().length<20} onClick={()=>void submit()}><UserCheck size={15}/>{busy?"Saving…":"Request endorsement"}</button></div></div>}
  <div className="phase2-list">{rows.map(row=><article className="phase2-row" key={row.id}><div><strong>{row.relationship_title}</strong><small>{[row.sport,row.playing_period].filter(Boolean).join(" · ")||"Sporting relationship"}</small><p>{row.endorsement_text}</p></div><span className={"status-tag status-"+row.status}>{row.status==="approved"&&<CheckCircle2 size={12}/>} {row.status}</span>{isAthlete&&(row.athlete_id===userId||row.endorser_id===userId)&&row.status==="pending"&&<button className="button button-light-outline" disabled={busy} onClick={()=>void approve(row.id)}>{row.endorser_id===userId?"Confirm endorsement":"Approve"}</button>}</article>)}</div>
  {!rows.length&&<p className="workspace-muted">No endorsements yet.</p>}
+ {notice&&<p className="workspace-muted" role="status">{notice}</p>}
  </div>;
 }
