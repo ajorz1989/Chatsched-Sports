@@ -5,6 +5,7 @@ import {loadOpportunityById} from "../lib/opportunities";
 import ReportForm from "../components/ReportForm";
 import SupportRequestButton from "../components/SupportRequestButton";
 import VerificationBadge,{levelFromStatus} from "../components/VerificationBadge";
+import CoverImage from "../components/CoverImage";
 import {supabase,supabaseConfigured} from "../lib/supabase";
 import type {Opportunity} from "../lib/types";
 
@@ -129,6 +130,7 @@ export default function OpportunityDetailPage(){
         <div className="eyebrow"><span className="status-dot"/> {item.type.replace("-"," ").toUpperCase()}</div>
         <h1>{item.title}</h1><p className="detail-org">{item.organisation}</p>
         <div className="detail-meta-row"><span><MapPin size={16}/> {item.location}, {item.country}</span><span><Trophy size={16}/> {item.level}</span></div>
+        <CoverImage src={item.imageUrl} sport={item.sport} variant="hero" label={item.title+" cover photo"}/>
         <div className="detail-rule"/>
         <div className="detail-copy-block"><div className="section-kicker">Overview</div><p>{item.summary}</p></div>{item.description&&<div className="detail-copy-block"><div className="section-kicker">Full description</div><p className="opportunity-detail-longcopy">{item.description}</p></div>}{item.eligibility&&<div className="detail-copy-block"><div className="section-kicker">Eligibility & requirements</div><p className="opportunity-detail-longcopy">{item.eligibility}</p></div>}{!item.description&&!item.eligibility&&<div className="demo-note"><span className="note-symbol">i</span><p>Full eligibility details are not included in this listing yet. Ask the organisation for selection stages, dates and any costs before sharing sensitive information.</p></div>}
         <div className="detail-copy-block"><div className="section-kicker">Before you apply</div><div className="detail-check"><CheckCircle2 size={17}/><span>Review eligibility and requirements with the official organisation.</span></div><div className="detail-check"><CheckCircle2 size={17}/><span>Confirm dates, location, costs and who will contact you.</span></div><div className="detail-check"><CheckCircle2 size={17}/><span>Never pay an unverified person who promises selection or a contract.</span></div></div>
