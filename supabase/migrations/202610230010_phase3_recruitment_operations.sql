@@ -160,9 +160,6 @@ set search_path=public
 as $$
 declare request_id_value uuid;
 begin
-  if (select auth.uid()) is null then
-    raise exception 'Authentication is required.';
-  end if;
   select request_id into request_id_value
   from public.athlete_reference_invites
   where id=target_invite
