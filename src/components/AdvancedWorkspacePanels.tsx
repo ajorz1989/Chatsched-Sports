@@ -21,6 +21,7 @@ export default function AdvancedWorkspacePanels({userId,accountType,email}:Props
  const [savedType,setSavedType]=useState("");
  const [notice,setNotice]=useState("");
  const [uploads,setUploads]=useState<{cv?:string;mediaKit?:string;avatar?:string}>({});
+ const [dob,setDob]=useState("");
  const [matchesFor,setMatchesFor]=useState("");
  const [matches,setMatches]=useState<any[]>([]);
  const [owned,setOwned]=useState<{id:string;title:string}[]>([]);
@@ -35,7 +36,7 @@ export default function AdvancedWorkspacePanels({userId,accountType,email}:Props
      supabase.from("email_preferences").select("application_updates,opportunity_recommendations,saved_search_alerts,weekly_digest,marketing").eq("user_id",userId).maybeSingle(),
      supabase.from("opportunities").select("id,title").eq("created_by",userId).order("created_at",{ascending:false}).limit(50)
    ]);
-   if(p.data)setProfile(p.data);
+   if(p.data){setProfile(p.data);setDob(p.data.date_of_birth??"");}
    if(s.data)setSearches(s.data as SearchRow[]);
    if(pref.data)setPrefs(pref.data as Prefs);
    if(o.data)setOwned(o.data as {id:string;title:string}[]);
@@ -105,7 +106,7 @@ export default function AdvancedWorkspacePanels({userId,accountType,email}:Props
   {athlete&&<section className="workspace-form-card workspace-advanced-card">
    <div className="workspace-section-title"><div><p className="workspace-kicker">CV & PROFILE MEDIA</p><h2>Be ready for recruiter review.</h2><p className="workspace-subtitle">Your CV is never shared with an organisation just because you uploaded it. Sharing requires explicit consent on each application.</p></div><FileUp size={22}/></div>
    <div className="workspace-upload-grid">{[["cv","CV / résumé"],["mediaKit","Media-kit PDF"],["avatar","Profile photo"]].map(([kind,label])=><label className="workspace-upload-box" key={kind}><Upload size={18}/><strong>{label}</strong><small>Choose file</small><input type="file" accept={kind==="avatar"?"image/jpeg,image/png,image/webp":"application/pdf"} onChange={e=>{const file=e.target.files?.[0];if(file)void upload(kind as "cv"|"mediaKit"|"avatar",file);}}/>{uploads[kind as keyof typeof uploads]&&<CheckCircle2 size={15}/>}</label>)}</div>
-   <div className="workspace-upload-status">{profile?.cv_url&&<span>CV on file</span>}{profile?.media_kit_url&&<span>Media kit on file</span>}</div>
+   <div className="workspace-upload-status">{profile?.cv_url&&<span>CV on file</span>}{profile?.media_kit_url&&<span>Media kit on file</span>}</div><div className="workspace-profile-field"><label>Date of birth <input type="date" value={dob} onChange={e=>setDob(e.target.value)}/></label><button className="button button-light-workspace" type="button" onClick={async()=>{if(!supabase||!userId)return;const {error}=await supabase.from("athlete_profiles").update({date_of_birth:dob||null,updated_at:new Date().toISOString()}).eq("user_id",userId);setNotice(error?error.message:"Age eligibility information saved.");}}>Save age eligibility</button><small>Your date of birth is used for matching but is not shown on public athlete profiles.</small></div>
   </section>}
 
   {athlete&&<section className="workspace-form-card workspace-advanced-card">
