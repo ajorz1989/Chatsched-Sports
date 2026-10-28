@@ -72,4 +72,16 @@ describe("scoreOpportunityMatch", () => {
     expect(result.checks.find((c) => c.key === "sport")?.status).toBe("unmet");
     expect(result.score).toBe(20);
   });
+  it("treats a listing that says 'To be confirmed' as missing data, not as a mismatch or a match", () => {
+    const vague: Opportunity = { ...opportunity, location: "To be confirmed", level: "To be confirmed" };
+    const result = scoreOpportunityMatch({ sport: "Football", location: "Cape Town", level: "Senior" }, vague);
+    expect(result.score).toBe(40);
+    expect(result.checks.find((c) => c.key === "location")?.status).toBe("missing");
+    expect(result.checks.find((c) => c.key === "level")?.status).toBe("missing");
+  });
+  it("does not award goal points when no goal has been stated", () => {
+    const result = scoreOpportunityMatch({ sport: "Football", goals: [] }, opportunity);
+    expect(result.score).toBe(40);
+    expect(result.checks.find((c) => c.key === "goals")?.status).toBe("missing");
+  });
 });

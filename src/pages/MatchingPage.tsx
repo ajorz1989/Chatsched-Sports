@@ -2,7 +2,7 @@ import {useEffect,useMemo,useState} from "react";import {ArrowUpRight,CheckCircl
 type Sport={id:string;name:string};
 export default function MatchingPage(){
  const [opportunities,setOpportunities]=useState<Opportunity[]>([]);const [demo,setDemo]=useState(true);const [loading,setLoading]=useState(true);const [sports,setSports]=useState<Sport[]>([]);
- const [sport,setSport]=useState("");const [position,setPosition]=useState("");const [location,setLocation]=useState("");const [level,setLevel]=useState("");const [goals,setGoals]=useState("trial, academy, development");const [notice,setNotice]=useState("");
+ const [sport,setSport]=useState("");const [position,setPosition]=useState("");const [location,setLocation]=useState("");const [level,setLevel]=useState("");const [goals,setGoals]=useState("");const [notice,setNotice]=useState("");
  useEffect(()=>{let alive=true;(async()=>{try{const feed=await loadOpportunityFeed();if(alive){setOpportunities(feed.opportunities);setDemo(feed.demo);}
  if(supabaseConfigured&&supabase){const {data:sportRows}=await supabase.from("sports").select("id,name").eq("is_active",true).order("name");if(alive&&sportRows)setSports(sportRows as Sport[]);
  const {data:{user}}=await supabase.auth.getUser();if(user){const [athleteResult,profileResult]=await Promise.all([supabase.from("athlete_profiles").select("primary_sport_id,position,playing_level,location,career_goals").eq("user_id",user.id).maybeSingle(),supabase.from("profiles").select("location").eq("id",user.id).maybeSingle()]);

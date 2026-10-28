@@ -21,6 +21,9 @@ const routeMeta:Record<string,{title:string;description:string;noindex?:boolean}
  "/messages":{title:"Private Messages",description:"Private conversations for discoverable members of the ChatSched Sport network.",noindex:true},
  "/notifications":{title:"Account Notifications",description:"Review account updates, message notifications and application activity.",noindex:true},
  "/representation":{title:"Athlete Career Support and Representation",description:"Explore ChatSched Sport career planning, opportunity support and a structured representation pathway."},
+ "/recruitment":{title:"Recruiter Hub",description:"Private recruitment pipeline for verified organisations.",noindex:true},
+ "/talent-discover":{title:"Verified Talent Search",description:"Member-only reverse talent search for verified organisations. Results respect each athlete's privacy settings.",noindex:true},
+ "/insights":{title:"Organisation Insights",description:"Private recruitment insights for verified organisation owners.",noindex:true},
  "/admin":{title:"Platform Moderation",description:"Restricted moderation, verification and audit tools.",noindex:true}
 };
 function setMeta(selector:string,attribute:string,value:string){
@@ -51,7 +54,7 @@ export default function SiteLayout(){
  },[userId,location.pathname]);
  useEffect(()=>{
   const pathname=location.pathname;
-  const meta=routeMeta[pathname]??(pathname.startsWith("/opportunities/")?{title:"Opportunity Details",description:"Review the description, eligibility and terms of this sporting opportunity."}:pathname.startsWith("/talent/")?{title:"Athlete Profile",description:"Review an opted-in athlete sports profile, achievements and portfolio."}:pathname.startsWith("/organisations/")?{title:"Sports Organisation Profile",description:"Review organisation details and published sporting opportunities."}:{title:"ChatSched Sport",description:"The Sports Opportunity Network connecting sporting talent to opportunity."});
+  const meta=routeMeta[pathname]??(pathname.startsWith("/opportunities/")?{title:"Opportunity Details",description:"Review the description, eligibility and terms of this sporting opportunity."}:pathname.startsWith("/talent/")?{title:"Athlete Profile",description:"Review an opted-in athlete sports profile, achievements and portfolio."}:pathname.startsWith("/organisations/")?{title:"Sports Organisation Profile",description:"Review organisation details and published sporting opportunities."}:{title:"Page not found",description:"This page does not exist on ChatSched Sport.",noindex:true});
   document.title=meta.title+" | ChatSched Sport";
   setMeta('meta[name="description"]',"content",meta.description);
   setMeta('meta[property="og:title"]',"content",meta.title+" | ChatSched Sport");

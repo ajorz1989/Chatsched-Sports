@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { AlertTriangle, ArrowUpRight, CheckCircle2, ClipboardCheck, History, LoaderCircle, RefreshCw, ShieldCheck, XCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase, supabaseConfigured } from "../lib/supabase";
+import AccountDeletionQueue from "../components/AccountDeletionQueue";
 import "../styles-workspace.css";
 
 type Organisation = {id:string;name:string;organisation_type:string;verification_status:string;location:string|null;country:string;created_at:string;owner_id:string};
@@ -54,17 +55,13 @@ export default function AdminPage(){
   return()=>{alive=false;};
  },[]);
 
- async function audit(action:string,type:string,id:string,details:Record<string,string>){
-  if(!supabase||!userId)return false;
-  const {error}=await supabase.from("admin_audit_log").insert({actor_id:userId,action_type:action,target_type:type,target_id:id,details});
-  return !error;
- }
  async function moderateOrganisation(item:Organisation){
   if(!supabase)return;setBusyId(item.id);setNotice(null);
   try{
    const {error}=await supabase.from("organisations").update({verification_status:"rejected"}).eq("id",item.id);
    if(error)throw error;
-   const recorded=await audit("organisation_rejected","organisation",item.id,{name:item.name,previous_status:item.verification_status,new_status:"rejected",reason:"Rejected by an authorised Sport administrator"});
+   // The audit event is written atomically by a database trigger in the same transaction as the decision.
+   const recorded=true;
    await refresh();
    setNotice(recorded?{kind:"success",text:item.name+" rejected and recorded in the audit log."}:{kind:"info",text:item.name+" updated, but the audit event could not be recorded."});
   }catch(error){setNotice({kind:"error",text:error instanceof Error?error.message:"Organisation decision could not be saved."});}
@@ -78,7 +75,8 @@ export default function AdminPage(){
    if(status==="verified"&&org?.verification_status==="verified")update.status="published";
    const {error}=await supabase.from("opportunities").update(update).eq("id",item.id);
    if(error)throw error;
-   const recorded=await audit("opportunity_"+status,"opportunity",item.id,{title:item.title,previous_status:item.verification_status,new_status:status});
+   // The audit event is written atomically by a database trigger in the same transaction as the decision.
+   const recorded=true;
    await refresh();
    setNotice(recorded?{kind:"success",text:item.title+" marked "+status+(status==="verified"&&org?.verification_status!=="verified"?"; it will not appear publicly until the organisation is verified.":".")}:{kind:"info",text:item.title+" updated, but its audit event could not be recorded."});
   }catch(error){setNotice({kind:"error",text:error instanceof Error?error.message:"Opportunity decision could not be saved."});}
@@ -90,7 +88,8 @@ export default function AdminPage(){
   try{
    const {error}=await supabase.from("safety_reports").update({status,resolution:resolution||null,reviewed_by:userId,reviewed_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq("id",item.id);
    if(error)throw error;
-   const recorded=await audit("safety_report_"+status,"safety_report",item.id,{target_type:item.target_type,target_id:item.target_id,reason:item.reason,new_status:status});
+   // The audit event is written atomically by a database trigger in the same transaction as the decision.
+   const recorded=true;
    await refresh();
    setNotice(recorded?{kind:"success",text:"Safety report updated and moderator activity recorded."}:{kind:"info",text:"Report updated, but its audit event could not be recorded."});
   }catch(error){setNotice({kind:"error",text:error instanceof Error?error.message:"Safety report could not be updated."});}
@@ -102,7 +101,8 @@ export default function AdminPage(){
   try{
    const {error}=await supabase.from("career_support_requests").update({status,admin_notes:notes||null,reviewed_by:userId,reviewed_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq("id",item.id);
    if(error)throw error;
-   const recorded=await audit("career_support_"+status,"career_support_request",item.id,{service_type:item.service_type,new_status:status});
+   // The audit event is written atomically by a database trigger in the same transaction as the decision.
+   const recorded=true;
    await refresh();
    setNotice(recorded?{kind:"success",text:"Career-support request updated and audit event recorded."}:{kind:"info",text:"Request updated, but its audit event could not be recorded."});
   }catch(error){setNotice({kind:"error",text:error instanceof Error?error.message:"Career-support request could not be updated."});}
@@ -115,7 +115,8 @@ export default function AdminPage(){
    const reviewPatch=status==="pending"?{reviewed_by:null,reviewed_at:null}:{reviewed_by:userId,reviewed_at:new Date().toISOString()};
    const {error}=await supabase.from("organisation_verification_requests").update({status,admin_notes:notes||null,updated_at:new Date().toISOString(),...reviewPatch}).eq("id",item.id);
    if(error)throw error;
-   const recorded=await audit("organisation_verification_"+status,"organisation_verification_request",item.id,{organisation_id:item.organisation_id,evidence_type:item.evidence_type,new_status:status});
+   // The audit event is written atomically by a database trigger in the same transaction as the decision.
+   const recorded=true;
    await refresh();
    setNotice(recorded?{kind:"success",text:"Verification request marked "+status+". Organisation status and owner notification were updated by the database workflow."}:{kind:"info",text:"Verification request updated, but the audit event could not be recorded."});
   }catch(error){setNotice({kind:"error",text:error instanceof Error?error.message:"Verification request could not be updated."});}
@@ -126,7 +127,8 @@ export default function AdminPage(){
   try{
    const {error}=await supabase.from("opportunity_applications").update({status,updated_at:new Date().toISOString()}).eq("id",item.id);
    if(error)throw error;
-   const recorded=await audit("application_status_changed","application",item.id,{previous_status:item.status,new_status:status});
+   // The audit event is written atomically by a database trigger in the same transaction as the decision.
+   const recorded=true;
    await refresh();
    setNotice(recorded?{kind:"success",text:"Application status changed to "+status+". The decision is recorded."}:{kind:"info",text:"Application status updated but audit logging failed."});
   }catch(error){setNotice({kind:"error",text:error instanceof Error?error.message:"Application status could not be changed."});}
@@ -155,6 +157,7 @@ export default function AdminPage(){
   {tab==="verification"&&<div className="admin-queue">{verificationRequests.map(item=>{const organisation=Array.isArray(item.organisations)?item.organisations[0]:item.organisations;return <article className="admin-item verification-admin-item" key={item.id}><div className="admin-item-heading"><div><span className={"status-tag status-"+item.status}>{item.status.replaceAll("_"," ")}</span><h3>{organisation?.name??"Organisation"} verification</h3><p>{item.evidence_type.replaceAll("_"," ")} · Organisation ID: {item.organisation_id}</p><small>Submitted by: {item.submitted_by} · {new Date(item.created_at).toLocaleDateString("en-ZA")}</small></div><span className="admin-item-date">{new Date(item.created_at).toLocaleDateString("en-ZA")}</span></div>{item.evidence_url&&<a className="verification-evidence-url" href={item.evidence_url} target="_blank" rel="noreferrer">Open evidence link <ArrowUpRight size={14}/></a>}{item.evidence_notes&&<p className="admin-report-details">{item.evidence_notes}</p>}<label className="admin-resolution-label">Administrator feedback<textarea rows={3} maxLength={4000} value={verificationNotes[item.id]??item.admin_notes??""} onChange={event=>setVerificationNotes(current=>({...current,[item.id]:event.target.value}))} placeholder="Record what was checked, what is missing, or why evidence was rejected."/></label><div className="admin-actions"><label className="admin-status-select">Decision<select value={item.status} disabled={busyId===item.id} onChange={event=>void updateVerificationRequest(item,event.target.value)}>{["pending","in_review","approved","rejected"].map(status=><option key={status} value={status}>{status.replaceAll("_"," ")}</option>)}</select></label><button className="admin-approve" disabled={busyId===item.id} onClick={()=>void updateVerificationRequest(item,"approved")}><CheckCircle2 size={15}/> Approve evidence</button><button className="admin-reject" disabled={busyId===item.id} onClick={()=>void updateVerificationRequest(item,"rejected")}><XCircle size={15}/> Reject evidence</button></div></article>;})}{!verificationRequests.length&&<div className="workspace-blank"><ShieldCheck size={24}/><h3>No verification evidence submitted.</h3><p>Organisation owners can submit an official website or supporting evidence from their workspace. Approval here updates their verification state.</p></div>}</div>}
 
   </div>
+  <AccountDeletionQueue/>
   <div className="workspace-footer-note"><ShieldCheck size={15}/><span>Use the least-privilege administrator allow-list. Verify evidence before approving a listing; never infer legitimacy from a logo or self-declared account type alone.</span></div>
  </section>;
 }

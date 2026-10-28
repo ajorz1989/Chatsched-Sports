@@ -10,6 +10,9 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@fontsource/dm-mono": "^5.2.5",
+    "@fontsource/manrope": "^5.2.5",
+    "@fontsource/space-grotesk": "^5.2.5",
     "@supabase/supabase-js": "^2.110.8",
     "lucide-react": "^0.511.0",
     "react": "^19.2.8",

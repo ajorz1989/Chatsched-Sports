@@ -1,7 +1,7 @@
 import {useEffect,useState,type FormEvent} from "react";
 import {ArrowLeft,ArrowUpRight,CalendarDays,CheckCircle2,Heart,MapPin,ShieldCheck,Trophy} from "lucide-react";
 import {Link,useNavigate,useParams} from "react-router-dom";
-import {loadOpportunityById} from "../lib/opportunities";
+import {isClosed,loadOpportunityById} from "../lib/opportunities";
 import ReportForm from "../components/ReportForm";
 import SupportRequestButton from "../components/SupportRequestButton";
 import VerificationBadge,{levelFromStatus} from "../components/VerificationBadge";
@@ -104,11 +104,24 @@ export default function OpportunityDetailPage(){
 
   async function apply(event:FormEvent<HTMLFormElement>){
     event.preventDefault();
-    if(!item||item.demo||!supabaseConfigured||!supabase)return;
+    if(!item||item.demo||isClosed(item)||!supabaseConfigured||!supabase)return;
     if(!userId){navigate("/join?mode=login&next="+encodeURIComponent("/opportunities/"+item.id));return;}
     setBusy(true);setFeedback(null);
     try{
-      const {error}=await supabase.from("opportunity_applications").insert({opportunity_id:item.id,athlete_id:userId,message:applyMessage.trim()||null,cv_consent:cvConsent,cv_consent_at:cvConsent&&cvUrl?new Date().toISOString():null,application_snapshot:{captured_at:new Date().toISOString(),opportunity:{id:item.id,title:item.title,sport:item.sport,discipline:item.discipline,level:item.level,location:item.location,country:item.country,startDate:item.startDate,closingDate:item.closingDate},athlete:athleteSnapshot,cv_shared:cvConsent&&Boolean(cvUrl),cv_url:cvConsent&&cvUrl?cvUrl:null}});
+      // Only sporting fields are shared by default. Date of birth and the CV link are never included
+      // unless the athlete explicitly consents, and then only the CV link and self-reported CV sections are added.
+      const {date_of_birth:_dob,cv_url:_cv,...baseAthlete}=athleteSnapshot as Record<string,unknown>;
+      void _dob;void _cv;
+      let cvSections:Record<string,unknown>|null=null;
+      if(cvConsent&&cvUrl){
+        const [achievements,statistics,experience]=await Promise.all([
+          supabase.from("athlete_achievements").select("title,organisation_name,achievement_date,description").eq("athlete_id",userId).order("achievement_date",{ascending:false}).limit(25),
+          supabase.from("athlete_statistics").select("metric_name,metric_value,metric_unit,season,competition_name,evidence_url").eq("athlete_id",userId).order("created_at",{ascending:false}).limit(40),
+          supabase.from("athlete_experience").select("organisation_name,role_title,competition_level,start_date,end_date,is_current,description").eq("athlete_id",userId).order("start_date",{ascending:false}).limit(25)
+        ]);
+        cvSections={self_reported:true,achievements:achievements.data??[],statistics:statistics.data??[],experience:experience.data??[]};
+      }
+      const {error}=await supabase.from("opportunity_applications").insert({opportunity_id:item.id,athlete_id:userId,message:applyMessage.trim()||null,cv_consent:cvConsent,cv_consent_at:cvConsent&&cvUrl?new Date().toISOString():null,application_snapshot:{captured_at:new Date().toISOString(),opportunity:{id:item.id,title:item.title,sport:item.sport,discipline:item.discipline,level:item.level,location:item.location,country:item.country,startDate:item.startDate,closingDate:item.closingDate},athlete:baseAthlete,cv_profile:cvSections,cv_shared:cvConsent&&Boolean(cvUrl),cv_url:cvConsent&&cvUrl?cvUrl:null}});
       if(error)throw error;
       setFeedback({kind:"success",text:"Your application was submitted. You can track its status in your workspace."});
       setApplyMessage("");
@@ -121,6 +134,7 @@ export default function OpportunityDetailPage(){
   if(loading||!authChecked)return <section className="detail-page"><p className="loading-text">Loading opportunity…</p></section>;
   if(!item)return <section className="detail-page"><div className="empty-state"><h1>Opportunity not found</h1><p>This listing may have closed or is no longer available.</p><Link className="button button-dark" to="/opportunities"><ArrowLeft size={16}/> Back to opportunities</Link></div></section>;
 
+  const closed=!item.demo&&isClosed(item);
   return <section className="detail-page">
     <div className="detail-topbar"><Link to="/opportunities" className="back-link"><ArrowLeft size={16}/> All opportunities</Link><span>OPPORTUNITY DETAIL / {item.sport.toUpperCase()}</span></div>
     {item.demo&&<div className="demo-note detail-demo-note"><span className="note-symbol">i</span><p>This is an illustrative example, not a current opening. Do not submit personal information or treat it as verified.</p></div>}
@@ -145,8 +159,8 @@ export default function OpportunityDetailPage(){
         {item.demo?<button className="button button-dark button-full" type="button" disabled>Example only — applications closed</button>:<>
           {item.applicationUrl&&<a className="button button-lime button-full" href={item.applicationUrl} target="_blank" rel="noreferrer">Apply externally <ArrowUpRight size={16}/></a>}
           {item.applicationMethod!=="external"&&<><button className="button button-full save-opportunity-button" type="button" onClick={()=>void toggleSaved()} disabled={busy||!supabaseConfigured}><Heart size={15} fill={isSaved?"currentColor":"none"}/>{isSaved?"Saved to workspace":"Save opportunity"}</button>
-          {userId&&<form className="detail-apply-form" onSubmit={apply}><label>Application note <textarea value={applyMessage} onChange={e=>setApplyMessage(e.target.value)} maxLength={2000} rows={3} placeholder="Briefly explain your interest (optional)."/></label>{cvUrl&&<label className="detail-cv-consent"><input type="checkbox" checked={cvConsent} onChange={e=>setCvConsent(e.target.checked)}/><span><strong>Share my CV with this organisation.</strong> I consent to sharing the CV currently stored on my profile. A snapshot of this application is retained for recruiter review.</span></label>}{!cvUrl&&<p className="detail-cv-note">No CV is stored on your profile. You can apply without one, or upload it from your workspace first.</p>}<button className="button button-lime button-full" type="submit" disabled={busy||!supabaseConfigured}>{busy?"Please wait…":"Submit application"} <ArrowUpRight size={15}/></button></form>}
-          {!userId&&<Link className="button button-lime button-full" to={"/join?mode=login&next="+encodeURIComponent("/opportunities/"+item.id)}>Sign in to apply <ArrowUpRight size={16}/></Link>}</>}
+          {closed&&<div className="demo-note"><span className="note-symbol">i</span><p><strong>Applications closed.</strong> This listing's closing date has passed, so new applications are no longer accepted.</p></div>}{userId&&!closed&&<form className="detail-apply-form" onSubmit={apply}><label>Application note <textarea value={applyMessage} onChange={e=>setApplyMessage(e.target.value)} maxLength={2000} rows={3} placeholder="Briefly explain your interest (optional)."/></label>{cvUrl&&<label className="detail-cv-consent"><input type="checkbox" checked={cvConsent} onChange={e=>setCvConsent(e.target.checked)}/><span><strong>Share my CV with this organisation.</strong> I consent to sharing the CV currently stored on my profile. A snapshot of this application is retained for recruiter review.</span></label>}{!cvUrl&&<p className="detail-cv-note">No CV is stored on your profile. You can apply without one, or upload it from your workspace first.</p>}<button className="button button-lime button-full" type="submit" disabled={busy||!supabaseConfigured}>{busy?"Please wait…":"Submit application"} <ArrowUpRight size={15}/></button></form>}
+          {!userId&&!closed&&<Link className="button button-lime button-full" to={"/join?mode=login&next="+encodeURIComponent("/opportunities/"+item.id)}>Sign in to apply <ArrowUpRight size={16}/></Link>}</>}
         </>}
         {userId&&<SupportRequestButton opportunityId={item.id} opportunityTitle={item.title} userId={userId} isMinor={isMinor}/>}
         <p className="detail-safety">ChatSched Sport does not guarantee selection, contracts, sponsorship or representation. Applying is not a promise of acceptance.</p>{!item.demo&&<div className="detail-report-wrap"><ReportForm targetType="opportunity" targetId={item.id}/>{item.organisationId&&<ReportForm targetType="organisation" targetId={item.organisationId}/>}</div>}

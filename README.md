@@ -26,7 +26,7 @@ Build trusted infrastructure for sporting opportunity—not just a brochure or u
 - Transparent, deterministic opportunity-match explorer that explains which criteria contribute to each score.
 - Public About, How it Works, audience, privacy overview, platform principles and safeguarding information pages.
 - Automated unit tests for explainable match scoring and a CI workflow that runs tests, type-checks and builds.
-- Nine Supabase/PostgreSQL migrations for data, RLS, column-level grants, moderation, safety reports, career-support requests, directory views, messaging, notifications, Realtime and evidence-led organisation verification.
+- Ordered Supabase/PostgreSQL migrations in `supabase/migrations/` covering data, RLS, column-level grants, moderation, audit logging, messaging, notifications, Realtime, verification, matching, billing and compliance. Apply **all** of them, in filename order.
 - Cloudflare Pages SPA fallback and a GitHub Actions production build workflow.
 
 Some account and database-backed flows require the dedicated Sport Supabase project. The UI intentionally stays in preview mode without it. A source-code push is not proof that the database has been provisioned or the site deployed.
@@ -42,7 +42,7 @@ React 19 · TypeScript · Vite · Tailwind CSS · Lucide · Supabase Auth/Postgr
 3. Copy `.env.example` to `.env.local`.
 4. Create a **new, separate** Supabase project for ChatSched Sport.
 5. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in `.env.local`.
-6. Apply these migrations in order in the new Sport project's SQL editor: `supabase/migrations/202610220001_initial_sports_network.sql`, `supabase/migrations/202610220002_workspace_messaging_admin.sql`, then `supabase/migrations/202610220003_enable_sport_realtime.sql`, `supabase/migrations/202610220004_organisation_verification_evidence.sql`, `supabase/migrations/202610220005_athlete_directory_and_bookmarks_hardening.sql`, `supabase/migrations/202610220006_athlete_cv_statistics_experience.sql`, and `supabase/migrations/202610220007_public_profile_privacy_hardening.sql`, `supabase/migrations/202610220008_reverse_discovery_and_insights.sql`, and `supabase/migrations/202610220009_trust_integrity_and_workflow_notifications.sql`.
+6. Apply **every** file in `supabase/migrations/` in filename order (oldest first) in the new Sport project, using the Supabase CLI (`supabase db push`) or the SQL editor. Do not cherry-pick: later migrations depend on earlier ones. The migration list changes as the product grows, so this README deliberately does not hard-code a count.
 7. Run `npm run dev` for development, `npm run test` for unit tests, and `npm run build` for type-checking plus the production build.
 
 **Never use the existing ChatSched advertising database for Sport.** Only a browser-safe Supabase publishable/anon key belongs in Vite client environment variables; never put a service-role or secret key in the browser or commit real environment files.
@@ -60,7 +60,7 @@ Only do this for a trusted administrator. The private admin table is not exposed
 
 ## Cloudflare Pages
 
-Connect `ajorz1989/Chatsched-Sports` as a **separate** Cloudflare Pages project:
+Connect the Sport repository (`ajorz1989/Chatsched-Sports`; the product brief calls the working repository name `CHATSCHED-SPORT`, which is the same project) as a **separate** Cloudflare Pages project:
 - Build command: `npm run build`
 - Build output directory: `dist`
 - Environment variables: `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`
@@ -79,7 +79,7 @@ The built `public/_redirects` file provides the SPA fallback for client routes s
 - Signup asks the user to self-confirm they are 18+. This is a **client-side safeguard, not independent age verification or server-enforced age assurance**. Do not onboard minors until an appropriately safeguarded, guardian-assisted pathway and server-side eligibility controls have been designed and reviewed.
 - Never guarantee selection, contracts, scholarships, sponsorships or representation, and do not present sample data as actual opportunities.
 
-Before a public launch, apply and test all nine migrations in a non-production Sport Supabase project, verify every RLS/grant/trigger/view, configure Auth redirect URLs and email settings, add rate-limiting and abuse-reporting, review data retention and POPIA obligations, and complete security/safeguarding review. No live Sport database or Cloudflare deployment is provisioned by a GitHub commit alone.
+Before a public launch, apply and test every migration in a non-production Sport Supabase project, verify every RLS/grant/trigger/view, configure Auth redirect URLs and email settings, add rate-limiting and abuse-reporting, review data retention and POPIA obligations, and complete security/safeguarding review. No live Sport database or Cloudflare deployment is provisioned by a GitHub commit alone.
 
 ## Product roadmap after this foundation
 
