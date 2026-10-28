@@ -412,3 +412,39 @@ main:focus{outline:none}
 
 /* Hero third line: readable on navy */
 .hero-copy h1 span{color:#a9b8d6}
+
+/* ======================= Sports strip v2 ======================= */
+.sports-strip{display:grid;grid-template-columns:minmax(220px,300px) 1fr;gap:40px;align-items:center;padding:44px max(22px,calc((100vw - 1240px)/2));background:#fff;border-bottom:1px solid #dee4ed;overflow:visible}
+.sports-strip-head h2{margin:8px 0 8px;font:700 clamp(26px,3vw,36px)/1.05 var(--display);letter-spacing:-.03em;color:var(--ink)}
+.sports-strip-head h2 span{color:#d61f30}
+.sports-strip-head p{margin:0;font-size:14px;color:var(--muted);line-height:1.6}
+.sports-strip-kicker{font:600 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.sports-tiles{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:10px}
+.sport-tile{position:relative;display:flex;flex-direction:column;align-items:center;gap:10px;padding:18px 8px 14px;background:#f6f8fc;border:1px solid #dee4ed;border-radius:12px 12px 12px 3px;color:var(--ink);transition:transform .18s,background .18s,border-color .18s,box-shadow .18s}
+.sport-tile-icon{display:grid;place-items:center;width:52px;height:52px;border-radius:50%;background:#0a1f44;color:#fff;transition:background .18s,transform .18s}
+.sport-tile-name{font:700 13px Manrope,sans-serif;text-align:center}
+.sport-tile-arrow{position:absolute;top:9px;right:9px;color:var(--muted);opacity:0;transition:opacity .18s}
+.sport-tile:hover{background:#fff;border-color:#0a1f44;transform:translateY(-3px);box-shadow:0 14px 26px -16px rgba(10,31,68,.4)}
+.sport-tile:hover .sport-tile-icon{background:#ff4757;transform:scale(1.06)}
+.sport-tile:hover .sport-tile-arrow,.sport-tile:focus-visible .sport-tile-arrow{opacity:1}
+@media(max-width:1000px){.sports-strip{grid-template-columns:1fr;gap:20px;padding:36px 22px}}
+@media(max-width:760px){
+  .sports-tiles{display:flex;overflow-x:auto;gap:10px;margin:0 -22px;padding:4px 22px 10px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+  .sports-tiles li{flex:0 0 108px;scroll-snap-align:start}
+  .sports-strip{padding:32px 22px 24px}
+}
+.sports-strip .sports-tiles li{display:block;padding:0;border:0;border-radius:0;background:transparent;white-space:normal;font-size:inherit}
+.sports-strip .sport-tile-icon svg{color:#fff}
+.sports-strip .sport-tile:hover .sport-tile-icon svg{color:#fff}
+.sports-strip .sport-tile-arrow{color:var(--muted)}
+.sports-strip .sports-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:10px}
+.sport-tile{height:100%}
+@media(max-width:760px){.sports-strip .sports-tiles{display:flex}}
+/* Sports strip: nine tiles, no orphan row */
+.sports-strip .sports-tiles{grid-template-columns:repeat(9,minmax(0,1fr));gap:8px}
+.sport-tile{padding:16px 4px 12px}
+.sport-tile-name{font-size:12px}
+.sport-tile-icon{width:46px;height:46px}
+@media(max-width:1180px){.sports-strip{grid-template-columns:1fr;gap:20px;padding:36px 22px}}
+@media(max-width:899px) and (min-width:761px){.sports-strip .sports-tiles{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:760px){.sports-tiles li{flex-basis:96px}}
