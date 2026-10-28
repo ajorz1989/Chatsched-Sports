@@ -22,10 +22,11 @@ with check(exists(select 1 from public.organisations o where o.id=organisation_i
 grant select,insert,update,delete on public.recruiter_saved_searches to authenticated;
 
 -- A safer, richer reverse-match function. It returns reasons and keeps the ranking explainable.
+drop function if exists public.match_opportunity_athletes(uuid);
 create or replace function public.match_opportunity_athletes(target_opportunity uuid)
 returns table (
   athlete_id uuid, display_name text, avatar_url text, sport text, discipline text,
-  position text, playing_level text, location text, score integer, reasons jsonb,
+  "position" text, playing_level text, location text, score integer, reasons jsonb,
   age integer, availability text
 )
 language sql security invoker set search_path=public
