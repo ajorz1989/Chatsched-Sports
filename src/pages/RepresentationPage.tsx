@@ -16,7 +16,7 @@ export default function RepresentationPage(){
     <div className="eyebrow"><span className="status-dot"/> REPRESENT · GROW</div>
     <h1>Talent needs more<br/><span>than a listing.</span></h1>
     <p>ChatSched Sport is building the infrastructure around the sporting journey—from discovery to development, connection, career support and long-term growth.</p>
-    <div className="hero-actions"><Link className="button button-lime" to="/workspace">Request career support <ArrowRight size={17}/></Link><Link className="button button-light-outline" to="/matching">Explore matching <ArrowUpRight size={16}/></Link></div>
+    <div className="hero-actions"><Link className="button button-accent" to="/workspace">Request career support <ArrowRight size={17}/></Link><Link className="button button-light-outline" to="/matching">Explore matching <ArrowUpRight size={16}/></Link></div>
     <div className="hero-proof"><span><ShieldCheck size={16}/> Clear boundaries</span><span><Waypoints size={16}/> Structured pathway</span><span><Sparkles size={16}/> Opportunity-focused</span></div>
    </div>
    <div className="representation-signal"><div className="representation-ring ring-a"/><div className="representation-ring ring-b"/><div className="representation-core"><Trophy size={27}/><strong>SPORT</strong><small>CAREER SUPPORT</small></div><span className="rep-node node-a">PLAN</span><span className="rep-node node-b">CONNECT</span><span className="rep-node node-c">GROW</span></div>

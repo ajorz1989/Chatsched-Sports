@@ -448,3 +448,29 @@ main:focus{outline:none}
 @media(max-width:1180px){.sports-strip{grid-template-columns:1fr;gap:20px;padding:36px 22px}}
 @media(max-width:899px) and (min-width:761px){.sports-strip .sports-tiles{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:760px){.sports-tiles li{flex-basis:96px}}
+
+/* ======================= Semantic colours (separate from the brand red) ======================= */
+:root{
+  --success-bg:#e8f5ec;--success-fg:#14532d;--success-bd:#b5dcc2;
+  --warn-bg:#fff7e0;--warn-fg:#7a5600;--warn-bd:#f0dca0;
+  --error-bg:#fdecea;--error-fg:#9b1c1c;--error-bd:#f3c1be;
+  --info-bg:#e8eefb;--info-fg:#16336e;--info-bd:#c3d2f1;
+}
+.form-message-success,.notice-success,.report-success,.verification-success{background:var(--success-bg)!important;color:var(--success-fg)!important;border-color:var(--success-bd)!important}
+.form-message-error,.notice-error{background:var(--error-bg)!important;color:var(--error-fg)!important;border-color:var(--error-bd)!important}
+.notice-info,.form-message-info{background:var(--info-bg)!important;color:var(--info-fg)!important;border-color:var(--info-bd)!important}
+.status-verified,.status-accepted,.status-published{background:var(--success-bg)!important;color:var(--success-fg)!important}
+.status-draft{background:var(--warn-bg);color:var(--warn-fg)}
+.match-check-met svg,.match-check-met em,.hp-checks .ok svg{color:#15803d}
+.match-check-unmet svg,.match-check-unmet em,.hp-checks .no svg{color:#b91c1c}
+.match-check-missing svg,.match-check-missing em,.hp-checks .miss svg{color:#92600a}
+.match-score.match-strength-strong strong{color:#15803d}
+.vbadge-verified{background:var(--success-bg);color:var(--success-fg);border-color:var(--success-bd)}
+.closing-tag{background:#b45309}
+.workspace-notice button:hover{background:rgba(0,0,0,.06);color:inherit}
+.admin-approve{background:var(--success-bg);color:var(--success-fg)}
+
+/* Readable form text: normal-weight placeholders, calmer labels */
+::placeholder{font-weight:400}
+.form-label,.join-form label{font-weight:700}
+.form-label>input,.form-label>select,.join-form input,.join-form select{font-weight:500}

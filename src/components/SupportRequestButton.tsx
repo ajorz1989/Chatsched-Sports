@@ -24,6 +24,6 @@ export default function SupportRequestButton({opportunityId,opportunityTitle,use
  <label className="cv-check"><input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)}/><span>I consent to ChatSched Sport contacting me about this request.</span></label>
  {isMinor&&<label className="cv-check"><input type="checkbox" checked={guardianConsent} onChange={e=>setGuardianConsent(e.target.checked)}/><span>I confirm that a parent/legal guardian has given consent for this support request.</span></label>}
  {message&&<div className="workspace-notice notice-info">{message}</div>}
- <div className="workspace-modal-actions"><button type="button" className="button button-light-outline" onClick={()=>setOpen(false)}>Cancel</button><button type="button" className="button button-lime" disabled={busy} onClick={()=>void submit()}>{busy?"Sending…":"Send support request"}</button></div>
+ <div className="workspace-modal-actions"><button type="button" className="button button-light-outline" onClick={()=>setOpen(false)}>Cancel</button><button type="button" className="button button-accent" disabled={busy} onClick={()=>void submit()}>{busy?"Sending…":"Send support request"}</button></div>
  </div></div>}</>;
 }
