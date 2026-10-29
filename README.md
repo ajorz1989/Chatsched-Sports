@@ -96,3 +96,12 @@ Before a public launch, apply and test every migration in a non-production Sport
 **INSPECT → PLAN → IMPLEMENT → TEST → AUDIT → COMMIT → PUSH**
 
 A successful GitHub push is not a successful build. A successful build is not a deployed website. Verify each state separately and report it honestly.
+
+## Cloudflare deployment (Workers with static assets)
+
+- Build command: `npm run build`. Deploy command: `npx wrangler deploy` (configured by `wrangler.jsonc`).
+- SPA fallback is handled by `assets.not_found_handling = single-page-application`. Do **not** add a `_redirects` catch-all (`/* /index.html 200`): Workers rejects it as an infinite loop.
+- `worker/index.ts` serves `/sitemap.xml` and `/robots.txt` dynamically and passes everything else to the assets.
+- `public/_headers` (CSP and security headers) is applied to static assets.
+- Variables: set the `VITE_SUPABASE_*` values as **build** variables (baked into the bundle) and also as **runtime** variables (Settings → Variables and Secrets) so the sitemap can read opportunity ids. Never add the service-role key here.
+- `functions/` and `public/_routes.json` are kept so the same code still works if the site is moved to Cloudflare Pages.
