@@ -2,8 +2,8 @@
 // Static files and the SPA fallback are served by the `assets` binding (see wrangler.jsonc).
 // Only /sitemap.xml and /robots.txt run this Worker first; everything else goes straight to assets.
 // The handlers are shared with functions/ so the same code also works if the site is moved to Pages.
-import { onRequestGet as sitemap } from "../functions/sitemap.xml";
-import { onRequestGet as robots } from "../functions/robots.txt";
+import { onRequestGet as sitemap } from "../functions/sitemap.xml.ts";
+import { onRequestGet as robots } from "../functions/robots.txt.ts";
 
 interface Env {
   ASSETS: { fetch(request: Request): Promise<Response> };
