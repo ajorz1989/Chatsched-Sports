@@ -83,10 +83,12 @@ export default function AdvancedWorkspacePanels({userId,accountType}:Props){
  }
  async function withdrawLatest(){
    if(!supabase||!userId)return;
-   const {data}=await supabase.from("opportunity_applications").select("id").eq("athlete_id",userId).not("status","eq","withdrawn").order("created_at",{ascending:false}).limit(1).maybeSingle();
-   if(!data){setNotice("No active application found.");return;}
-   const {error}=await supabase.from("opportunity_applications").update({status:"withdrawn",updated_at:new Date().toISOString()}).eq("id",data.id).eq("athlete_id",userId);
-   if(error)setNotice(error.message);else{setWithdrawn(true);setNotice("Application withdrawn.");}
+   const {data}=await supabase.from("opportunity_applications").select("id").eq("athlete_id",userId).in("status",["submitted","reviewing","shortlisted"]).order("created_at",{ascending:false}).limit(1).maybeSingle();
+   if(!data){setNotice("No open application to withdraw.");return;}
+   const {data:changed,error}=await supabase.from("opportunity_applications").update({status:"withdrawn",updated_at:new Date().toISOString()}).eq("id",data.id).eq("athlete_id",userId).select("id");
+   if(error)setNotice(error.message);
+   else if(!changed?.length)setNotice("The application could not be withdrawn. Please refresh and try again.");
+   else{setWithdrawn(true);setNotice("Application withdrawn.");}
  }
  async function loadMatches(id:string){if(!supabase||!id)return;const {data,error}=await supabase.rpc("match_opportunity_athletes",{target_opportunity:id});if(error)setNotice(error.message);else setMatches((data??[]) as any[]);setMatchesFor(id);}
  if(!userId||!supabaseConfigured||!supabase)return null;

@@ -45,7 +45,7 @@ export const onRequestGet = async ({ request, env }: SportSitemapContext): Promi
     try {
       const [opportunities, organisations, athletes] = await Promise.all([
         readPublicIds(baseUrl, apiKey, "opportunities",
-          "select=id&status=eq.published&verification_status=eq.verified&order=created_at.desc&limit=500"),
+          "select=id&status=eq.published&verification_status=eq.verified&or=(closing_date.is.null,closing_date.gte." + new Date().toISOString().slice(0, 10) + ")&order=created_at.desc&limit=500"),
         readPublicIds(baseUrl, apiKey, "organisations",
           "select=id&verification_status=eq.verified&order=created_at.desc&limit=500"),
         readPublicIds(baseUrl, apiKey, "athlete_directory", "select=id&limit=500")
