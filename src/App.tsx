@@ -21,6 +21,13 @@ import TalentSearchPage from "./pages/TalentSearchPage";
 import OrganisationInsightsPage from "./pages/OrganisationInsightsPage";
 import RepresentationPage from "./pages/RepresentationPage";
 import RecruiterHubPage from "./pages/RecruiterHubPage";
+import HelpPage from "./pages/HelpPage";
+import ContactPage from "./pages/ContactPage";
+import CookiesPage from "./pages/CookiesPage";
+import VerificationPage from "./pages/VerificationPage";
+import ReportConcernPage from "./pages/ReportConcernPage";
+import DataRequestPage from "./pages/DataRequestPage";
+import StatusPage from "./pages/StatusPage";
 
 export default function App() {
   return (
@@ -41,6 +48,13 @@ export default function App() {
           <Route path="/safeguarding" element={<AudiencePage />} />
           <Route path="/privacy" element={<AudiencePage />} />
           <Route path="/terms" element={<AudiencePage />} />
+          <Route path="/help" element={<HelpPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/cookies" element={<CookiesPage />} />
+          <Route path="/verification" element={<VerificationPage />} />
+          <Route path="/report" element={<ReportConcernPage />} />
+          <Route path="/data-request" element={<DataRequestPage />} />
+          <Route path="/status" element={<StatusPage />} />
           <Route path="/workspace" element={<WorkspacePage />} />
           <Route path="/talent" element={<TalentDirectoryPage />} />
           <Route path="/organisations" element={<OrganisationsPage />} />

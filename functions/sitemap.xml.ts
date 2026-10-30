@@ -11,7 +11,8 @@ interface SportSitemapContext { request: Request; env: SportSitemapEnv; }
 const staticPaths = [
   "/", "/opportunities", "/talent", "/organisations", "/matching",
   "/about", "/how-it-works", "/for-athletes", "/for-organisations",
-  "/for-partners", "/safeguarding", "/privacy", "/terms"
+  "/for-partners", "/safeguarding", "/privacy", "/terms",
+  "/help", "/contact", "/cookies", "/verification", "/report", "/data-request"
 ];
 
 function escapeXml(value: string): string {

@@ -105,3 +105,12 @@ A successful GitHub push is not a successful build. A successful build is not a 
 - `public/_headers` (CSP and security headers) is applied to static assets.
 - Variables: set the `VITE_SUPABASE_*` values as **build** variables (baked into the bundle) and also as **runtime** variables (Settings → Variables and Secrets) so the sitemap can read opportunity ids. Never add the service-role key here.
 - `functions/` and `public/_routes.json` are kept so the same code still works if the site is moved to Cloudflare Pages.
+
+## Support, trust and compliance pages
+
+Public routes: `/help` (FAQ with search and FAQPage structured data), `/contact`, `/cookies`, `/verification`, `/report`, `/data-request`, `/status`. The 404 page offers search and popular links.
+
+- Messages from `/contact`, `/report` and `/data-request` are stored in `contact_messages` through the `submit_contact_message()` function only. Anonymous visitors have no direct table access. The function validates input, applies rate limits (3 per email per hour), ignores honeypot submissions, and sets the priority itself (safeguarding is urgent; concerns and data requests are high).
+- Administrators triage the queue from **Admin → Inbox**.
+- Cookie choices are stored by `src/lib/consent.ts`. Nothing optional runs until `analyticsAllowed()` is true. No analytics provider is wired up yet.
+- Before launch: confirm who monitors the inbox and the response times you will commit to, and have the privacy, cookie and POPIA wording reviewed by a qualified professional.
