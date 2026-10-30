@@ -1,0 +1,9 @@
+import {CheckCircle2,Lock,Search,Sparkles,UserCheck} from "lucide-react";
+import VerificationBadge from "./VerificationBadge";
+/** Useful hero side panel that replaces a decorative index. Weights mirror lib/matching.ts. */
+export default function HeroAside({kind}:{kind:"opportunities"|"organisations"|"matching"|"talent"|"journey"}){
+ if(kind==="opportunities"||kind==="organisations")return <aside className="hero-aside" aria-label="What the labels mean"><h2>What the labels mean</h2><ul><li><VerificationBadge level="verified" compact/><span>Passed our review</span></li><li><VerificationBadge level="pending" compact/><span>Evidence under review</span></li><li><VerificationBadge level="example" compact/><span>Illustrative sample only</span></li></ul><p>We never imply official affiliation without confirmation.</p></aside>;
+ if(kind==="matching")return <aside className="hero-aside" aria-label="How scoring works"><h2>How the score works</h2><ul className="hero-aside-weights"><li><span>Sport</span><b>40</b></li><li><span>Position</span><b>20</b></li><li><span>Location</span><b>15</b></li><li><span>Level</span><b>15</b></li><li><span>Goal type</span><b>10</b></li></ul><p>Points out of 100. Missing details are flagged, never guessed.</p></aside>;
+ if(kind==="talent")return <aside className="hero-aside" aria-label="Privacy promise"><h2>Privacy first</h2><ul><li><Lock size={15}/><span>Only opted-in profiles appear</span></li><li><UserCheck size={15}/><span>Athletes choose what is public</span></li><li><Lock size={15}/><span>Contact details stay private</span></li></ul></aside>;
+ return <aside className="hero-aside" aria-label="The journey"><h2>The journey</h2><ul><li><Search size={15}/><span>Discover opportunities</span></li><li><Sparkles size={15}/><span>See why they fit</span></li><li><CheckCircle2 size={15}/><span>Apply and track progress</span></li></ul></aside>;
+}
