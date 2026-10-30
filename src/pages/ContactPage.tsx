@@ -6,7 +6,7 @@ import "../styles-support.css";
 export default function ContactPage(){
  return <section className="sx-page">
   <header className="sx-hero">
-   <span className="sx-icon"><Mail size={26} aria-hidden="true"/></span>
+   <span className="sx-icon"><Mail size={24} aria-hidden="true"/></span>
    <p className="section-kicker">CONTACT</p>
    <h1>Talk to the ChatSched Sport team.</h1>
    <p className="sx-lead">Questions, partnership ideas or something that is not working. We read every message.</p>

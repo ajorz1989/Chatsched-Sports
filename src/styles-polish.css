@@ -403,7 +403,7 @@ main:focus{outline:none}
 @media(max-width:760px){
   .path-cards{grid-template-columns:1fr}
   .section-pad{padding:48px 22px}
-  .pathway-timeline{display:flex!important;overflow-x:auto;gap:12px;scroll-snap-type:x mandatory;margin-right:-22px;padding-right:22px;padding-bottom:6px}
+  body .pathway-timeline{display:flex;overflow-x:auto;gap:12px;scroll-snap-type:x mandatory;margin-right:-22px;padding-right:22px;padding-bottom:6px}
   .pathway-timeline .pathway-card{flex:0 0 78%;scroll-snap-align:start}
   .hero-preview-wrap{min-height:0;margin:14px 0 0}
   .trust-levels li{flex-direction:column;align-items:flex-start;gap:8px}
@@ -456,10 +456,10 @@ main:focus{outline:none}
   --error-bg:#fdecea;--error-fg:#9b1c1c;--error-bd:#f3c1be;
   --info-bg:#e8eefb;--info-fg:#16336e;--info-bd:#c3d2f1;
 }
-.form-message-success,.notice-success,.report-success,.verification-success{background:var(--success-bg)!important;color:var(--success-fg)!important;border-color:var(--success-bd)!important}
-.form-message-error,.notice-error{background:var(--error-bg)!important;color:var(--error-fg)!important;border-color:var(--error-bd)!important}
-.notice-info,.form-message-info{background:var(--info-bg)!important;color:var(--info-fg)!important;border-color:var(--info-bd)!important}
-.status-verified,.status-accepted,.status-published{background:var(--success-bg)!important;color:var(--success-fg)!important}
+body .form-message-success,body .notice-success,body .report-success,body .verification-success{background:var(--success-bg);color:var(--success-fg);border-color:var(--success-bd)}
+body .form-message-error,body .notice-error{background:var(--error-bg);color:var(--error-fg);border-color:var(--error-bd)}
+body .notice-info,body .form-message-info{background:var(--info-bg);color:var(--info-fg);border-color:var(--info-bd)}
+body .status-verified,body .status-accepted,body .status-published{background:var(--success-bg);color:var(--success-fg)}
 .status-draft{background:var(--warn-bg);color:var(--warn-fg)}
 .match-check-met svg,.match-check-met em,.hp-checks .ok svg{color:#15803d}
 .match-check-unmet svg,.match-check-unmet em,.hp-checks .no svg{color:#b91c1c}
@@ -539,3 +539,44 @@ main:focus{outline:none}
 .empty-preview>span:nth-child(2){display:grid}
 .empty-preview b{font-size:14px}
 .empty-preview small{font-size:12px;color:var(--muted)}
+
+/* ---- Route loading (code-split fallback) ---- */
+.route-loading{min-height:60vh;position:relative}
+.route-loading-bar{position:fixed;top:0;left:0;height:3px;width:40%;background:var(--lime,#ff4757);animation:route-bar 1s ease-in-out infinite}
+@keyframes route-bar{0%{transform:translateX(-100%)}100%{transform:translateX(260%)}}
+@media (prefers-reduced-motion:reduce){.route-loading-bar{animation:none;width:100%;opacity:.5}}
+
+/* ---- Button system: four roles ----
+   Primary   .button-accent  (red)       main action, one per view
+   Secondary .button-dark    (navy)      supporting action
+   Outline   .button-light-outline (on dark) / -outline-dark / -workspace (on light)
+   Quiet     .button-quiet   (text link) low-emphasis, e.g. "View all"
+   Icon scale: 16 inline, 20 card, 24 feature. */
+body .button{border-radius:6px;letter-spacing:.02em;transition:transform .18s,background-color .18s,border-color .18s,color .18s}
+body .button svg{flex-shrink:0}
+body .button-accent{background:var(--lime);border-color:var(--lime);color:var(--ink)}
+body .button-accent:hover{background:#e63a49;border-color:#e63a49;color:#fff}
+body .button-dark{background:var(--ink);border-color:var(--ink);color:#fff}
+body .button-dark:hover{background:#16315f;border-color:#16315f}
+body .button-light-outline,body .button-light-outline-dark,body .button-light-workspace{background:transparent;border:1px solid currentColor}
+body .button-light-outline{color:#fff;border-color:rgba(255,255,255,.55)}
+body .button-light-outline:hover{border-color:var(--lime);color:#fff;background:rgba(255,71,87,.12)}
+body .button-light-outline-dark,body .button-light-workspace{color:var(--ink);border-color:#b9c4d9}
+body .button-light-outline-dark:hover,body .button-light-workspace:hover{border-color:var(--lime);background:#fff2f3;color:var(--ink)}
+body .button-quiet{background:transparent;border-color:transparent;color:var(--ink);padding:0 4px;min-height:40px;text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--lime);text-decoration-thickness:2px}
+body .button-quiet:hover{transform:none;color:#e63a49}
+body .button:disabled,body .button[aria-disabled=true]{opacity:.55;transform:none}
+.icon-sm{width:16px;height:16px}.icon-md{width:20px;height:20px}.icon-lg{width:24px;height:24px}
+
+/* ---- Account menu + footer legal row ---- */
+.account-menu{position:relative}
+button.header-avatar{border:0;cursor:pointer}
+.account-menu-panel{position:absolute;right:0;top:calc(100% + 10px);min-width:200px;background:#fff;border:1px solid #d9e0ec;border-radius:10px;box-shadow:0 14px 34px rgba(10,31,68,.18);padding:6px;z-index:60;display:grid}
+.account-menu-panel a,.account-menu-panel button{display:flex;align-items:center;min-height:44px;padding:0 12px;border:0;background:transparent;border-radius:6px;font:600 14px var(--display);color:var(--ink);text-align:left;cursor:pointer}
+.account-menu-panel a:hover,.account-menu-panel button:hover{background:#f6f8fc;color:#e63a49}
+.account-menu-panel button{border-top:1px solid #eef1f7;margin-top:4px;border-radius:0 0 6px 6px}
+.footer-bottom{display:flex;flex-wrap:wrap;gap:8px 22px}
+.footer-legal{flex-basis:100%;display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;padding-top:14px;margin-top:6px;border-top:1px solid rgba(255,255,255,.12)}
+.footer-legal strong{font:700 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#aab6cc}
+.footer-legal a{color:#aab6cc;font-size:12px;display:inline-flex;gap:4px;align-items:center}
+.footer-legal a:hover{color:#fff}

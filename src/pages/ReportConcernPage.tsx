@@ -6,7 +6,7 @@ import "../styles-support.css";
 export default function ReportConcernPage(){
  return <section className="sx-page">
   <header className="sx-hero">
-   <span className="sx-icon sx-icon-alert"><AlertTriangle size={26} aria-hidden="true"/></span>
+   <span className="sx-icon sx-icon-alert"><AlertTriangle size={24} aria-hidden="true"/></span>
    <p className="section-kicker">REPORT A CONCERN</p>
    <h1>Tell us about something that does not feel right.</h1>
    <p className="sx-lead">Fake listings, requests for money, impersonation, harassment, privacy problems or a safeguarding worry. Reports go privately to our moderators.</p>
