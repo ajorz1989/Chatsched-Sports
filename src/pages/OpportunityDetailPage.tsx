@@ -1,7 +1,8 @@
 import {useEffect,useState,type FormEvent} from "react";
-import {ArrowLeft,ArrowUpRight,CalendarDays,CheckCircle2,Heart,MapPin,ShieldCheck,Trophy} from "lucide-react";
+import {ArrowLeft,ArrowUpRight,CalendarDays,CheckCircle2,Heart,MapPin,Share2,ShieldCheck,Sparkles,Trophy} from "lucide-react";
 import {Link,useNavigate,useParams} from "react-router-dom";
-import {isClosed,loadOpportunityById} from "../lib/opportunities";
+import {isClosed,loadOpportunityById,loadOpportunityFeed} from "../lib/opportunities";
+import OpportunityCard from "../components/OpportunityCard";
 import ReportForm from "../components/ReportForm";
 import SupportRequestButton from "../components/SupportRequestButton";
 import VerificationBadge,{levelFromStatus} from "../components/VerificationBadge";
@@ -29,8 +30,23 @@ export default function OpportunityDetailPage(){
   const [isMinor,setIsMinor]=useState(false);
   const [athleteSnapshot,setAthleteSnapshot]=useState<Record<string,unknown>>({});
   const [busy,setBusy]=useState(false);
+  const [related,setRelated]=useState<Opportunity[]>([]);
+  const [shared,setShared]=useState("");
   const [feedback,setFeedback]=useState<{kind:"success"|"error"|"info";text:string}|null>(null);
 
+  useEffect(()=>{
+    if(!item)return;let alive=true;
+    void loadOpportunityFeed().then(feed=>{if(!alive)return;setRelated(feed.opportunities.filter(x=>x.id!==item.id&&x.sport===item.sport&&x.demo===item.demo).slice(0,3));}).catch(()=>{});
+    return()=>{alive=false;};
+  },[item]);
+  async function share(){
+    if(!item)return;const url=window.location.href;
+    try{
+      if(navigator.share){await navigator.share({title:item.title,url});return;}
+      if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(url);setShared("Link copied");window.setTimeout(()=>setShared(""),2200);return;}
+    }catch{/* user cancelled or clipboard blocked */}
+    window.prompt("Copy this link",url);
+  }
   useEffect(()=>{
     let alive=true;
     loadOpportunityById(opportunityId).then(result=>{if(!alive)return;setItem(result);setLoading(false);})
@@ -135,6 +151,7 @@ export default function OpportunityDetailPage(){
   if(!item)return <section className="detail-page"><div className="empty-state"><h1>Opportunity not found</h1><p>This listing may have closed or is no longer available.</p><Link className="button button-dark" to="/opportunities"><ArrowLeft size={16}/> Back to opportunities</Link></div></section>;
 
   const closed=!item.demo&&isClosed(item);
+  const daysLeft=(()=>{if(!item.closingDate)return null;const end=new Date(item.closingDate+"T23:59:59");if(Number.isNaN(end.getTime()))return null;return Math.floor((end.getTime()-Date.now())/86400000);})();
   return <section className="detail-page">
     <div className="detail-topbar"><Link to="/opportunities" className="back-link"><ArrowLeft size={16}/> All opportunities</Link><span>OPPORTUNITY DETAIL / {item.sport.toUpperCase()}</span></div>
     {item.demo&&<div className="demo-note detail-demo-note"><span className="note-symbol">i</span><p>This is an illustrative example, not a current opening. Do not submit personal information or treat it as verified.</p></div>}
@@ -154,7 +171,7 @@ export default function OpportunityDetailPage(){
         <div className="detail-side-row"><span>Sport</span><strong>{item.sport}</strong></div>
         <div className="detail-side-row"><span>Location</span><strong>{item.location}</strong></div>
         <div className="detail-side-row"><span>Opportunity type</span><strong>{item.type.charAt(0).toUpperCase()+item.type.slice(1)}</strong></div>
-        <div className="detail-side-row"><span>Closing date</span><strong><CalendarDays size={14}/>{formatDate(item.closingDate)}</strong></div>{item.startDate&&<div className="detail-side-row"><span>Start date</span><strong><CalendarDays size={14}/>{formatDate(item.startDate)}</strong></div>}{(item.minimumAge!==null&&item.minimumAge!==undefined)||(item.maximumAge!==null&&item.maximumAge!==undefined)&&<div className="detail-side-row"><span>Age eligibility</span><strong>{item.minimumAge??"Any"}–{item.maximumAge??"Any"}</strong></div>}{item.numberOfPlaces&&<div className="detail-side-row"><span>Places</span><strong>{item.numberOfPlaces}</strong></div>}{item.applicationMethod&&<div className="detail-side-row"><span>Application method</span><strong>{item.applicationMethod}</strong></div>}
+        {daysLeft!==null&&daysLeft>=0&&!closed&&<div className="detail-countdown"><CalendarDays size={14}/>{daysLeft===0?"Closes today":daysLeft===1?"Closes tomorrow":"Closes in "+daysLeft+" days"}</div>}<div className="detail-side-row"><span>Closing date</span><strong><CalendarDays size={14}/>{formatDate(item.closingDate)}</strong></div>{item.startDate&&<div className="detail-side-row"><span>Start date</span><strong><CalendarDays size={14}/>{formatDate(item.startDate)}</strong></div>}{(item.minimumAge!==null&&item.minimumAge!==undefined)||(item.maximumAge!==null&&item.maximumAge!==undefined)&&<div className="detail-side-row"><span>Age eligibility</span><strong>{item.minimumAge??"Any"}–{item.maximumAge??"Any"}</strong></div>}{item.numberOfPlaces&&<div className="detail-side-row"><span>Places</span><strong>{item.numberOfPlaces}</strong></div>}{item.applicationMethod&&<div className="detail-side-row"><span>Application method</span><strong>{item.applicationMethod}</strong></div>}
         {item.compensationType&&<div className="detail-side-row"><span>Compensation / costs</span><strong>{item.compensationType.replaceAll("_"," ")}</strong></div>}
         {item.demo?<button className="button button-dark button-full" type="button" disabled>Example only — applications closed</button>:<>
           {item.applicationUrl&&<a className="button button-accent button-full" href={item.applicationUrl} target="_blank" rel="noreferrer">Apply externally <ArrowUpRight size={16}/></a>}
@@ -163,10 +180,12 @@ export default function OpportunityDetailPage(){
           {!userId&&!closed&&<Link className="button button-accent button-full" to={"/join?mode=login&next="+encodeURIComponent("/opportunities/"+item.id)}>Sign in to apply <ArrowUpRight size={16}/></Link>}</>}
         </>}
         {userId&&<SupportRequestButton opportunityId={item.id} opportunityTitle={item.title} userId={userId} isMinor={isMinor}/>}
+        <div className="detail-extra-actions"><button type="button" className="button button-light-outline-dark" onClick={()=>void share()}><Share2 size={15}/> {shared||"Share listing"}</button><Link className="button button-light-outline-dark" to="/matching"><Sparkles size={15}/> See how you match</Link></div>
         <p className="detail-safety">ChatSched Sport does not guarantee selection, contracts, sponsorship or representation. Applying is not a promise of acceptance.</p>{!item.demo&&<div className="detail-report-wrap"><ReportForm targetType="opportunity" targetId={item.id}/>{item.organisationId&&<ReportForm targetType="organisation" targetId={item.organisationId}/>}</div>}
         {userId&&<Link className="detail-workspace-link" to="/workspace">View your workspace <ArrowUpRight size={14}/></Link>}
       </aside>
     </div>
+    {related.length>0&&<section className="detail-related"><div className="section-kicker">More {item.sport} opportunities</div><div className="opportunity-grid">{related.map(x=><OpportunityCard key={x.id} opportunity={x}/>)}</div></section>}
     {!item.demo&&<div className="apply-bar"><div><small>Closes</small><strong>{formatDate(item.closingDate)}</strong></div><a className="button button-accent" href="#detail-apply">{userId?"Apply or save":"Sign in to apply"} <ArrowUpRight size={15}/></a></div>}
   </section>;
 }
