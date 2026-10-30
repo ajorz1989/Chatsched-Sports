@@ -1,7 +1,7 @@
-import {useEffect,useMemo,useState} from "react";
+import {useCallback,useEffect,useMemo,useState} from "react";
 import {ArrowUpRight,Bookmark,LoaderCircle,MapPin,Search,ShieldCheck,Star,Trophy,Users} from "lucide-react";
 import {Link} from "react-router-dom";
-import {supabase,supabaseConfigured} from "../lib/supabase";
+import {supabase,supabaseConfigured} from "../lib/supabase";import {loadSportNames,sanitiseSearchTerm} from "../lib/opportunities";
 import "../styles-workspace.css";
 
 type Org={id:string;name:string;verification_status:string;organisation_type:string;location:string|null;country:string};
@@ -13,6 +13,7 @@ const allowedRoles=["club","academy","scout","coach","brand","sponsor","agent","
 export default function TalentSearchPage(){
  const [userId,setUserId]=useState("");const [checked,setChecked]=useState(false);const [loading,setLoading]=useState(true);const [orgs,setOrgs]=useState<Org[]>([]);const [selectedOrg,setSelectedOrg]=useState("");const [items,setItems]=useState<Athlete[]>([]);const [shortlists,setShortlists]=useState<Shortlist[]>([]);
  const [query,setQuery]=useState("");const [sport,setSport]=useState("all");const [level,setLevel]=useState("all");const [notice,setNotice]=useState("");const [busyId,setBusyId]=useState("");
+ const PAGE_SIZE=30;const [debounced,setDebounced]=useState("");const [page,setPage]=useState(0);const [total,setTotal]=useState(0);const [loadingMore,setLoadingMore]=useState(false);const [sportNames,setSportNames]=useState<string[]>([]);const [levelNames,setLevelNames]=useState<string[]>([]);
 
  useEffect(()=>{let alive=true;(async()=>{
   if(!supabaseConfigured||!supabase){setChecked(true);setLoading(false);return;}
@@ -26,15 +27,26 @@ export default function TalentSearchPage(){
   }catch(error){if(alive)setNotice(error instanceof Error?error.message:"Verified organisation access could not be confirmed.");setChecked(true);}finally{if(alive)setLoading(false);}
  })();return()=>{alive=false;};},[]);
 
- useEffect(()=>{let alive=true;if(!selectedOrg||!supabase)return;
- (async()=>{const [a,s]=await Promise.all([
-   supabase.from("athlete_directory").select("id,display_name,avatar_url,location,country,sport,discipline,position,playing_level,availability,career_goals").order("display_name").limit(250),
-   supabase.from("talent_shortlists").select("id,organisation_id,athlete_id,note").eq("organisation_id",selectedOrg)
- ]);if(!alive)return;if(a.error){setNotice(a.error.message);return;}if(s.error){setNotice(s.error.message);return;}setItems((a.data??[]) as Athlete[]);setShortlists((s.data??[]) as Shortlist[]);})();return()=>{alive=false;};},[selectedOrg]);
-
- const sports=useMemo(()=>Array.from(new Set(items.map(x=>x.sport).filter((x):x is string=>Boolean(x)))).sort(),[items]);
- const levels=useMemo(()=>Array.from(new Set(items.map(x=>x.playing_level).filter((x):x is string=>Boolean(x)))).sort(),[items]);
- const filtered=useMemo(()=>{const q=query.trim().toLowerCase();return items.filter(item=>(sport==="all"||item.sport===sport)&&(level==="all"||item.playing_level===level)&&(!q||[item.display_name,item.sport??"",item.discipline??"",item.position??"",item.location??"",item.country??"",item.playing_level??"",item.career_goals??""].some(v=>v.toLowerCase().includes(q))));},[items,query,sport,level]);
+ const fetchPage=useCallback(async(pageNumber:number)=>{
+  if(!supabase)throw new Error("Not connected");
+  let request=supabase.from("athlete_directory").select("id,display_name,avatar_url,location,country,sport,discipline,position,playing_level,availability,career_goals",{count:"exact"});
+  if(sport!=="all")request=request.eq("sport",sport);
+  if(level!=="all")request=request.eq("playing_level",level);
+  const term=sanitiseSearchTerm(debounced);
+  if(term){const pattern="*"+term.replace(/ /g,"*")+"*";request=request.or(["display_name","sport","discipline","position","location","country","playing_level","career_goals"].map(column=>column+".ilike."+pattern).join(","));}
+  const from=pageNumber*PAGE_SIZE;
+  const {data,error,count}=await request.order("display_name",{ascending:true}).order("id",{ascending:true}).range(from,from+PAGE_SIZE-1);
+  if(error)throw error;
+  return{rows:(data??[]) as unknown as Athlete[],count:count??0};
+ },[debounced,sport,level]);
+ useEffect(()=>{const timer=window.setTimeout(()=>setDebounced(query),300);return()=>window.clearTimeout(timer);},[query]);
+ useEffect(()=>{let alive=true;void loadSportNames().then(names=>{if(alive)setSportNames(names);});return()=>{alive=false;};},[]);
+ useEffect(()=>{let alive=true;if(!selectedOrg||!supabase)return;const client=supabase;
+ (async()=>{try{const [result,s]=await Promise.all([fetchPage(0),client.from("talent_shortlists").select("id,organisation_id,athlete_id,note").eq("organisation_id",selectedOrg)]);if(!alive)return;if(s.error){setNotice(s.error.message);return;}setItems(result.rows);setTotal(result.count);setPage(0);setShortlists((s.data??[]) as Shortlist[]);setLevelNames(current=>Array.from(new Set([...current,...result.rows.map(row=>row.playing_level).filter((row):row is string=>Boolean(row))])).sort());}catch(error){if(alive)setNotice(error&&typeof error==="object"&&"message" in error?String((error as {message:unknown}).message):"Talent could not be loaded.");}})();return()=>{alive=false;};},[selectedOrg,fetchPage]);
+ async function loadMore(){if(loadingMore)return;setLoadingMore(true);try{const next=page+1;const result=await fetchPage(next);setItems(current=>{const seen=new Set(current.map(item=>item.id));return[...current,...result.rows.filter(item=>!seen.has(item.id))];});setPage(next);setTotal(result.count);setLevelNames(current=>Array.from(new Set([...current,...result.rows.map(row=>row.playing_level).filter((row):row is string=>Boolean(row))])).sort());}catch(error){setNotice(error&&typeof error==="object"&&"message" in error?String((error as {message:unknown}).message):"More talent could not be loaded.");}finally{setLoadingMore(false);}}
+ const sports=useMemo(()=>{const names=new Set<string>(sportNames);if(sport!=="all")names.add(sport);return Array.from(names).sort();},[sportNames,sport]);
+ const levels=useMemo(()=>{const names=new Set<string>(levelNames);if(level!=="all")names.add(level);return Array.from(names).sort();},[levelNames,level]);
+ const filtered=items;const hasMore=items.length<total;
  const currentOrg=orgs.find(x=>x.id===selectedOrg);const shortlistIds=new Set(shortlists.map(x=>x.athlete_id));
 
  async function toggleShortlist(athlete:Athlete){
@@ -59,8 +71,9 @@ export default function TalentSearchPage(){
   <div className="workspace-hero"><div><div className="workspace-kicker"><span className="status-dot"/> VERIFIED TALENT DISCOVERY</div><h1>Find the right<br/><span>sporting context.</span></h1><p>Search public athlete profiles using relevant sporting fields. Your private shortlist stays with your organisation.</p></div><Link className="button button-dark" to="/workspace">Back to workspace <ArrowUpRight size={15}/></Link></div>
   {notice&&<div className="workspace-notice notice-info" role="status">{notice}</div>}
   <div className="talent-search-toolbar"><label>Organisation<select value={selectedOrg} onChange={e=>setSelectedOrg(e.target.value)}>{orgs.map(org=><option key={org.id} value={org.id}>{org.name}</option>)}</select></label><label className="search-field"><Search size={17}/><span className="sr-only">Search talent</span><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search athlete, position, sport or location"/></label><label>Sport<select value={sport} onChange={e=>setSport(e.target.value)}><option value="all">All sports</option>{sports.map(x=><option key={x} value={x}>{x}</option>)}</select></label><label>Level<select value={level} onChange={e=>setLevel(e.target.value)}><option value="all">All levels</option>{levels.map(x=><option key={x} value={x}>{x}</option>)}</select></label></div>
-  <div className="talent-search-summary"><span>{filtered.length} discoverable profile{filtered.length===1?"":"s"}</span><span><Bookmark size={13}/> {shortlists.length} shortlisted</span><span><ShieldCheck size={13}/> Public profiles only</span></div>
+  <div className="talent-search-summary"><span>{total} discoverable profile{total===1?"":"s"}{hasMore?" · showing "+filtered.length:""}</span><span><Bookmark size={13}/> {shortlists.length} shortlisted</span><span><ShieldCheck size={13}/> Public profiles only</span></div>
   <div className="talent-discovery-grid">{filtered.map(athlete=><article className="talent-discovery-card" key={athlete.id}><div className="talent-card-head"><span className="talent-avatar">{athlete.avatar_url?<img src={athlete.avatar_url} alt=""/>:(athlete.display_name.trim()[0]||"A").toUpperCase()}</span>{shortlistIds.has(athlete.id)&&<span className="shortlisted-badge"><Star size={12}/> Shortlisted</span>}</div><h3>{athlete.display_name}</h3><p className="talent-sport">{[athlete.sport,athlete.discipline].filter(Boolean).join(" · ")||"Sport not specified"}</p><div className="talent-details">{athlete.position&&<span><Trophy size={13}/>{athlete.position}</span>}{athlete.playing_level&&<span><Users size={13}/>{athlete.playing_level}</span>}{(athlete.location||athlete.country)&&<span><MapPin size={13}/>{[athlete.location,athlete.country].filter(Boolean).join(", ")}</span>}</div>{athlete.career_goals&&<p className="talent-goals">{athlete.career_goals}</p>}<div className="talent-card-actions"><Link className="button button-dark" to={"/talent/"+athlete.id}>View profile <ArrowUpRight size={14}/></Link><button className="talent-shortlist-btn" disabled={busyId===athlete.id} onClick={()=>void toggleShortlist(athlete)}><Bookmark size={14} fill={shortlistIds.has(athlete.id)?"currentColor":"none"}/>{shortlistIds.has(athlete.id)?"Shortlisted":"Shortlist"}</button></div></article>)}</div>
+  {hasMore&&<div className="catalogue-load-more"><button className="button button-dark" type="button" onClick={()=>void loadMore()} disabled={loadingMore}>{loadingMore?"Loading…":"Load more profiles"}</button></div>}
   {!filtered.length&&<div className="workspace-blank"><Search size={25}/><h3>No matching public profiles.</h3><p>Broaden the filters or review the public talent directory. Athlete visibility is always controlled by the athlete.</p></div>}
   <div className="workspace-footer-note"><ShieldCheck size={15}/><span>Do not infer ability, availability or eligibility beyond what an athlete has chosen to publish. Shortlists are private to your verified organisation.</span></div>
  </section>;

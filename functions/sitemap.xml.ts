@@ -11,7 +11,8 @@ interface SportSitemapContext { request: Request; env: SportSitemapEnv; }
 const staticPaths = [
   "/", "/opportunities", "/talent", "/organisations", "/matching",
   "/about", "/how-it-works", "/for-athletes", "/for-organisations",
-  "/for-partners", "/safeguarding", "/privacy", "/terms"
+  "/for-partners", "/safeguarding", "/privacy", "/terms",
+  "/help", "/contact", "/cookies", "/verification", "/report", "/data-request"
 ];
 
 function escapeXml(value: string): string {
@@ -45,7 +46,7 @@ export const onRequestGet = async ({ request, env }: SportSitemapContext): Promi
     try {
       const [opportunities, organisations, athletes] = await Promise.all([
         readPublicIds(baseUrl, apiKey, "opportunities",
-          "select=id&status=eq.published&verification_status=eq.verified&order=created_at.desc&limit=500"),
+          "select=id&status=eq.published&verification_status=eq.verified&or=(closing_date.is.null,closing_date.gte." + new Date().toISOString().slice(0, 10) + ")&order=created_at.desc&limit=500"),
         readPublicIds(baseUrl, apiKey, "organisations",
           "select=id&verification_status=eq.verified&order=created_at.desc&limit=500"),
         readPublicIds(baseUrl, apiKey, "athlete_directory", "select=id&limit=500")

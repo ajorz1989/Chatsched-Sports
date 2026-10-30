@@ -15,11 +15,48 @@ function normaliseType(value:string):OpportunityType{const allowed:OpportunityTy
 function mapRow(row:LiveRow):Opportunity{return{id:row.id,title:row.title,type:normaliseType(row.opportunity_type),sport:relatedName(row.sports)??"Multi-sport",discipline:row.discipline,positions:row.positions??[],organisation:relatedName(row.organisations)??"Verified organisation",organisationId:row.organisation_id,location:row.location??"To be confirmed",country:row.country??"South Africa",level:row.competition_level??"To be confirmed",summary:row.summary??"View details for requirements and application information.",description:row.description,eligibility:row.eligibility,closingDate:row.closing_date,compensationType:row.compensation_type,minimumAge:row.minimum_age,maximumAge:row.maximum_age,numberOfPlaces:row.number_of_places,startDate:row.start_date,applicationMethod:row.application_method,applicationUrl:row.application_url,imageUrl:row.cover_image_url??null,verificationStatus:row.verification_status??"pending",demo:false};}
 const baseFields="id,title,opportunity_type,discipline,positions,location,country,competition_level,summary,description,eligibility,closing_date,compensation_type,minimum_age,maximum_age,number_of_places,start_date,application_method,application_url,verification_status,organisation_id,organisations(name),sports(name)";
 const selectFields=baseFields+",cover_image_url";
+/** Today's date (UTC, matching the database's current_date) as YYYY-MM-DD. */
+export function todayIso():string{return new Date().toISOString().slice(0,10);}
+/** True once a listing's closing date has passed. Listings without a closing date stay open. */
+export function isClosed(opportunity:Pick<Opportunity,"closingDate">):boolean{return Boolean(opportunity.closingDate)&&String(opportunity.closingDate)<todayIso();}
+/** Remove characters that have meaning in PostgREST filter syntax or LIKE patterns. */
+export function sanitiseSearchTerm(value:string):string{return value.replace(/[^\p{L}\p{N}\s-]/gu," ").replace(/\s+/g," ").trim().slice(0,80);}
+export interface FeedQuery{search?:string;type?:string;sport?:string;page?:number;pageSize?:number}
+export interface FeedResult{opportunities:Opportunity[];demo:boolean;total:number;hasMore:boolean}
+const DEFAULT_PAGE_SIZE=24;
+function buildFeedQuery(client:NonNullable<typeof supabase>,fields:string,query:FeedQuery){
+ const sportFilter=query.sport&&query.sport!=="all";
+ const select=sportFilter?fields.replace("sports(name)","sports!inner(name)"):fields;
+ let request=client.from("opportunities").select(select,{count:"exact"}).eq("status","published").eq("verification_status","verified").or("closing_date.is.null,closing_date.gte."+todayIso());
+ if(query.type&&query.type!=="all")request=request.eq("opportunity_type",query.type);
+ if(sportFilter)request=request.eq("sports.name",query.sport as string);
+ const term=sanitiseSearchTerm(query.search??"");
+ if(term){const pattern="*"+term.replace(/ /g,"*")+"*";request=request.or(["title","summary","location","discipline"].map(column=>column+".ilike."+pattern).join(","));}
+ return request;
+}
+/** Server-side search, filtering and pagination for the public catalogue. Expired listings are never returned. */
+export async function searchOpportunities(query:FeedQuery={}):Promise<FeedResult>{
+ const pageSize=Math.min(Math.max(query.pageSize??DEFAULT_PAGE_SIZE,1),60);const page=Math.max(query.page??0,0);const from=page*pageSize;const to=from+pageSize-1;
+ const filtered=Boolean(sanitiseSearchTerm(query.search??"")||(query.type&&query.type!=="all")||(query.sport&&query.sport!=="all"));
+ if(!supabaseConfigured||!supabase)return{opportunities:sampleOpportunities,demo:true,total:sampleOpportunities.length,hasMore:false};
+ try{
+  const client=supabase;
+  const run=(fields:string)=>buildFeedQuery(client,fields,query).order("created_at",{ascending:false}).order("id",{ascending:true}).range(from,to);
+  const first=await run(selectFields);const result=first.error?await run(baseFields):first;
+  if(result.error)return{opportunities:sampleOpportunities,demo:true,total:sampleOpportunities.length,hasMore:false};
+  const rows=(result.data??[]) as unknown as LiveRow[];const total=result.count??rows.length;
+  if(total===0&&!filtered)return{opportunities:sampleOpportunities,demo:true,total:sampleOpportunities.length,hasMore:false};
+  return{opportunities:rows.map(mapRow),demo:false,total,hasMore:from+rows.length<total};
+ }catch{return{opportunities:sampleOpportunities,demo:true,total:sampleOpportunities.length,hasMore:false};}
+}
+/** Active sports for the catalogue filter, independent of which listings are loaded. */
+export async function loadSportNames():Promise<string[]>{
+ if(!supabaseConfigured||!supabase)return[];
+ try{const {data,error}=await supabase.from("sports").select("name").eq("is_active",true).order("name");if(error||!data)return[];return(data as {name:string}[]).map(row=>row.name);}catch{return[];}
+}
+/** Convenience for matching and recommendations: the newest open, verified listings. */
 export async function loadOpportunityFeed():Promise<{opportunities:Opportunity[];demo:boolean}>{
- if(!supabaseConfigured||!supabase)return{opportunities:sampleOpportunities,demo:true};
- try{const first=await supabase.from("opportunities").select(selectFields).eq("status","published").eq("verification_status","verified").order("created_at",{ascending:false}).limit(60);const {data,error}=first.error?await supabase.from("opportunities").select(baseFields).eq("status","published").eq("verification_status","verified").order("created_at",{ascending:false}).limit(60):first;
- if(error||!data||data.length===0)return{opportunities:sampleOpportunities,demo:true};return{opportunities:(data as unknown as LiveRow[]).map(mapRow),demo:false};
- }catch{return{opportunities:sampleOpportunities,demo:true};}
+ const result=await searchOpportunities({pageSize:60});return{opportunities:result.opportunities,demo:result.demo};
 }
 export async function loadOpportunityById(id:string):Promise<Opportunity|null>{
  const sample=sampleOpportunities.find(item=>item.id===id);if(sample)return sample;if(!supabaseConfigured||!supabase)return null;

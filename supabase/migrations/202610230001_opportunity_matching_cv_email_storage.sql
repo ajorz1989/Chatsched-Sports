@@ -191,7 +191,7 @@ create policy "Public read sport media"
 
 -- Ranked athlete matching. The score is deliberately explainable rather than a black box.
 create or replace function public.match_opportunity_athletes(target_opportunity uuid)
-returns table (athlete_id uuid, display_name text, avatar_url text, sport text, discipline text, position text, playing_level text, location text, score integer, reasons jsonb)
+returns table (athlete_id uuid, display_name text, avatar_url text, sport text, discipline text, "position" text, playing_level text, location text, score integer, reasons jsonb)
 language sql security invoker set search_path = public
 as $$
   with target as (
