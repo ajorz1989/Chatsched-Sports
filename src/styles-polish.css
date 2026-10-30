@@ -580,3 +580,12 @@ button.header-avatar{border:0;cursor:pointer}
 .footer-legal strong{font:700 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#aab6cc}
 .footer-legal a{color:#aab6cc;font-size:12px;display:inline-flex;gap:4px;align-items:center}
 .footer-legal a:hover{color:#fff}
+
+/* ---- Contrast fixes (WCAG AA) ----
+   Tokens: --red-text is for red text on LIGHT surfaces; --red stays for fills and text on navy. */
+:root{--red-text:#d61f30;--muted-2:#586783}
+body .representation-process .section-kicker,body .section-kicker-light{color:#98a8c6}
+body .vbadge-official,body .filters-toggle em,body .header-badge,body .join-steps li::before,body .role-card.is-selected .role-card-icon{background:#d61f30;color:#fff}
+body .path-card-primary,body .path-card-primary small,body .path-card-primary b{color:var(--ink)}
+body .path-card-primary .path-card-icon{background:rgba(10,31,68,.14)}
+body .path-card-primary:hover{background:#ff6b78;border-color:#ff6b78}
