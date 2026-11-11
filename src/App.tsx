@@ -28,6 +28,10 @@ import VerificationPage from "./pages/VerificationPage";
 import ReportConcernPage from "./pages/ReportConcernPage";
 import DataRequestPage from "./pages/DataRequestPage";
 import StatusPage from "./pages/StatusPage";
+import {SportPage,SportsIndexPage} from "./pages/SportPages";
+import {TypePage,TypesIndexPage} from "./pages/TypePages";
+import {LocationPage,LocationsIndexPage} from "./pages/LocationPages";
+import {GuidePage,GuidesIndexPage} from "./pages/GuidePages";
 
 export default function App() {
   return (
@@ -48,6 +52,14 @@ export default function App() {
           <Route path="/safeguarding" element={<AudiencePage />} />
           <Route path="/privacy" element={<AudiencePage />} />
           <Route path="/terms" element={<AudiencePage />} />
+          <Route path="/sports" element={<SportsIndexPage />} />
+          <Route path="/sports/:sportSlug" element={<SportPage />} />
+          <Route path="/opportunity-types" element={<TypesIndexPage />} />
+          <Route path="/opportunity-types/:typeSlug" element={<TypePage />} />
+          <Route path="/locations" element={<LocationsIndexPage />} />
+          <Route path="/locations/:locationSlug" element={<LocationPage />} />
+          <Route path="/guides" element={<GuidesIndexPage />} />
+          <Route path="/guides/:guideSlug" element={<GuidePage />} />
           <Route path="/help" element={<HelpPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/cookies" element={<CookiesPage />} />

@@ -98,3 +98,26 @@
  .sx-row{grid-template-columns:1fr}
  .sx-page{padding:40px 16px 72px}
 }
+
+/* browse pages: sports, types, locations, guides */
+.sx-crumbs{margin-bottom:20px;font-size:.85rem}
+.sx-crumbs ol{list-style:none;display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:0;margin:0}
+.sx-crumbs li{display:flex;align-items:center;gap:6px;color:var(--muted)}
+.sx-crumbs a{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+.sx-card-grid{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.sx-tile{display:flex;flex-direction:column;gap:8px;height:100%;padding:20px;background:#fff;border:1px solid #dbe3f1;border-radius:16px;color:var(--ink);text-decoration:none;transition:border-color .15s,transform .15s}
+.sx-tile:hover,.sx-tile:focus-visible{border-color:var(--ink);transform:translateY(-2px)}
+.sx-tile:focus-visible{outline:3px solid #9db6f0;outline-offset:2px}
+.sx-tile strong{font-family:var(--display);font-size:1.1rem}
+.sx-tile span,.sx-tile small{color:var(--muted);line-height:1.5}
+.sx-tag{align-self:flex-start;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--paper);color:var(--ink)!important;padding:3px 10px;border-radius:999px}
+.sx-chips-left{justify-content:flex-start}
+.sx-listings{margin:36px 0}
+.sx-listings-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px}
+.sx-listings-head h2{margin:0 0 14px}
+.sx-prose{max-width:720px}
+.sx-prose h2{scroll-margin-top:96px}
+.sx-toc{background:var(--paper);border:1px solid #dbe3f1;border-radius:12px;padding:16px 20px;margin-bottom:28px}
+.sx-toc ol{margin:8px 0 0;padding-left:20px;display:grid;gap:4px}
+.sx-toc a{color:var(--ink)}
+.sx-article .sx-hero{max-width:720px}
