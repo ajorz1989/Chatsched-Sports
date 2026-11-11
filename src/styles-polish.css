@@ -403,7 +403,7 @@ main:focus{outline:none}
 @media(max-width:760px){
   .path-cards{grid-template-columns:1fr}
   .section-pad{padding:48px 22px}
-  .pathway-timeline{display:flex!important;overflow-x:auto;gap:12px;scroll-snap-type:x mandatory;margin-right:-22px;padding-right:22px;padding-bottom:6px}
+  body .pathway-timeline{display:flex;overflow-x:auto;gap:12px;scroll-snap-type:x mandatory;margin-right:-22px;padding-right:22px;padding-bottom:6px}
   .pathway-timeline .pathway-card{flex:0 0 78%;scroll-snap-align:start}
   .hero-preview-wrap{min-height:0;margin:14px 0 0}
   .trust-levels li{flex-direction:column;align-items:flex-start;gap:8px}
@@ -448,3 +448,144 @@ main:focus{outline:none}
 @media(max-width:1180px){.sports-strip{grid-template-columns:1fr;gap:20px;padding:36px 22px}}
 @media(max-width:899px) and (min-width:761px){.sports-strip .sports-tiles{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:760px){.sports-tiles li{flex-basis:96px}}
+
+/* ======================= Semantic colours (separate from the brand red) ======================= */
+:root{
+  --success-bg:#e8f5ec;--success-fg:#14532d;--success-bd:#b5dcc2;
+  --warn-bg:#fff7e0;--warn-fg:#7a5600;--warn-bd:#f0dca0;
+  --error-bg:#fdecea;--error-fg:#9b1c1c;--error-bd:#f3c1be;
+  --info-bg:#e8eefb;--info-fg:#16336e;--info-bd:#c3d2f1;
+}
+body .form-message-success,body .notice-success,body .report-success,body .verification-success{background:var(--success-bg);color:var(--success-fg);border-color:var(--success-bd)}
+body .form-message-error,body .notice-error{background:var(--error-bg);color:var(--error-fg);border-color:var(--error-bd)}
+body .notice-info,body .form-message-info{background:var(--info-bg);color:var(--info-fg);border-color:var(--info-bd)}
+body .status-verified,body .status-accepted,body .status-published{background:var(--success-bg);color:var(--success-fg)}
+.status-draft{background:var(--warn-bg);color:var(--warn-fg)}
+.match-check-met svg,.match-check-met em,.hp-checks .ok svg{color:#15803d}
+.match-check-unmet svg,.match-check-unmet em,.hp-checks .no svg{color:#b91c1c}
+.match-check-missing svg,.match-check-missing em,.hp-checks .miss svg{color:#92600a}
+.match-score.match-strength-strong strong{color:#15803d}
+.vbadge-verified{background:var(--success-bg);color:var(--success-fg);border-color:var(--success-bd)}
+.closing-tag{background:#b45309}
+.workspace-notice button:hover{background:rgba(0,0,0,.06);color:inherit}
+.admin-approve{background:var(--success-bg);color:var(--success-fg)}
+
+/* Readable form text: normal-weight placeholders, calmer labels */
+::placeholder{font-weight:400}
+.form-label,.join-form label{font-weight:700}
+.form-label>input,.form-label>select,.join-form input,.join-form select{font-weight:500}
+
+/* ======================= Join page ======================= */
+.role-picker{border:0;margin:0;padding:0;min-width:0}
+.role-picker legend{padding:0;margin-bottom:8px;font:700 12px Manrope,sans-serif;color:var(--ink)}
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.role-card{position:relative;display:flex;gap:10px;align-items:center;padding:10px 12px;min-height:56px;background:#fff;border:1px solid #cbd4e3;border-radius:10px 10px 10px 3px;cursor:pointer;transition:border-color .15s,background .15s,box-shadow .15s}
+.role-card:hover{border-color:#16336e}
+.role-card input{position:absolute;opacity:0;inset:0;cursor:pointer;margin:0}
+.role-card:has(input:focus-visible){outline:3px solid #6a8c00;outline:3px solid #20376d;outline-offset:2px}
+.role-card.is-selected{border-color:#0a1f44;background:#eef2fa;box-shadow:inset 0 0 0 1px #0a1f44}
+.role-card-icon{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:#e3e9f4;color:#0a1f44;flex:0 0 auto}
+.role-card.is-selected .role-card-icon{background:#ff4757;color:#fff}
+.role-card-text{display:grid;gap:1px;min-width:0}
+.role-card-text b{font:700 13px Manrope,sans-serif;color:var(--ink)}
+.role-card-text small{font-size:11px;line-height:1.35;color:var(--muted)}
+@media(max-width:480px){.role-grid{grid-template-columns:1fr}}
+.pw-meter{display:flex;align-items:center;gap:10px;margin-top:6px;font:600 12px Manrope,sans-serif;color:var(--muted)}
+.pw-bars{display:flex;gap:4px}
+.pw-bars i{width:34px;height:5px;border-radius:3px;background:#dbe2ef}
+.pw-bars i.on.s1{background:#dc2626}.pw-bars i.on.s2{background:#d97706}.pw-bars i.on.s3{background:#65a30d}.pw-bars i.on.s4{background:#15803d}
+.join-steps{margin-top:34px;padding-top:24px;border-top:1px solid rgba(255,255,255,.15);max-width:420px}
+.join-steps h3{margin:0 0 14px;font:600 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:#98a8c6}
+.join-steps ol{list-style:none;margin:0;padding:0;display:grid;gap:14px;counter-reset:step}
+.join-steps li{counter-increment:step;display:grid;grid-template-columns:30px 1fr;column-gap:12px;align-items:start}
+.join-steps li::before{content:counter(step);grid-row:span 2;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#ff4757;color:#fff;font:700 13px var(--display)}
+.join-steps b{font-size:14px;color:#fff}
+.join-steps small{font-size:13px;color:#c0cbe0;line-height:1.5}
+.role-card-text small{font-weight:500}
+
+/* ======================= Inner page hero aside ======================= */
+.hero-aside{position:relative;z-index:1;width:min(300px,100%);flex:0 0 auto;padding:18px 20px;border:1px solid #2b3d63;background:rgba(255,255,255,.05);border-radius:12px 12px 12px 3px}
+.hero-aside h2{margin:0 0 12px;font:600 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:#98a8c6}
+.hero-aside ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.hero-aside li{display:flex;align-items:center;gap:10px;font-size:13px;color:#e3e9f4}
+.hero-aside li svg{color:#ff6a77;flex:0 0 auto}
+.hero-aside p{margin:12px 0 0;font-size:12px;line-height:1.5;color:#b4c0d8}
+.hero-aside-weights li{justify-content:space-between;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.1)}
+.hero-aside-weights li:last-child{border-bottom:0;padding-bottom:0}
+.hero-aside-weights b{font:700 15px var(--display);color:#fff}
+@media(max-width:1000px){.hero-aside{width:100%;margin-top:26px}}
+
+/* Audience pages: use the full width */
+.audience-section-copy{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);column-gap:56px;align-items:start}
+.audience-section-copy>.section-kicker,.audience-section-copy>h2,.audience-section-copy>p{grid-column:1}
+.audience-section-copy>.audience-bullets{grid-column:2;grid-row:1 / span 3;display:grid;gap:12px;padding:22px;background:#fff;border:1px solid #dee4ed;border-top:3px solid #ff4757;border-radius:2px}
+.audience-section-copy>.audience-bullets span{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.5}
+.audience-section-copy>.audience-bullets svg{color:#15803d;flex:0 0 auto;margin-top:2px}
+@media(max-width:900px){.audience-section-copy{display:block}.audience-section-copy>.audience-bullets{margin-top:18px}}
+.audience-principles{border-radius:2px}
+.audience-principle-grid strong{font-size:16px;line-height:1.35}
+.audience-bottom-cta{align-items:center;gap:24px;flex-wrap:wrap}
+.audience-bottom-cta h2{font-size:clamp(26px,3.4vw,38px)}
+.audience-bottom-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+/* ======================= Detail + directory extras ======================= */
+.detail-countdown{display:flex;align-items:center;gap:8px;margin:2px 0 10px;padding:9px 12px;background:#fff7e0;border:1px solid #f0dca0;color:#7a5600;font:700 12px Manrope,sans-serif;border-radius:2px}
+.detail-extra-actions{display:grid;gap:8px;margin-top:14px}
+.detail-extra-actions .button{justify-content:center;width:100%}
+.detail-related{padding:32px max(22px,calc((100vw - 1240px)/2)) 40px}
+.detail-related .opportunity-grid{margin-top:14px}
+.empty-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.empty-preview{display:inline-flex;align-items:center;gap:12px;margin:22px auto 0;padding:12px 16px;border:1px dashed #b4c0d8;background:#f9fbfe;text-align:left;opacity:.9;flex-wrap:wrap;justify-content:center}
+.empty-preview>span:nth-child(2){display:grid}
+.empty-preview b{font-size:14px}
+.empty-preview small{font-size:12px;color:var(--muted)}
+
+/* ---- Route loading (code-split fallback) ---- */
+.route-loading{min-height:60vh;position:relative}
+.route-loading-bar{position:fixed;top:0;left:0;height:3px;width:40%;background:var(--lime,#ff4757);animation:route-bar 1s ease-in-out infinite}
+@keyframes route-bar{0%{transform:translateX(-100%)}100%{transform:translateX(260%)}}
+@media (prefers-reduced-motion:reduce){.route-loading-bar{animation:none;width:100%;opacity:.5}}
+
+/* ---- Button system: four roles ----
+   Primary   .button-accent  (red)       main action, one per view
+   Secondary .button-dark    (navy)      supporting action
+   Outline   .button-light-outline (on dark) / -outline-dark / -workspace (on light)
+   Quiet     .button-quiet   (text link) low-emphasis, e.g. "View all"
+   Icon scale: 16 inline, 20 card, 24 feature. */
+body .button{border-radius:6px;letter-spacing:.02em;transition:transform .18s,background-color .18s,border-color .18s,color .18s}
+body .button svg{flex-shrink:0}
+body .button-accent{background:var(--lime);border-color:var(--lime);color:var(--ink)}
+body .button-accent:hover{background:#e63a49;border-color:#e63a49;color:#fff}
+body .button-dark{background:var(--ink);border-color:var(--ink);color:#fff}
+body .button-dark:hover{background:#16315f;border-color:#16315f}
+body .button-light-outline,body .button-light-outline-dark,body .button-light-workspace{background:transparent;border:1px solid currentColor}
+body .button-light-outline{color:#fff;border-color:rgba(255,255,255,.55)}
+body .button-light-outline:hover{border-color:var(--lime);color:#fff;background:rgba(255,71,87,.12)}
+body .button-light-outline-dark,body .button-light-workspace{color:var(--ink);border-color:#b9c4d9}
+body .button-light-outline-dark:hover,body .button-light-workspace:hover{border-color:var(--lime);background:#fff2f3;color:var(--ink)}
+body .button-quiet{background:transparent;border-color:transparent;color:var(--ink);padding:0 4px;min-height:40px;text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--lime);text-decoration-thickness:2px}
+body .button-quiet:hover{transform:none;color:#e63a49}
+body .button:disabled,body .button[aria-disabled=true]{opacity:.55;transform:none}
+.icon-sm{width:16px;height:16px}.icon-md{width:20px;height:20px}.icon-lg{width:24px;height:24px}
+
+/* ---- Account menu + footer legal row ---- */
+.account-menu{position:relative}
+button.header-avatar{border:0;cursor:pointer}
+.account-menu-panel{position:absolute;right:0;top:calc(100% + 10px);min-width:200px;background:#fff;border:1px solid #d9e0ec;border-radius:10px;box-shadow:0 14px 34px rgba(10,31,68,.18);padding:6px;z-index:60;display:grid}
+.account-menu-panel a,.account-menu-panel button{display:flex;align-items:center;min-height:44px;padding:0 12px;border:0;background:transparent;border-radius:6px;font:600 14px var(--display);color:var(--ink);text-align:left;cursor:pointer}
+.account-menu-panel a:hover,.account-menu-panel button:hover{background:#f6f8fc;color:#e63a49}
+.account-menu-panel button{border-top:1px solid #eef1f7;margin-top:4px;border-radius:0 0 6px 6px}
+.footer-bottom{display:flex;flex-wrap:wrap;gap:8px 22px}
+.footer-legal{flex-basis:100%;display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;padding-top:14px;margin-top:6px;border-top:1px solid rgba(255,255,255,.12)}
+.footer-legal strong{font:700 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#aab6cc}
+.footer-legal a{color:#aab6cc;font-size:12px;display:inline-flex;gap:4px;align-items:center}
+.footer-legal a:hover{color:#fff}
+
+/* ---- Contrast fixes (WCAG AA) ----
+   Tokens: --red-text is for red text on LIGHT surfaces; --red stays for fills and text on navy. */
+:root{--red-text:#d61f30;--muted-2:#586783}
+body .representation-process .section-kicker,body .section-kicker-light{color:#98a8c6}
+body .vbadge-official,body .filters-toggle em,body .header-badge,body .join-steps li::before,body .role-card.is-selected .role-card-icon{background:#d61f30;color:#fff}
+body .path-card-primary,body .path-card-primary small,body .path-card-primary b{color:var(--ink)}
+body .path-card-primary .path-card-icon{background:rgba(10,31,68,.14)}
+body .path-card-primary:hover{background:#ff6b78;border-color:#ff6b78}

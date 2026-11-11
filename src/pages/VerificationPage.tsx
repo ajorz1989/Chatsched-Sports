@@ -15,7 +15,7 @@ const levels:{level:VerificationLevel;meaning:string;status:string}[]=[
 export default function VerificationPage(){
  return <section className="sx-page">
   <header className="sx-hero">
-   <span className="sx-icon"><ShieldCheck size={26} aria-hidden="true"/></span>
+   <span className="sx-icon"><ShieldCheck size={24} aria-hidden="true"/></span>
    <p className="section-kicker">TRUST AND VERIFICATION</p>
    <h1>What verified means, and what it does not.</h1>
    <p className="sx-lead">Verification is how we help athletes tell real opportunities from risky ones. It is a review step, not a guarantee.</p>
@@ -46,7 +46,7 @@ export default function VerificationPage(){
     <li>Open your workspace and submit a verification request with evidence, such as a registration, an official website or a confirmation from a governing body.</li>
     <li>We review it and record the decision. You are notified of the outcome.</li>
    </ol>
-   <div className="sx-actions"><Link className="button button-dark" to="/workspace">Open my workspace <ArrowUpRight size={15}/></Link><Link className="button button-light-outline-dark" to="/report">Report a false claim</Link></div>
+   <div className="sx-actions"><Link className="button button-dark" to="/workspace">Open my workspace <ArrowUpRight size={16}/></Link><Link className="button button-light-outline-dark" to="/report">Report a false claim</Link></div>
   </div>
  </section>;
 }

@@ -61,7 +61,7 @@ export default function ContactForm({kinds,initialKind,subjectPrefix,messageLabe
  }
 
  if(!supabaseConfigured||!supabase)return <p className="sx-note">This form activates once the Sport database is connected.</p>;
- if(sent)return <div className="sx-success" role="status"><CheckCircle2 size={22} aria-hidden="true"/><div><strong>Message received.</strong><p>{success}</p><button type="button" className="sx-link" onClick={()=>setSent(false)}>Send another message</button></div></div>;
+ if(sent)return <div className="sx-success" role="status"><CheckCircle2 size={20} aria-hidden="true"/><div><strong>Message received.</strong><p>{success}</p><button type="button" className="sx-link" onClick={()=>setSent(false)}>Send another message</button></div></div>;
 
  return <form className="sx-form" onSubmit={submit} noValidate={false}>
   {kinds.length>1&&<label className="sx-field"><span>What is this about?</span><select value={kind} onChange={e=>setKind(e.target.value as ContactKind)}>{kinds.map(item=><option key={item.value} value={item.value}>{item.label}</option>)}</select></label>}
@@ -75,6 +75,6 @@ export default function ContactForm({kinds,initialKind,subjectPrefix,messageLabe
   {/* Honeypot: hidden from people and assistive tech; bots tend to fill it in. */}
   <div className="sx-hp" aria-hidden="true"><label>Website<input tabIndex={-1} autoComplete="off" value={website} onChange={e=>setWebsite(e.target.value)}/></label></div>
   {error&&<div className="sx-error" role="alert">{error}</div>}
-  <button className="button button-dark" type="submit" disabled={busy||message.trim().length<10||!name.trim()||!email.trim()}>{busy?<><LoaderCircle size={15} className="spin"/> Sending…</>:<>{submitLabel} <ArrowUpRight size={15}/></>}</button>
+  <button className="button button-dark" type="submit" disabled={busy||message.trim().length<10||!name.trim()||!email.trim()}>{busy?<><LoaderCircle size={16} className="spin"/> Sending…</>:<>{submitLabel} <ArrowUpRight size={16}/></>}</button>
  </form>;
 }

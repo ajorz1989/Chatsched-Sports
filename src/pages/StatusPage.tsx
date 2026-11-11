@@ -42,7 +42,7 @@ export default function StatusPage(){
 
  return <section className="sx-page">
   <header className="sx-hero">
-   <span className="sx-icon"><Activity size={26} aria-hidden="true"/></span>
+   <span className="sx-icon"><Activity size={24} aria-hidden="true"/></span>
    <p className="section-kicker">SERVICE STATUS</p>
    <h1>{headline}</h1>
    <p className="sx-lead">These checks run from your browser right now. They show whether this device can reach our services. They are not a history of past incidents.</p>
@@ -55,7 +55,7 @@ export default function StatusPage(){
      <strong>{item.state==="ok"?"Working":item.state==="down"?"Not responding":item.state==="unknown"?"Not configured":"Checking"}{item.ms!==undefined&&item.state==="ok"?" · "+item.ms+" ms":""}</strong>
     </li>)}
    </ul>
-   <div className="sx-actions"><button type="button" className="button button-dark" onClick={()=>void run()}><RefreshCw size={15}/> Check again</button>{checkedAt&&<span className="sx-small">Last checked {checkedAt.toLocaleTimeString("en-ZA")}</span>}</div>
+   <div className="sx-actions"><button type="button" className="button button-dark" onClick={()=>void run()}><RefreshCw size={16}/> Check again</button>{checkedAt&&<span className="sx-small">Last checked {checkedAt.toLocaleTimeString("en-ZA")}</span>}</div>
    {anyDown&&<p className="sx-note">If a service stays down, try again in a few minutes, then <a href="/contact">contact us</a>.</p>}
   </div>
  </section>;

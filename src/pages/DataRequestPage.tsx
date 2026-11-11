@@ -41,17 +41,17 @@ export default function DataRequestPage(){
 
  return <section className="sx-page">
   <header className="sx-hero">
-   <span className="sx-icon"><FileLock2 size={26} aria-hidden="true"/></span>
+   <span className="sx-icon"><FileLock2 size={24} aria-hidden="true"/></span>
    <p className="section-kicker">YOUR DATA</p>
    <h1>See, correct, export or delete your information.</h1>
    <p className="sx-lead">Under South Africa's Protection of Personal Information Act (POPIA) you can ask what we hold about you, ask us to correct it, object to how it is used, or ask us to delete it.</p>
   </header>
   <div className="sx-body">
    {userId&&<div className="sx-grid">
-    <article className="sx-card"><h3>Download my data</h3><p>Get a copy of the personal information linked to your account as a file.</p><button className="button button-dark" type="button" onClick={()=>void download()} disabled={busy}><Download size={15}/> Download my data</button></article>
+    <article className="sx-card"><h3>Download my data</h3><p>Get a copy of the personal information linked to your account as a file.</p><button className="button button-dark" type="button" onClick={()=>void download()} disabled={busy}><Download size={16}/> Download my data</button></article>
     <article className="sx-card"><h3>Correct my information</h3><p>You can edit your profile, achievements and organisation details yourself.</p><Link className="button button-light-outline-dark" to="/workspace">Open my workspace</Link></article>
     <article className="sx-card"><h3>Delete my account</h3><p>Ask us to delete your account and personal data. An administrator reviews each request first.</p>
-     {!confirmDelete?<button className="button button-light-outline-dark" type="button" onClick={()=>setConfirmDelete(true)} disabled={busy}><Trash2 size={15}/> Request deletion</button>:
+     {!confirmDelete?<button className="button button-light-outline-dark" type="button" onClick={()=>setConfirmDelete(true)} disabled={busy}><Trash2 size={16}/> Request deletion</button>:
       <div className="sx-confirm" role="alertdialog" aria-label="Confirm deletion request"><p><strong>This cannot be undone once processed.</strong> Your profile, applications and messages will be removed.</p><div className="sx-actions"><button className="button button-dark" type="button" onClick={()=>void requestDeletion()} disabled={busy}>Yes, request deletion</button><button className="button button-light-outline-dark" type="button" onClick={()=>setConfirmDelete(false)}>Cancel</button></div></div>}
     </article>
    </div>}
@@ -79,7 +79,7 @@ export default function DataRequestPage(){
       <li>See the <Link to="/privacy">privacy overview</Link> and <Link to="/cookies">cookie settings</Link>.</li>
      </ul>
      <h3>Not happy with our response?</h3>
-     <p className="sx-small">You can complain to South Africa's Information Regulator through its <a href="https://inforegulator.org.za/complaints/" target="_blank" rel="noreferrer">complaints page<ExternalLink size={12} aria-hidden="true"/><span className="sr-only"> (opens in new tab)</span></a>.</p>
+     <p className="sx-small">You can complain to South Africa's Information Regulator through its <a href="https://inforegulator.org.za/complaints/" target="_blank" rel="noreferrer">complaints page<ExternalLink size={16} aria-hidden="true"/><span className="sr-only"> (opens in new tab)</span></a>.</p>
     </aside>
    </div>
   </div>

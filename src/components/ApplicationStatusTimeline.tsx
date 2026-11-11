@@ -32,12 +32,12 @@ export default function ApplicationStatusTimeline({applicationId}:Props){
 
  return <div className="application-timeline" aria-label="Application status history">
   {events.map(event=><div className="application-timeline-item" key={event.id}>
-   <span className="application-timeline-dot"><ShieldCheck size={13}/></span>
+   <span className="application-timeline-dot"><ShieldCheck size={16}/></span>
    <div>
     <strong>{labels[event.to_status]??event.to_status.replaceAll("_"," ")}</strong>
     {event.from_status&&<small>from {labels[event.from_status]??event.from_status.replaceAll("_"," ")}</small>}
     {event.note&&<p>{event.note}</p>}
-    <small><Clock3 size={12}/> {new Intl.DateTimeFormat("en-ZA",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}).format(new Date(event.created_at))}</small>
+    <small><Clock3 size={16}/> {new Intl.DateTimeFormat("en-ZA",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}).format(new Date(event.created_at))}</small>
    </div>
   </div>)}
  </div>;

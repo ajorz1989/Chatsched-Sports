@@ -30,7 +30,7 @@ export default function CookiesPage(){
 
  return <section className="sx-page">
   <header className="sx-hero">
-   <span className="sx-icon"><Cookie size={26} aria-hidden="true"/></span>
+   <span className="sx-icon"><Cookie size={24} aria-hidden="true"/></span>
    <p className="section-kicker">COOKIES AND STORAGE</p>
    <h1>Cookie policy and settings.</h1>
    <p className="sx-lead">Cookies and similar browser storage are small pieces of data kept on your device. We keep this simple: essential storage only, and optional analytics only with your permission.</p>

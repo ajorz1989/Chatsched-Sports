@@ -1,41 +1,47 @@
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import SiteLayout from "./components/SiteLayout";
 import HomePage from "./pages/HomePage";
-import OpportunitiesPage from "./pages/OpportunitiesPage";
-import OpportunityDetailPage from "./pages/OpportunityDetailPage";
-import JoinPage from "./pages/JoinPage";
-import NotFoundPage from "./pages/NotFoundPage";
-import WorkspacePage from "./pages/WorkspacePage";
-import AdminPage from "./pages/AdminPage";
-import MessagesPage from "./pages/MessagesPage";
-import TalentDirectoryPage from "./pages/TalentDirectoryPage";
-import TalentProfilePage from "./pages/TalentProfilePage";
-import MatchingPage from "./pages/MatchingPage";
-import NotificationsPage from "./pages/NotificationsPage";
-import ForgotPasswordPage from "./pages/ForgotPasswordPage";
-import ResetPasswordPage from "./pages/ResetPasswordPage";
-import AudiencePage from "./pages/AudiencePage";
-import OrganisationsPage from "./pages/OrganisationsPage";
-import OrganisationProfilePage from "./pages/OrganisationProfilePage";
-import TalentSearchPage from "./pages/TalentSearchPage";
-import OrganisationInsightsPage from "./pages/OrganisationInsightsPage";
-import RepresentationPage from "./pages/RepresentationPage";
-import RecruiterHubPage from "./pages/RecruiterHubPage";
-import HelpPage from "./pages/HelpPage";
-import ContactPage from "./pages/ContactPage";
-import CookiesPage from "./pages/CookiesPage";
-import VerificationPage from "./pages/VerificationPage";
-import ReportConcernPage from "./pages/ReportConcernPage";
-import DataRequestPage from "./pages/DataRequestPage";
-import StatusPage from "./pages/StatusPage";
-import {SportPage,SportsIndexPage} from "./pages/SportPages";
-import {TypePage,TypesIndexPage} from "./pages/TypePages";
-import {LocationPage,LocationsIndexPage} from "./pages/LocationPages";
-import {GuidePage,GuidesIndexPage} from "./pages/GuidePages";
+const OpportunitiesPage = lazy(() => import("./pages/OpportunitiesPage"));
+const OpportunityDetailPage = lazy(() => import("./pages/OpportunityDetailPage"));
+const JoinPage = lazy(() => import("./pages/JoinPage"));
+const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
+const WorkspacePage = lazy(() => import("./pages/WorkspacePage"));
+const AdminPage = lazy(() => import("./pages/AdminPage"));
+const MessagesPage = lazy(() => import("./pages/MessagesPage"));
+const TalentDirectoryPage = lazy(() => import("./pages/TalentDirectoryPage"));
+const TalentProfilePage = lazy(() => import("./pages/TalentProfilePage"));
+const MatchingPage = lazy(() => import("./pages/MatchingPage"));
+const NotificationsPage = lazy(() => import("./pages/NotificationsPage"));
+const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
+const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"));
+const AudiencePage = lazy(() => import("./pages/AudiencePage"));
+const OrganisationsPage = lazy(() => import("./pages/OrganisationsPage"));
+const OrganisationProfilePage = lazy(() => import("./pages/OrganisationProfilePage"));
+const TalentSearchPage = lazy(() => import("./pages/TalentSearchPage"));
+const OrganisationInsightsPage = lazy(() => import("./pages/OrganisationInsightsPage"));
+const RepresentationPage = lazy(() => import("./pages/RepresentationPage"));
+const RecruiterHubPage = lazy(() => import("./pages/RecruiterHubPage"));
+const HelpPage = lazy(() => import("./pages/HelpPage"));
+const ContactPage = lazy(() => import("./pages/ContactPage"));
+const CookiesPage = lazy(() => import("./pages/CookiesPage"));
+const VerificationPage = lazy(() => import("./pages/VerificationPage"));
+const ReportConcernPage = lazy(() => import("./pages/ReportConcernPage"));
+const DataRequestPage = lazy(() => import("./pages/DataRequestPage"));
+const StatusPage = lazy(() => import("./pages/StatusPage"));
+const SportPage = lazy(() => import("./pages/SportPages").then(m => ({ default: m.SportPage })));
+const SportsIndexPage = lazy(() => import("./pages/SportPages").then(m => ({ default: m.SportsIndexPage })));
+const TypePage = lazy(() => import("./pages/TypePages").then(m => ({ default: m.TypePage })));
+const TypesIndexPage = lazy(() => import("./pages/TypePages").then(m => ({ default: m.TypesIndexPage })));
+const LocationPage = lazy(() => import("./pages/LocationPages").then(m => ({ default: m.LocationPage })));
+const LocationsIndexPage = lazy(() => import("./pages/LocationPages").then(m => ({ default: m.LocationsIndexPage })));
+const GuidePage = lazy(() => import("./pages/GuidePages").then(m => ({ default: m.GuidePage })));
+const GuidesIndexPage = lazy(() => import("./pages/GuidePages").then(m => ({ default: m.GuidesIndexPage })));
 
 export default function App() {
   return (
     <BrowserRouter>
+      <Suspense fallback={<div className="route-loading" role="status" aria-live="polite"><span className="route-loading-bar"/><span className="sr-only">Loading…</span></div>}>
       <Routes>
         <Route element={<SiteLayout />}>
           <Route path="/" element={<HomePage />} />
@@ -83,6 +89,7 @@ export default function App() {
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }
