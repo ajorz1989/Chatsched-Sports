@@ -6,8 +6,8 @@ interface SportSitemapEnv {
   VITE_SUPABASE_PUBLISHABLE_KEY?: string;
   VITE_SUPABASE_ANON_KEY?: string;
 }
-import {guides} from "../src/content/guides.ts";
-import {locations,opportunityTypes,sports} from "../src/content/taxonomy.ts";
+import {guides} from "../src/content/guides";
+import {locations,opportunityTypes,sports} from "../src/content/taxonomy";
 
 interface SportSitemapContext { request: Request; env: SportSitemapEnv; }
 
