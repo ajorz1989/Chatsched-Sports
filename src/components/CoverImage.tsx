@@ -6,5 +6,6 @@ export default function CoverImage({src,sport,variant="card",label}:{src?:string
  const url=safeImageUrl(src);const [failed,setFailed]=useState(false);
  if(url&&!failed)return <div className={"cover-image cover-"+variant}><img src={url} alt={label??""} loading={variant==="hero"?"eager":"lazy"} decoding="async" referrerPolicy="no-referrer" onError={()=>setFailed(true)}/></div>;
  if(variant==="hero")return null;
- return <div className="cover-image cover-card cover-placeholder" aria-hidden="true"><SportIcon sport={sport} size={44}/></div>;
+ const slug=(sport??"other").trim().toLowerCase().replace(/[^a-z]+/g,"-")||"other";
+ return <div className={"cover-image cover-card cover-placeholder cover-sport-"+slug} aria-hidden="true"><span className="cover-watermark"><SportIcon sport={sport} size={170}/></span><span className="cover-badge"><SportIcon sport={sport} size={32}/></span></div>;
 }

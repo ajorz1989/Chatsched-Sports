@@ -629,3 +629,32 @@ body .hero-section .button-accent:focus-visible,body .final-cta-section .button-
 .desktop-nav a,.header-signin,.header-actions .button{white-space:nowrap}
 @media (min-width:981px) and (max-width:1180px){.desktop-nav{gap:14px}.desktop-nav a{font-size:13px;padding-inline:6px}.header-actions .button{padding-inline:12px}}
 @media (min-width:981px) and (max-width:1240px){.site-header .brand-wordmark small{display:none}.site-header .brand-lockup{flex:0 0 auto}.desktop-nav{margin-right:12px;gap:12px}.header-actions{gap:12px}}
+
+/* ---- Sport cover placeholders: bold, brand-only palettes, one per sport ---- */
+.cover-placeholder{--c1:#0a1f44;--c2:#16336e;--hot:#ff4757;--ax:78%;--ay:18%;position:relative;overflow:hidden;color:#fff;
+ background:radial-gradient(circle at var(--ax) var(--ay),color-mix(in srgb,var(--hot) 55%,transparent),transparent 52%),linear-gradient(135deg,var(--c1),var(--c2))}
+.cover-placeholder::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,.06) 0 2px,transparent 2px 22px);pointer-events:none}
+.cover-placeholder::after{display:block!important;content:"";position:absolute;left:0;right:0;bottom:0;height:5px;background:var(--hot);opacity:.95}
+.cover-watermark{position:absolute;right:-18px;bottom:-34px;color:rgba(255,255,255,.1);line-height:0;transform:rotate(-8deg)}
+.cover-badge{position:relative;z-index:1;display:grid;place-items:center;width:68px;height:68px;border-radius:50%;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.55);backdrop-filter:none}
+.cover-sport-football{--c1:#0a1f44;--c2:#1b4a9c;--ax:82%;--ay:15%}
+.cover-sport-rugby{--c1:#2a0f2a;--c2:#0a1f44;--hot:#ff4757;--ax:20%;--ay:85%}
+.cover-sport-cricket{--c1:#0d2a5c;--c2:#0a1f44;--ax:85%;--ay:80%}
+.cover-sport-netball{--c1:#16336e;--c2:#2d58b8;--ax:15%;--ay:20%}
+.cover-sport-athletics{--c1:#0a1f44;--c2:#6b1230;--hot:#ff4757;--ax:80%;--ay:20%}
+.cover-sport-swimming{--c1:#0a3a78;--c2:#0a1f44;--hot:#ff6b78;--ax:20%;--ay:90%}
+.cover-sport-basketball{--c1:#0a1f44;--c2:#8a1d38;--ax:50%;--ay:100%}
+.cover-sport-boxing{--c1:#3a0f1c;--c2:#0a1f44;--ax:85%;--ay:25%}
+.cover-sport-esports{--c1:#1c1f6b;--c2:#0a1f44;--hot:#ff4757;--ax:15%;--ay:80%}
+.cover-sport-multi-sport,.cover-sport-other{--c1:#0a1f44;--c2:#243f7e}
+
+/* ---- Hero preview card: larger focal point ---- */
+.hero-preview{width:min(460px,100%);padding:30px 30px 26px;transform:rotate(1.2deg) scale(1.0)}
+.hero-preview h3{font-size:27px}
+.hp-sport{font-size:12px}.hp-org{font-size:14px;margin-bottom:18px}
+.hp-score strong{font-size:52px}.hp-score small{font-size:13px}
+.hp-track{height:8px;margin:8px 0 18px}
+.hp-checks{gap:12px;padding-top:16px}.hp-checks li{font-size:15px}
+.hp-note{font-size:12px}
+@media (min-width:1001px){.hero-art{min-height:520px}.hero-preview{margin-right:-24px}}
+@media (max-width:1000px){.hero-preview{padding:24px}.hero-preview h3{font-size:23px}.hp-score strong{font-size:42px}}
