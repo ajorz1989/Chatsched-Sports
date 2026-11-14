@@ -29,6 +29,14 @@ const VerificationPage = lazy(() => import("./pages/VerificationPage"));
 const ReportConcernPage = lazy(() => import("./pages/ReportConcernPage"));
 const DataRequestPage = lazy(() => import("./pages/DataRequestPage"));
 const StatusPage = lazy(() => import("./pages/StatusPage"));
+const SportPage = lazy(() => import("./pages/SportPages").then(m => ({ default: m.SportPage })));
+const SportsIndexPage = lazy(() => import("./pages/SportPages").then(m => ({ default: m.SportsIndexPage })));
+const TypePage = lazy(() => import("./pages/TypePages").then(m => ({ default: m.TypePage })));
+const TypesIndexPage = lazy(() => import("./pages/TypePages").then(m => ({ default: m.TypesIndexPage })));
+const LocationPage = lazy(() => import("./pages/LocationPages").then(m => ({ default: m.LocationPage })));
+const LocationsIndexPage = lazy(() => import("./pages/LocationPages").then(m => ({ default: m.LocationsIndexPage })));
+const GuidePage = lazy(() => import("./pages/GuidePages").then(m => ({ default: m.GuidePage })));
+const GuidesIndexPage = lazy(() => import("./pages/GuidePages").then(m => ({ default: m.GuidesIndexPage })));
 
 export default function App() {
   return (
@@ -50,6 +58,14 @@ export default function App() {
           <Route path="/safeguarding" element={<AudiencePage />} />
           <Route path="/privacy" element={<AudiencePage />} />
           <Route path="/terms" element={<AudiencePage />} />
+          <Route path="/sports" element={<SportsIndexPage />} />
+          <Route path="/sports/:sportSlug" element={<SportPage />} />
+          <Route path="/opportunity-types" element={<TypesIndexPage />} />
+          <Route path="/opportunity-types/:typeSlug" element={<TypePage />} />
+          <Route path="/locations" element={<LocationsIndexPage />} />
+          <Route path="/locations/:locationSlug" element={<LocationPage />} />
+          <Route path="/guides" element={<GuidesIndexPage />} />
+          <Route path="/guides/:guideSlug" element={<GuidePage />} />
           <Route path="/help" element={<HelpPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/cookies" element={<CookiesPage />} />
