@@ -1,4 +1,4 @@
-import {ArrowDownRight,ArrowRight,ArrowUpRight,Building2,CheckCircle2,CircleHelp,Compass,Flag,Search,ShieldCheck,Sparkles,Trophy,Users,Waypoints,XCircle} from "lucide-react";import {Link} from "react-router-dom";
+import {ArrowDownRight,ArrowRight,ArrowUpRight,Building2,CheckCircle2,CircleHelp,Compass,Flag,Search,ShieldCheck,Sparkles,Trophy,Users,Waypoints,XCircle} from "lucide-react";import {useEffect,useState} from "react";import {Link} from "react-router-dom";
 import OpportunityCard from "../components/OpportunityCard";import SportIcon from "../components/SportIcon";import VerificationBadge from "../components/VerificationBadge";import ProgressRing from "../components/ProgressRing";import {sampleOpportunities} from "../lib/opportunities";import {useReveal} from "../lib/useReveal";
 const pathways=[
  {number:"01",title:"Discover",text:"Explore trials, academies, scholarships, scouting and sponsorships in one place.",icon:Compass,preview:"search"},
@@ -32,7 +32,18 @@ function Preview({kind}:{kind:string}){
  if(kind==="cv")return <div className="step-preview sp-flex" aria-hidden="true"><ProgressRing value={72} size={46}/><span className="sp-col"><span className="sp-row"/><span className="sp-row sp-short"/></span></div>;
  return <div className="step-preview" aria-hidden="true"><span className="sp-timeline"><i className="done"/><i className="done"/><i/></span><span className="sp-tl-label">Submitted · Reviewed · Decision</span></div>;
 }
-export default function HomePage(){useReveal();return <>
+function useCtaBar(){
+ const [show,setShow]=useState(false);
+ useEffect(()=>{
+  const hero=document.querySelector(".hero-section"),final=document.querySelector(".final-cta-section");
+  if(!hero||!("IntersectionObserver" in window))return;
+  let heroIn=true,finalIn=false;const update=()=>setShow(!heroIn&&!finalIn);
+  const io=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.target===hero)heroIn=e.isIntersecting;else finalIn=e.isIntersecting;});update();},{threshold:0.05});
+  io.observe(hero);if(final)io.observe(final);return()=>io.disconnect();
+ },[]);
+ return show;
+}
+export default function HomePage(){useReveal();const showBar=useCtaBar();return <>
 <section className="hero-section"><div className="hero-grid"><div className="hero-copy"><div className="eyebrow"><span className="status-dot"/> THE SPORTS OPPORTUNITY NETWORK</div><h1>Your game.<br/>Your opportunity.<br/><span>Your future.</span></h1><p className="hero-intro">A connected sports ecosystem built to help athletes discover what is next — and help the right people find the talent they are looking for.</p>
 <div className="path-cards"><Link className="path-card path-card-primary" to="/join"><span className="path-card-icon"><Trophy size={20}/></span><span><b>I'm an athlete</b><small>Build your sports profile</small></span><ArrowRight size={20}/></Link><Link className="path-card" to="/join?role=club"><span className="path-card-icon"><Building2 size={20}/></span><span><b>I'm an organisation</b><small>Publish an opportunity</small></span><ArrowRight size={20}/></Link></div>
 <p className="hero-browse">Just looking? <Link to="/opportunities">Browse opportunities <ArrowUpRight size={16}/></Link></p>
@@ -47,5 +58,5 @@ export default function HomePage(){useReveal();return <>
 <section className="org-split section-pad"><div className="org-split-copy"><div className="section-kicker">For clubs, academies and scouts</div><h2>Find the right talent.<br/><span>Not just more applicants.</span></h2><p>Publish structured opportunities, review applicants in one place and discover opted-in athletes by sport, position, level and location.</p><ul className="org-split-list"><li><CheckCircle2 size={16}/> Structured listings with clear eligibility</li><li><CheckCircle2 size={16}/> Ranked, explainable athlete matches</li><li><CheckCircle2 size={16}/> A recruitment hub with applications and shortlists</li></ul><div className="hero-actions"><Link className="button button-accent" to="/for-organisations">Set up your organisation <ArrowRight size={16}/></Link><Link className="button button-light-outline-dark" to="/talent">Browse athlete profiles <ArrowUpRight size={16}/></Link></div></div></section>
 <section className="faq-section section-pad"><div className="section-kicker">Good questions</div><h2>Before you join.</h2><div className="faq-list">{faqs.map(item=><details key={item.q} className="faq-item"><summary>{item.q}</summary><p>{item.a}</p></details>)}</div></section>
 <section className="final-cta-section"><div className="final-cta-inner"><div className="section-kicker section-kicker-light">Your next step starts here</div><h2>Make your talent<br/><span>easier to discover.</span></h2><p>Create a sports profile built around who you are, what you have done and where you want to go — or publish your first opportunity.</p><div className="hero-actions"><Link className="button button-accent" to="/join">Join as an athlete <ArrowRight size={16}/></Link><Link className="button button-light-outline" to="/for-organisations">Join as an organisation <ArrowUpRight size={16}/></Link></div></div></section>
-<div className="mobile-cta-bar"><Link className="button button-accent" to="/join">Join the network</Link><Link className="button button-light-outline-dark" to="/opportunities">Explore</Link></div>
+<div className={"mobile-cta-bar"+(showBar?" is-visible":"")} aria-hidden={!showBar}><Link className="button button-accent" to="/join">Join the network</Link><Link className="button button-light-outline-dark" to="/opportunities">Explore</Link></div>
 </>;}
