@@ -658,3 +658,89 @@ body .hero-section .button-accent:focus-visible,body .final-cta-section .button-
 .hp-note{font-size:12px}
 @media (min-width:1001px){.hero-art{min-height:520px}.hero-preview{margin-right:-24px}}
 @media (max-width:1000px){.hero-preview{padding:24px}.hero-preview h3{font-size:23px}.hp-score strong{font-size:42px}}
+
+/* =====================  Medium-impact design pass  ===================== */
+
+/* -- Audience band (replaces the long "Sports is a network" section) -- */
+.audience-band{display:grid;grid-template-columns:auto repeat(4,1fr);gap:12px;align-items:stretch;padding:22px max(22px,calc((100vw - 1240px)/2));background:#f6f8fc;border-bottom:1px solid #dee4ed}
+.audience-band-label{align-self:center;font:12px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#4d5b78;padding-right:8px}
+.audience-pill{display:flex;gap:12px;align-items:center;padding:14px 16px;background:#fff;border:1px solid #dee4ed;border-radius:10px;color:var(--ink);transition:border-color .18s,transform .18s,box-shadow .18s}
+.audience-pill svg{flex:0 0 auto;color:#16336e}
+.audience-pill b{display:block;font:700 15px var(--display)}
+.audience-pill small{display:block;font-size:13px;line-height:1.4;color:#4d5b78;margin-top:2px}
+.audience-pill:hover{border-color:var(--ink);transform:translateY(-2px);box-shadow:0 12px 24px -16px rgba(10,31,68,.4)}
+@media (max-width:1000px){.audience-band{grid-template-columns:1fr 1fr}.audience-band-label{grid-column:1/-1}}
+@media (max-width:560px){.audience-band{grid-template-columns:1fr}}
+
+/* -- Pathway: 2x2 with large product snapshots -- */
+@media (min-width:1001px){
+ body .pathway-timeline{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+ body .pathway-timeline .pathway-card{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);grid-template-rows:auto auto 1fr;column-gap:26px;align-items:start;padding:28px}
+ body .pathway-timeline .pathway-card .pathway-card-top{grid-column:1;grid-row:1}
+ body .pathway-timeline .pathway-card h3{grid-column:1;grid-row:2;font-size:26px}
+ body .pathway-timeline .pathway-card>p{grid-column:1;grid-row:3;font-size:16px}
+ body .pathway-timeline .pathway-card .step-preview{grid-column:2;grid-row:1/4;align-self:stretch;margin:0}
+}
+body .step-preview{padding:18px;gap:12px;font-size:14px;border-radius:12px;background:rgba(255,255,255,.08);justify-content:center}
+body .sp-bar{padding:10px 12px;font-size:14px;border-radius:8px}
+body .sp-row{height:9px}
+.sp-result{display:flex;align-items:center;gap:12px;padding:10px 12px;background:rgba(255,255,255,.06);border-radius:8px}
+.sp-result i{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.2);flex:0 0 auto}
+.sp-result em,.sp-check em,.sp-chips em{font:600 12px var(--mono);font-style:normal;color:#c0cbe0}
+.sp-result em{margin-left:auto}
+.sp-check{font-size:15px}.sp-check em{margin-left:auto}
+.sp-no svg{color:#ff6a77}.sp-missing svg{color:#f2c14e}.sp-check svg{color:#7fe3a4}
+.sp-no svg,.sp-missing svg{}
+.sp-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}.sp-chips em{background:rgba(255,255,255,.12);padding:3px 9px;border-radius:999px}
+.sp-tl-labels{display:flex;justify-content:space-between;font:12px var(--mono);color:#c0cbe0}
+body .sp-timeline i{height:8px}
+
+/* -- Featured listings as compact rows -- */
+.listing-rows{list-style:none;margin:26px 0 0;padding:0;display:grid;gap:10px}
+.listing-row{display:grid;grid-template-columns:auto 1fr auto auto;gap:18px;align-items:center;padding:16px 20px;background:#fff;border:1px solid #dee4ed;border-radius:12px;color:var(--ink);transition:border-color .18s,transform .18s,box-shadow .18s}
+.listing-row:hover{border-color:var(--ink);transform:translateX(3px);box-shadow:0 14px 26px -18px rgba(10,31,68,.4)}
+.listing-row-icon{display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:var(--ink);color:#fff}
+.listing-row-main b{display:block;font:700 18px var(--display);letter-spacing:-.01em}
+.listing-row-main small{display:block;font-size:14px;color:#4d5b78;margin-top:3px}
+.listing-row-meta{display:grid;justify-items:end;gap:5px}.listing-row-meta small{font:12px var(--mono);color:#4d5b78}
+@media (max-width:700px){.listing-row{grid-template-columns:auto 1fr auto;gap:12px;padding:14px}.listing-row-meta{display:none}.listing-row-main b{font-size:16px}}
+
+/* -- Organisation split: alternate layout with a filter illustration -- */
+@media (min-width:1001px){.org-split{display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center}}
+.org-split-visual{background:var(--ink);color:#fff;border-radius:16px 16px 16px 4px;padding:26px;box-shadow:0 28px 50px -26px rgba(10,31,68,.6);position:relative;overflow:hidden}
+.org-split-visual::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,.05) 0 2px,transparent 2px 24px);pointer-events:none}
+.osv-head{position:relative;display:flex;gap:10px;align-items:center;font:700 17px var(--display);margin-bottom:16px}
+.osv-filters{position:relative;margin:0;display:grid;gap:10px}
+.osv-filters div{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:8px}
+.osv-filters dt{font:12px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:#aab6cc}
+.osv-filters dd{margin:0;font:700 15px var(--display)}
+.osv-note{position:relative;margin:16px 0 0;font:12px var(--mono);color:#aab6cc;line-height:1.6}
+
+/* -- Opportunities: quick filters + results tools -- */
+.quick-filters{display:flex;gap:8px;overflow-x:auto;padding:14px 2px 6px;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+.quick-chip{flex:0 0 auto;min-height:40px;padding:0 16px;background:#fff;color:var(--ink);border:1px solid #c9d3e5;border-radius:999px;font:600 14px var(--display);transition:background .18s,border-color .18s,color .18s}
+.quick-chip:hover{border-color:var(--ink)}
+.quick-chip.is-active{background:var(--ink);border-color:var(--ink);color:#fff}
+.quick-chip-soon{border-style:dashed}.quick-chip-soon.is-active{background:#d61f30;border-color:#d61f30;border-style:solid}
+.catalogue-results-row{gap:14px;flex-wrap:wrap}
+.results-tools{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.sort-field{display:inline-flex;align-items:center;gap:8px;font:12px var(--mono);color:#4d5b78;text-transform:uppercase;letter-spacing:.08em}
+.sort-field select{min-height:38px;border:1px solid #c9d3e5;border-radius:8px;background:#fff;padding:0 28px 0 10px;font:600 14px var(--display);color:var(--ink);text-transform:none;letter-spacing:0}
+.catalogue-controls{grid-template-columns:minmax(0,1fr) minmax(180px,260px)}
+@media (max-width:760px){.catalogue-controls{grid-template-columns:1fr}}
+
+/* -- Typography: lighter, more open headings; larger small text -- */
+body h1,body h2,body h3{text-wrap:balance}
+body .section-heading-row h2,body .featured-heading h2,body .journey-top h2,body .trust-copy h2,body .org-split-copy h2,body .faq-section h2,body .final-cta-inner h2,body .catalogue-title-row h2{font-weight:600;letter-spacing:-.03em;line-height:1.1}
+body .hero-copy h1,body .catalogue-hero h1{font-weight:650;letter-spacing:-.035em}
+body h3{letter-spacing:-.015em}
+body .community-card p,body .pathway-card p,body .opportunity-summary,body .talent-details span,body .talent-goals,body .org-directory-description,body .notification-copy>p{font-size:15px;line-height:1.65}
+body .opportunity-card .opportunity-summary{font-size:14.5px}
+body .section-kicker,body .hero-proof,body .hero-bottomline,body .hero-art-caption,body .catalogue-hero-ctas>span,body .catalogue-hero-index,body .join-side-footer,body .catalogue-results-row{font-size:12px}
+body .hero-intro,body .journey-top>p,body .section-heading-row>p,body .catalogue-title-row>p{font-size:17px;line-height:1.7}
+body .opportunity-card-meta,body .opportunity-meta{font-size:14px}
+body .sp-timeline,body .sp-tl-labels{width:100%}
+body .sp-check.sp-no svg{color:#ff6a77}body .sp-check.sp-missing svg{color:#f2c14e}
+body .sp-check{gap:9px}body .sp-check em{white-space:nowrap}
+.quick-filters{margin-bottom:12px}
+body .step-preview:not(.sp-flex){grid-template-columns:minmax(0,1fr)}
