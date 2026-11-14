@@ -603,3 +603,29 @@ body .path-card-primary:hover{background:#ff6b78;border-color:#ff6b78}
   .sx-cookie-actions .button{flex:1}
 }
 @media (prefers-reduced-motion:reduce){.mobile-cta-bar,.mobile-cta-bar.is-visible{transition:none}}
+
+/* ---- Match strength badge (icon + label, never colour alone) ---- */
+.match-strength-badge{display:inline-flex;align-items:center;gap:6px;margin-top:6px;padding:3px 10px 3px 8px;border-radius:999px;font:700 12px var(--display);border:1px solid currentColor}
+.match-strength-badge-strong{color:#116530;background:#e8f6ee}
+.match-strength-badge-good{color:#16336e;background:#eaf0fc}
+.match-strength-badge-partial{color:#7a4a00;background:#fff4e0}
+.match-strength-badge-incomplete{color:#4d5b78;background:#eef1f7;border-style:dashed}
+.match-score{display:flex;flex-direction:column;align-items:flex-end}
+.match-score.match-strength-incomplete small{color:#4d5b78}
+
+/* ---- Focus ring: navy on light surfaces, white on dark ---- */
+body :focus-visible{outline:3px solid #20376d;outline-offset:2px}
+body .sx-field input:focus-visible,body .sx-field select:focus-visible,body .sx-field textarea:focus-visible,body .sx-search input:focus-visible,body .sx-faq summary:focus-visible,body .sx-tile:focus-visible{outline:3px solid #20376d;outline-offset:2px}
+body .hero-section :focus-visible,body .catalogue-hero :focus-visible,body .journey-section :focus-visible,body .final-cta-section :focus-visible,body .site-footer :focus-visible,body .talent-profile-side :focus-visible,body .matching-disclaimer :focus-visible,body .representation-hero :focus-visible,body .join-side-panel :focus-visible,body .top-strip :focus-visible,body .audience-principles :focus-visible,body .section-dark :focus-visible{outline:3px solid #fff;outline-offset:2px}
+body .button-accent:focus-visible{outline-color:#20376d}
+body .hero-section .button-accent:focus-visible,body .final-cta-section .button-accent:focus-visible{outline-color:#fff}
+
+/* ---- Join form reassurance ---- */
+.join-reassure{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:8px}
+.join-reassure li{display:flex;align-items:center;gap:8px;font-size:13px;color:#4d5b78}
+.join-reassure svg{color:#116530;flex-shrink:0}
+
+/* ---- Header: never wrap nav / actions at mid widths ---- */
+.desktop-nav a,.header-signin,.header-actions .button{white-space:nowrap}
+@media (min-width:981px) and (max-width:1180px){.desktop-nav{gap:14px}.desktop-nav a{font-size:13px;padding-inline:6px}.header-actions .button{padding-inline:12px}}
+@media (min-width:981px) and (max-width:1240px){.site-header .brand-wordmark small{display:none}.site-header .brand-lockup{flex:0 0 auto}.desktop-nav{margin-right:12px;gap:12px}.header-actions{gap:12px}}
